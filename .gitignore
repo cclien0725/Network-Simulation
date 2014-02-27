@@ -1,0 +1,7 @@
+# git ignore file
+*.suo
+*.user
+/Heterogenerous Simulation/bin
+/Heterogenerous Simulation/obj
+/Network Simulation/bin
+/Network Simulation/obj
