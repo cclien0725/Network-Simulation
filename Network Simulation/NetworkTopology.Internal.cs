@@ -12,6 +12,7 @@ namespace Network_Simulation
 
         public class Node
         {
+            public int ID { get; set; }
             public double Xpos { get; set; }
             public double Ypos { get; set; }
             public NodeType Type { get; set; }
@@ -22,6 +23,22 @@ namespace Network_Simulation
                 // Default value.
                 Type = NodeType.Normal;
                 Tracer = TracerType.None;
+            }
+        }
+
+        public class Edge
+        {
+            public int Node1 { get; set; }
+            public int Node2 { get; set; }
+            public double Length { get; set; }
+            public double Delay { get; set; }
+
+            public Edge()
+            {
+                Node1 = -1;
+                Node2 = -1;
+                Length = -1;
+                Delay = -1;
             }
         }
 

@@ -9,8 +9,8 @@ namespace Network_Simulation
 {
     public partial class NetworkTopology
     {
-        public Dictionary<int, int> NodeIndexTable;
         public List<Node> Nodes;
+        public List<Edge> Edges;
         public Adjacency[,] AdjacentMatrix;
         
         public int numberOfAttackers;
@@ -28,7 +28,7 @@ namespace Network_Simulation
         {
             // Create instance of nodes.
             Nodes = new List<Node>();
-            NodeIndexTable = new Dictionary<int, int>();
+            Edges = new List<Edge>();
 
             // Initialize environment parameters.
             this.percentageOfAttackers = percentageOfAttackers;
@@ -105,7 +105,7 @@ namespace Network_Simulation
             if (Nodes.Count == 0)
                 throw new Exception("Path() Fail: There are 0 nodes in the network.");
 
-            List<int> path = new List<int>() { NodeIndexTable[SourceNodeId], NodeIndexTable[DestinationNodeId]};
+            List<int> path = new List<int>() { NodeID2Index(SourceNodeId), NodeID2Index(DestinationNodeId) };
 
             for (int i = 0; i < path.Count - 1; i++)
             {
@@ -118,10 +118,7 @@ namespace Network_Simulation
             }
 
             for (int i = 0; i < path.Count; i++) 
-            {
-                var NodeId = NodeIndexTable.Where(item => item.Value == path[i]).Select(item => item.Key);
-                path[i] = NodeId.First();
-            }
+                path[i] = NodeIndex2ID(path[i]);
 
             return path;
         }
@@ -150,19 +147,9 @@ namespace Network_Simulation
                         numberOfNodes = Convert.ToInt32(Regex.Match(lines[i], @"\d+").Value);
                         for (int j = ++i; i < j + numberOfNodes; i++)
                         {
-                            string[] data = lines[i].Split(' ');
-                            Nodes.Add(new Node() { Xpos = Convert.ToDouble(data[1]), Ypos = Convert.ToDouble(data[2]) });
-                            NodeIndexTable.Add(Convert.ToInt32(data[0]), Nodes.Count - 1);
-                        }
-
-                        // Create the space of adjacent matrix
-                        AdjacentMatrix = new Adjacency[numberOfNodes, numberOfNodes];
-
-                        // If the file of shortest path is exist, then load into memory
-                        if (File.Exists(shortestPathFileName))
-                        {
-                            ReadShortestPathFile(shortestPathFileName);
-                            break;
+                            string[] data = lines[i].Split(' ', '\t');
+                            Nodes.Add(new Node() { ID = Convert.ToInt32(data[0]), Xpos = Convert.ToDouble(data[1]), Ypos = Convert.ToDouble(data[2]) });
+                            //NodeIndexTable.Add(Convert.ToInt32(data[0]), Nodes.Count - 1);
                         }
                     }
                     // Reading edges
@@ -171,21 +158,29 @@ namespace Network_Simulation
                         numberOfEdges = Convert.ToInt32(Regex.Match(lines[i], @"\d+").Value);
                         for (int j = ++i; i < j + numberOfEdges; i++)
                         {
-                            string[] data = lines[i].Split(' ');
+                            string[] data = lines[i].Split(' ', '\t');
                             int node1 = Convert.ToInt32(data[1]);
                             int node2 = Convert.ToInt32(data[2]);
                             double length = Convert.ToDouble(data[3]);
                             double delay = Convert.ToDouble(data[4]);
 
-                            AdjacentMatrix[NodeIndexTable[node1], NodeIndexTable[node2]] = new Adjacency() { Delay = delay, Length = length };
-                            AdjacentMatrix[NodeIndexTable[node2], NodeIndexTable[node1]] = new Adjacency() { Delay = delay, Length = length };
+                            Edges.Add(new Edge() { Node1 = node1, Node2 = node2, Length = length, Delay = delay });
                         }
 
+                        // If the file of shortest path is exist, then load into memory
+                        if (File.Exists(shortestPathFileName))
+                        {
+                            ReadShortestPathFile(shortestPathFileName);
+                            break;
+                        }
                         // Computing shortest path
-                        ComputingShortestPath();
+                        else
+                        {
+                            ComputingShortestPath();
 
-                        // Output the result to the file. (XXX.ShortestPath)
-                        WriteShortestPathFile(shortestPathFileName);
+                            // Output the result to the file. (XXX.ShortestPath)
+                            WriteShortestPathFile(shortestPathFileName);
+                        }
                     }
                 }
 
@@ -197,6 +192,58 @@ namespace Network_Simulation
             }
         }
 
+        public double Eccentricity(int NodeID)
+        {
+            double result = double.MinValue;
+
+            for (int i = 0; i < Nodes.Count; i++)
+                if (AdjacentMatrix[NodeID2Index(NodeID), i] != null &&
+                    result < AdjacentMatrix[NodeID2Index(NodeID), i].Length)
+                    result = AdjacentMatrix[NodeID2Index(NodeID), i].Length;
+
+            return result;
+        }
+
+        public int Degree(int NodeID)
+        {
+            return Edges.Where(n => n.Node1 == NodeID || n.Node2 == NodeID).ToList().Count;
+        }
+
+        public List<int> GetNeighborNodeIDs(int NodeID)
+        {
+            List<int> result = Edges.Where(n => n.Node1 == NodeID).Select(n => n.Node2).ToList();
+
+            result.AddRange(Edges.Where(n => n.Node2 == NodeID).Select(n => n.Node1).ToList());
+
+            return result;
+        }
+
+        public static NetworkTopology operator -(NetworkTopology n1, NetworkTopology n2)
+        {
+            NetworkTopology result = new NetworkTopology(n1.percentageOfAttackers, n1.numberOfVictims);
+            
+            result.Nodes = n1.Nodes.Except(n2.Nodes).ToList();
+            result.Edges = n1.Edges.Except(n2.Edges).ToList();
+
+            if (result.Nodes.Count > 0)
+            {
+                result.Initialize();
+                result.ComputingShortestPath();
+            }
+
+            return result;
+        }
+
+        public int NodeID2Index(int NodeID)
+        {
+            return Nodes.FindIndex(x => x.ID == NodeID);
+        }
+
+        public int NodeIndex2ID(int NodeIndex)
+        {
+            return Nodes[NodeIndex].ID;
+        }
+
         /// <summary>
         /// Read the shortest path file of the specific brite file.
         /// </summary>
@@ -204,15 +251,27 @@ namespace Network_Simulation
         private void ReadShortestPathFile(string fileName)
         {
             Console.WriteLine("Reading shortest path file...");
-            string[] lines = File.ReadAllLines(fileName);
 
-            for (int i = 0; i < lines.Length; i++)
+            // Create the space of adjacent matrix
+            if (AdjacentMatrix == null)
+                AdjacentMatrix = new Adjacency[Nodes.Count, Nodes.Count];
+
+            using (BufferedStream bs = new BufferedStream(File.OpenRead(fileName)))
             {
-                string[] data = lines[i].Split(' ');
-                for (int j = 0; j < data.Length; j++)
+                using (StreamReader reader = new StreamReader(bs))
                 {
-                    if (!data[j].Equals("null"))
-                        AdjacentMatrix[i, j] = new Adjacency(data[j]);
+                    int i = 0;
+
+                    while (!reader.EndOfStream)
+                    {
+                        string[] data = reader.ReadLine().Split(' ');
+
+                        for (int j = 0; j < data.Length; j++)
+                            if (!data[j].Equals("null"))
+                                AdjacentMatrix[i, j] = new Adjacency(data[j]);
+
+                        i++;
+                    }
                 }
             }
         }
@@ -223,32 +282,46 @@ namespace Network_Simulation
         private void WriteShortestPathFile(string fileName)
         {
             Console.WriteLine("Writing shortest path file...");
-            string contents = string.Empty;
 
-            for (int i = 0; i < Nodes.Count; i++)
+            using (BufferedStream bs = new BufferedStream(File.OpenWrite(fileName)))
             {
-                for (int j = 0; j < Nodes.Count; j++)
+                using (StreamWriter writer = new StreamWriter(bs))
                 {
-                    if (AdjacentMatrix[i, j] == null)
-                        contents += "null";
-                    else
-                        contents += AdjacentMatrix[i, j].GetString();
+                    for (int i = 0; i < Nodes.Count; i++)
+                    {
+                        for (int j = 0; j < Nodes.Count; j++)
+                        {
+                            if (AdjacentMatrix[i, j] == null)
+                                writer.Write("null");
+                            else
+                                writer.Write(AdjacentMatrix[i, j].GetString());
 
-                    if (j != Nodes.Count - 1)
-                        contents += " ";
+                            if (j != Nodes.Count - 1)
+                                writer.Write(" ");
+                        }
+                        writer.WriteLine();
+                    }
                 }
-                contents += Environment.NewLine;
             }
-
-            File.WriteAllText(fileName, contents);
         }
 
         /// <summary>
         /// Using Floyd-Warshar algorithm computing shortest path.
         /// </summary>
-        private void ComputingShortestPath()
+        public void ComputingShortestPath()
         {
             Console.WriteLine("Computing shortest path...");
+
+            // Create the space of adjacent matrix
+            AdjacentMatrix = null;
+            AdjacentMatrix = new Adjacency[Nodes.Count, Nodes.Count];
+
+            foreach (var edge in Edges)
+            {
+                AdjacentMatrix[NodeID2Index(edge.Node1), NodeID2Index(edge.Node2)] = new Adjacency() { Delay = edge.Delay, Length = edge.Length };
+                AdjacentMatrix[NodeID2Index(edge.Node2), NodeID2Index(edge.Node1)] = new Adjacency() { Delay = edge.Delay, Length = edge.Length };
+            }
+
             // Floyd-Warshall algorithm
             for (int i = 0; i < Nodes.Count; i++)
             {

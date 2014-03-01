@@ -50,9 +50,9 @@ namespace Heterogenerous_Simulation
                 networkTopology.Run();
 
                 // Using tomato deployment method.
-                //TomatoDeployment tomatoDeploy = new TomatoDeployment(30, 20, 10);
-                //networkTopology.Deploy(tomatoDeploy);
-                //networkTopology.Run();
+                TomatoDeployment tomatoDeploy = new TomatoDeployment(30, 20, 10);
+                networkTopology.Deploy(tomatoDeploy);
+                networkTopology.Run();
             }
             catch(Exception exception)
             {
