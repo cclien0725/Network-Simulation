@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Heterogenerous Simulation",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Network Simulation", "Network Simulation\Network Simulation.csproj", "{5E75DCBF-0796-474F-85E9-8818223CABA9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deployment Simulation", "Deployment Simulation\Deployment Simulation.csproj", "{FA83D011-E706-49B9-BBC4-053C6A99C615}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -19,6 +21,10 @@ Global
 		{5E75DCBF-0796-474F-85E9-8818223CABA9}.Debug|x86.Build.0 = Debug|x86
 		{5E75DCBF-0796-474F-85E9-8818223CABA9}.Release|x86.ActiveCfg = Release|x86
 		{5E75DCBF-0796-474F-85E9-8818223CABA9}.Release|x86.Build.0 = Release|x86
+		{FA83D011-E706-49B9-BBC4-053C6A99C615}.Debug|x86.ActiveCfg = Debug|x86
+		{FA83D011-E706-49B9-BBC4-053C6A99C615}.Debug|x86.Build.0 = Debug|x86
+		{FA83D011-E706-49B9-BBC4-053C6A99C615}.Release|x86.ActiveCfg = Release|x86
+		{FA83D011-E706-49B9-BBC4-053C6A99C615}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

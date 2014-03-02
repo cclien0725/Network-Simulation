@@ -1,6 +1,8 @@
 # git ignore file
 *.suo
 *.user
+/Deployment Simulation/bin
+/Deployment Simulation/obj
 /Heterogenerous Simulation/bin
 /Heterogenerous Simulation/obj
 /Network Simulation/bin

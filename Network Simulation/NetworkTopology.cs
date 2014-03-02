@@ -95,35 +95,6 @@ namespace Network_Simulation
         }
 
         /// <summary>
-        /// Return the shortest path from source node to destination node.
-        /// </summary>
-        /// <param name="SourceNodeId">The source node id.</param>
-        /// <param name="DestinationNodeId">The destination node id.</param>
-        /// <returns>The sequence of the node id, which is shortest path.</returns>
-        public List<int> Path(int SourceNodeId, int DestinationNodeId)
-        {
-            if (Nodes.Count == 0)
-                throw new Exception("Path() Fail: There are 0 nodes in the network.");
-
-            List<int> path = new List<int>() { NodeID2Index(SourceNodeId), NodeID2Index(DestinationNodeId) };
-
-            for (int i = 0; i < path.Count - 1; i++)
-            {
-                if (AdjacentMatrix[path[i], path[i + 1]] != null &&
-                    AdjacentMatrix[path[i], path[i + 1]].Predecessor != -1)
-                {
-                    path.Insert(i + 1, AdjacentMatrix[path[i], path[i + 1]].Predecessor);
-                    i--;
-                }
-            }
-
-            for (int i = 0; i < path.Count; i++) 
-                path[i] = NodeIndex2ID(path[i]);
-
-            return path;
-        }
-
-        /// <summary>
         /// Reading brite file and convert to our data structure.
         /// </summary>
         /// <param name="fileName">The path of brite file.</param>
@@ -192,58 +163,6 @@ namespace Network_Simulation
             }
         }
 
-        public double Eccentricity(int NodeID)
-        {
-            double result = double.MinValue;
-
-            for (int i = 0; i < Nodes.Count; i++)
-                if (AdjacentMatrix[NodeID2Index(NodeID), i] != null &&
-                    result < AdjacentMatrix[NodeID2Index(NodeID), i].Length)
-                    result = AdjacentMatrix[NodeID2Index(NodeID), i].Length;
-
-            return result;
-        }
-
-        public int Degree(int NodeID)
-        {
-            return Edges.Where(n => n.Node1 == NodeID || n.Node2 == NodeID).ToList().Count;
-        }
-
-        public List<int> GetNeighborNodeIDs(int NodeID)
-        {
-            List<int> result = Edges.Where(n => n.Node1 == NodeID).Select(n => n.Node2).ToList();
-
-            result.AddRange(Edges.Where(n => n.Node2 == NodeID).Select(n => n.Node1).ToList());
-
-            return result;
-        }
-
-        public static NetworkTopology operator -(NetworkTopology n1, NetworkTopology n2)
-        {
-            NetworkTopology result = new NetworkTopology(n1.percentageOfAttackers, n1.numberOfVictims);
-            
-            result.Nodes = n1.Nodes.Except(n2.Nodes).ToList();
-            result.Edges = n1.Edges.Except(n2.Edges).ToList();
-
-            if (result.Nodes.Count > 0)
-            {
-                result.Initialize();
-                result.ComputingShortestPath();
-            }
-
-            return result;
-        }
-
-        public int NodeID2Index(int NodeID)
-        {
-            return Nodes.FindIndex(x => x.ID == NodeID);
-        }
-
-        public int NodeIndex2ID(int NodeIndex)
-        {
-            return Nodes[NodeIndex].ID;
-        }
-
         /// <summary>
         /// Read the shortest path file of the specific brite file.
         /// </summary>
@@ -303,64 +222,6 @@ namespace Network_Simulation
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Using Floyd-Warshar algorithm computing shortest path.
-        /// </summary>
-        public void ComputingShortestPath()
-        {
-            Console.WriteLine("Computing shortest path...");
-
-            // Create the space of adjacent matrix
-            AdjacentMatrix = null;
-            AdjacentMatrix = new Adjacency[Nodes.Count, Nodes.Count];
-
-            foreach (var edge in Edges)
-            {
-                AdjacentMatrix[NodeID2Index(edge.Node1), NodeID2Index(edge.Node2)] = new Adjacency() { Delay = edge.Delay, Length = edge.Length };
-                AdjacentMatrix[NodeID2Index(edge.Node2), NodeID2Index(edge.Node1)] = new Adjacency() { Delay = edge.Delay, Length = edge.Length };
-            }
-
-            // Floyd-Warshall algorithm
-            for (int i = 0; i < Nodes.Count; i++)
-            {
-                for (int j = 0; j < Nodes.Count; j++)
-                {
-                    for (int k = j + 1; k < Nodes.Count; k++)
-                    {
-                        if ((AdjacentMatrix[j, k] == null && AdjacentMatrix[j, i] !=null && AdjacentMatrix[i,k] != null) ||
-                            (AdjacentMatrix[j, k] != null && AdjacentMatrix[j, i] != null && AdjacentMatrix[i, k] != null && AdjacentMatrix[j, k].Length > AdjacentMatrix[j, i].Length + AdjacentMatrix[i, k].Length))
-                        {
-                            if (AdjacentMatrix[k, j] == null)
-                            {
-                                AdjacentMatrix[k, j] = new Adjacency();
-                                AdjacentMatrix[j, k] = new Adjacency();
-                            }
-
-                            AdjacentMatrix[k, j].Length = AdjacentMatrix[j, k].Length = AdjacentMatrix[j, i].Length + AdjacentMatrix[i, k].Length;
-                            AdjacentMatrix[k, j].Delay = AdjacentMatrix[j, k].Delay = AdjacentMatrix[j, i].Delay + AdjacentMatrix[i, k].Delay;
-                            AdjacentMatrix[k, j].Predecessor = AdjacentMatrix[j, k].Predecessor = i;
-                        }
-                    }
-                }
-            }
-        }
-
-        private long Poisson(double lambda)
-        {
-            Random rd = new Random();
-            long k = 0;
-            double L = Math.Exp(-lambda), p = 1;
-            double r;
-
-            do {
-                ++k;
-                r = rd.NextDouble();
-                p *= r;
-            } while (p > L);
-
-            return --k;
         }
     }
 }
