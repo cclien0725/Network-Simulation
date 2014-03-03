@@ -138,6 +138,33 @@ namespace Network_Simulation
         }
 
         /// <summary>
+        /// Computing the clustering coefficeint of the node id on the network topology.
+        /// </summary>
+        /// <param name="NodeID">The node id on the network topology.</param>
+        /// <returns>The clustering coefficeint value.</returns>
+        public double ClusteringCoefficeint(int NodeID)
+        {
+            List<int> neighbor = GetNeighborNodeIDs(NodeID);
+            List<Edge> neighbor_edge_connect_set = new List<Edge>();
+            
+            for (int i = 0; i < neighbor.Count; i++)
+            {
+                List<Edge> tmp = new List<Edge>(Edges.Where(e => e.Node1 == neighbor[i] || e.Node2 == neighbor[i]));
+
+                for (int j = i + 1; j < neighbor.Count; j++)
+                    neighbor_edge_connect_set.AddRange(tmp.Where(e => e.Node1 == neighbor[j] || e.Node2 == neighbor[j]));
+            }
+
+            double max_edges = (neighbor.Count * (neighbor.Count - 1)) / 2;
+            double neighbor_edge_count = neighbor_edge_connect_set.Count;
+
+            if (max_edges > 0)
+                return neighbor_edge_count / max_edges;
+            else
+                return 0;
+        }
+
+        /// <summary>
         /// Getting the neighbor node IDs list for the specific node ID on the network topology.
         /// </summary>
         /// <param name="NodeID">The node Id on the network topology.</param>
@@ -152,6 +179,34 @@ namespace Network_Simulation
         }
 
         /// <summary>
+        /// Finding the center of node id on the network topology.
+        /// </summary>
+        /// <param name="centerID">The center node id will output.</param>
+        /// <returns>Do the network topology can find the center node id.</returns>
+        public bool FindCenterNodeID(out int centerID)
+        {
+            double minE = int.MaxValue;
+            double eccentricity;
+            centerID = -1;
+
+            foreach (var item in Nodes)
+            {
+                eccentricity = Eccentricity(item.ID);
+
+                if (minE > eccentricity && eccentricity != double.MinValue)
+                {
+                    minE = eccentricity;
+                    centerID = item.ID;
+                }
+                else if (minE == eccentricity)
+                    if (Degree(centerID) > Degree(item.ID))
+                        centerID = item.ID;
+            }
+
+            return centerID != -1;
+        }
+
+        /// <summary>
         /// Operator overloading(-, minus) that define the complement set between the two network topologies.
         /// </summary>
         /// <param name="left_n">The minuend of the network topology.</param>
@@ -163,12 +218,14 @@ namespace Network_Simulation
 
             result.Nodes = left_n.Nodes.Except(right_n.Nodes).ToList();
             result.Edges = left_n.Edges.Except(right_n.Edges).ToList();
+            foreach (var n in right_n.Nodes)
+                result.Edges.RemoveAll(e => e.Node1 == n.ID || e.Node2 == n.ID);
 
-            if (result.Nodes.Count > 0)
-            {
-                result.Initialize();
-                result.ComputingShortestPath();
-            }
+            //if (result.Nodes.Count > 0)
+            //{
+            //    result.Initialize();
+            //    result.ComputingShortestPath();
+            //}
 
             return result;
         }

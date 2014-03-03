@@ -22,7 +22,7 @@ namespace Heterogenerous_Simulation
             int centerID;
 
             // Finding the center node to run all level's process.
-            while (findCenterNodeID(tmp_src_net_topo, out centerID))
+            while (tmp_src_net_topo.FindCenterNodeID(out centerID))
             {
                 NetworkTopology scope_net_topo = new NetworkTopology(0, 0);
 
@@ -30,14 +30,18 @@ namespace Heterogenerous_Simulation
                 scope_net_topo.Nodes.Add(tmp_src_net_topo.Nodes[tmp_src_net_topo.NodeID2Index(centerID)]);
 
                 // Starting run algorithm with this level.
-                tmp_src_net_topo = startAlgorithm(tmp_src_net_topo, ref scope_net_topo, 3, ref deployNodes);
+                tmp_src_net_topo = startAlgorithm(tmp_src_net_topo, 4, ref scope_net_topo, ref deployNodes);
 
                 // Adding this round generated scope network topology to list.
                 allRoundScopeList.Add(scope_net_topo);
+
+                Console.WriteLine("====================================");
+                Console.WriteLine("Scope Count:\t{0}", scope_net_topo.Nodes.Count);
+                Console.WriteLine("Deploy Count:\t{0}", deployNodes.Count);
             }
 
             // Adding the remain nodes to deployment node list.
-            deployNodes.AddRange(tmp_src_net_topo.Nodes.Select(x => x.ID));
+            //deployNodes.AddRange(tmp_src_net_topo.Nodes.Select(x => x.ID));
 
             // Modifying actual tracer type on network topology depend on computed deployment node.
             foreach (int id in deployNodes)
@@ -51,15 +55,15 @@ namespace Heterogenerous_Simulation
         /// Finally, it will return the remain network topology with this process.
         /// </summary>
         /// <param name="src_net_topo">The source network topology</param>
-        /// <param name="scope_net_topo">This round process that generte scope topology</param>
         /// <param name="K">The K-diameter cut value</param>
+        /// <param name="scope_net_topo">This round process that generte scope topology</param>
         /// <param name="deployNodes">The result of the deployment node id</param>
         /// <returns>The remain network topology after process the algorithm.</returns>
-        private NetworkTopology startAlgorithm(NetworkTopology src_net_topo, ref NetworkTopology scope_net_topo, int K, ref List<int> deployNodes)
+        private NetworkTopology startAlgorithm(NetworkTopology src_net_topo, int K, ref NetworkTopology scope_net_topo, ref List<int> deployNodes)
         {
             double max_hop_count = double.MinValue;
 
-            while (max_hop_count < K - 1)
+            while (max_hop_count < K)
             {
                 int minDegree = int.MaxValue;
                 int selectNode = -1;
@@ -69,10 +73,13 @@ namespace Heterogenerous_Simulation
                 {
                     foreach (int neighbor in src_net_topo.GetNeighborNodeIDs(scopeNode.ID))
                     {
-                        if (minDegree > src_net_topo.Degree(neighbor) && !scope_net_topo.Nodes.Exists(x => x.ID == neighbor))
+                        if (!scope_net_topo.Nodes.Exists(x => x.ID == neighbor))
                         {
-                            minDegree = src_net_topo.Degree(neighbor);
-                            selectNode = neighbor;
+                            if (minDegree > src_net_topo.Degree(neighbor))
+                            {
+                                minDegree = src_net_topo.Degree(neighbor);
+                                selectNode = neighbor;
+                            }
                         }
                     }
                 }
@@ -97,29 +104,41 @@ namespace Heterogenerous_Simulation
 
                     foreach (var node1 in scope_net_topo.Nodes)
                         foreach (var node2 in scope_net_topo.Nodes)
-                            if (max_hop_count < scope_net_topo.Path(node1.ID, node2.ID).Count)
-                                max_hop_count = scope_net_topo.Path(node1.ID, node2.ID).Count;
+                        {
+                            int hop_count = scope_net_topo.Path(node1.ID, node2.ID).Count;
+
+                            if (max_hop_count < hop_count)
+                                max_hop_count = hop_count;
+                        }
                 }
             }
 
             List<int> tmp = new List<int>();
             NetworkTopology remain_topo;
 
+            // Handling the neighbor nodes of each node in the scope network topology.
             foreach (var scopeNode in scope_net_topo.Nodes)
                 tmp.AddRange(src_net_topo.GetNeighborNodeIDs(scopeNode.ID).Except(scope_net_topo.Nodes.Select(x => x.ID)));
             tmp = tmp.Distinct().ToList();
 
+            // During above process the tmp list will be deployment nodes, and add to deployNodes list.
             deployNodes.AddRange(tmp);
 
+            // Adding deploy nodes to the scope network topology.
             foreach (int id in tmp)
                 scope_net_topo.Nodes.AddRange(src_net_topo.Nodes.Where(x => x.ID == id).ToList());
 
+            // Adding deploy nodes's edge to the scope network topology.
             foreach (var scopeNode in scope_net_topo.Nodes)
                 scope_net_topo.Edges.AddRange(src_net_topo.Edges.Where(x => x.Node1 == scopeNode.ID || x.Node2 == scopeNode.ID).ToList());
             scope_net_topo.Edges = scope_net_topo.Edges.Distinct().ToList();
 
+            // Computing the complement set between source and scope network topology.
             remain_topo = src_net_topo - scope_net_topo;
+            // Computing the complement set's shortest path.
+            remain_topo.ComputingShortestPath();
 
+            // Removing deployment nodes and edges from scope network topology.
             foreach (int id in tmp)
             {
                 scope_net_topo.Nodes.RemoveAll(x => x.ID == id);
@@ -127,30 +146,6 @@ namespace Heterogenerous_Simulation
             }
 
             return remain_topo;
-        }
-
-        private bool findCenterNodeID(NetworkTopology networkTopology, out int centerID)
-        {
-            double minE = int.MaxValue;
-            centerID = -1;
-
-            foreach (var item in networkTopology.Nodes)
-            {
-                if (minE > networkTopology.Eccentricity(item.ID) && networkTopology.Eccentricity(item.ID) != double.MinValue)
-                {
-                    minE = networkTopology.Eccentricity(item.ID);
-                    centerID = item.ID;
-                }
-                else if (minE == networkTopology.Eccentricity(item.ID))
-                {
-                    int minD = networkTopology.Degree(centerID);
-
-                    if (minD > networkTopology.Degree(item.ID))
-                        centerID = item.ID;
-                }
-            }
-
-            return centerID != -1;
         }
     }
 }

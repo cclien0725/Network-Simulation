@@ -18,6 +18,8 @@ namespace Deployment_Simulation
         static extern bool AllocConsole();
 
         private string fileName = string.Format(@"C:\Users\{0}\Dropbox\RCLab\Personal Paper\TestMap3.brite", Environment.UserName);
+        //private string fileName = @"C:\Users\Chia-Chun Lien\Desktop\n1kd4_4.brite";
+        //private string fileName = @"C:\Users\Chia-Chun Lien\Desktop\TestMap4.brite";
 
         public Form1()
         {
@@ -36,8 +38,8 @@ namespace Deployment_Simulation
                 networkTopology.ReadBriteFile(fileName);
 
                 // Using randomly depolyment method.
-                KCutWithClusteringDeployment randomDeploy = new KCutWithClusteringDeployment(30, 20, 10);
-                networkTopology.Deploy(randomDeploy);
+                KCutWithClusteringDeployment clusteringDeploy = new KCutWithClusteringDeployment(30, 20, 10);
+                networkTopology.Deploy(clusteringDeploy);
                 networkTopology.Run();
             }
             catch (Exception exception)
