@@ -17,8 +17,8 @@ namespace Deployment_Simulation
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
 
-        private string fileName = string.Format(@"C:\Users\{0}\Dropbox\RCLab\Personal Paper\TestMap3.brite", Environment.UserName);
-        //private string fileName = @"C:\Users\Chia-Chun Lien\Desktop\n1kd4_4.brite";
+        //private string fileName = string.Format(@"C:\Users\{0}\Dropbox\RCLab\Personal Paper\TestMap3.brite", Environment.UserName);
+        private string fileName = @"C:\Users\Chia-Chun Lien\Desktop\n1kd4_4.brite";
         //private string fileName = @"C:\Users\Chia-Chun Lien\Desktop\TestMap4.brite";
 
         public Form1()

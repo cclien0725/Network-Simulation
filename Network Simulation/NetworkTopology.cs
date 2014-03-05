@@ -151,16 +151,6 @@ namespace Network_Simulation
                             string[] data = lines[i].Split(' ', '\t');
                             Nodes.Add(new Node() { ID = Convert.ToInt32(data[0]), Xpos = Convert.ToDouble(data[1]), Ypos = Convert.ToDouble(data[2]) });
                         }
-
-                        // Create the space of adjacent matrix
-                        AdjacentMatrix = new Adjacency[numberOfNodes, numberOfNodes];
-
-                        // If the file of shortest path is exist, then load into memory
-                        if (File.Exists(shortestPathFileName))
-                        {
-                            ReadShortestPathFile(shortestPathFileName);
-                            break;
-                        }
                     }
                     // Reading edges
                     else if (Regex.IsMatch(lines[i], @"(^Edges)"))
@@ -211,37 +201,39 @@ namespace Network_Simulation
             Console.WriteLine("Reading shortest path file...");
 
             // Create the space of adjacent matrix
-            //if (AdjacentMatrix == null)
-            //    AdjacentMatrix = new Adjacency[Nodes.Count, Nodes.Count];
+            if (AdjacentMatrix == null)
+                AdjacentMatrix = new Adjacency[Nodes.Count, Nodes.Count];
 
-            //using (BufferedStream bs = new BufferedStream(File.OpenRead(fileName)))
-            //{
-            //    using (StreamReader reader = new StreamReader(bs))
-            //    {
-            //        int i = 0;
-
-            //        while (!reader.EndOfStream)
-            //        {
-            //            string[] data = reader.ReadLine().Split(' ');
-
-            //            for (int j = 0; j < data.Length; j++)
-            //                if (!data[j].Equals("null"))
-            //                    AdjacentMatrix[i, j] = new Adjacency(data[j]);
-
-            //            i++;
-            //        }
-            //    }
-            //}
-            try
+            using (BufferedStream bs = new BufferedStream(File.OpenRead(fileName)))
             {
-                using (Stream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (StreamReader reader = new StreamReader(bs))
                 {
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    AdjacentMatrix = formatter.Deserialize(stream) as Adjacency[,];
+                    int i = 0;
+
+                    while (!reader.EndOfStream)
+                    {
+                        string[] data = reader.ReadLine().Split(' ');
+
+                        for (int j = 0; j < data.Length; j++)
+                            if (!data[j].Equals("null"))
+                                AdjacentMatrix[i, j] = new Adjacency(data[j]);
+
+                        i++;
+                    }
                 }
             }
-            catch (Exception ex)
-            { }
+            //try
+            //{
+            //    using (BufferedStream bs = new BufferedStream(File.OpenRead(fileName)))
+            //    {
+            //        BinaryFormatter formatter = new BinaryFormatter();
+            //        AdjacentMatrix = formatter.Deserialize(bs) as Adjacency[,];
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw ex;
+            //}
         }
 
         /// <summary>
@@ -251,36 +243,38 @@ namespace Network_Simulation
         {
             Console.WriteLine("Writing shortest path file...");
 
-            //using (BufferedStream bs = new BufferedStream(File.OpenWrite(fileName)))
-            //{
-            //    using (StreamWriter writer = new StreamWriter(bs))
-            //    {
-            //        for (int i = 0; i < Nodes.Count; i++)
-            //        {
-            //            for (int j = 0; j < Nodes.Count; j++)
-            //            {
-            //                if (AdjacentMatrix[i, j] == null)
-            //                    writer.Write("null");
-            //                else
-            //                    writer.Write(AdjacentMatrix[i, j].GetString());
-
-            //                if (j != Nodes.Count - 1)
-            //                    writer.Write(" ");
-            //            }
-            //            writer.WriteLine();
-            //        }
-            //    }
-            //}
-            try
+            using (BufferedStream bs = new BufferedStream(File.OpenWrite(fileName)))
             {
-                using (FileStream fStream = File.OpenWrite(fileName))
+                using (StreamWriter writer = new StreamWriter(bs))
                 {
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    formatter.Serialize(fStream, AdjacentMatrix);
+                    for (int i = 0; i < Nodes.Count; i++)
+                    {
+                        for (int j = 0; j < Nodes.Count; j++)
+                        {
+                            if (AdjacentMatrix[i, j] == null)
+                                writer.Write("null");
+                            else
+                                writer.Write(AdjacentMatrix[i, j].GetString());
+
+                            if (j != Nodes.Count - 1)
+                                writer.Write(" ");
+                        }
+                        writer.WriteLine();
+                    }
                 }
             }
-            catch (Exception ex)
-            { }
+            //try
+            //{
+            //    using (FileStream fStream = File.OpenWrite(fileName))
+            //    {
+            //        BinaryFormatter formatter = new BinaryFormatter();
+            //        formatter.Serialize(fStream, AdjacentMatrix);
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw ex;
+            //}
         }
     }
 }

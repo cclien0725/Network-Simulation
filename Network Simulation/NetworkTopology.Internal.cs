@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Network_Simulation
 {
@@ -42,8 +43,8 @@ namespace Network_Simulation
             }
         }
 
-        [Serializable()]
-        public class Adjacency
+        //[Serializable]
+        public class Adjacency// : ISerializable
         {
             public double Length { get; set; }
             public double Delay { get; set; }
@@ -66,6 +67,20 @@ namespace Network_Simulation
             {
                 return string.Format("{0},{1},{2}", Predecessor, Length, Delay);
             }
+
+            //public void GetObjectData(SerializationInfo info, StreamingContext context)
+            //{
+            //    info.AddValue("length", Length, typeof(double));
+            //    info.AddValue("delay", Delay, typeof(double));
+            //    info.AddValue("predecessor", Predecessor, typeof(int));
+            //}
+
+            //public Adjacency(SerializationInfo info, StreamingContext context)
+            //{
+            //    Length = (double)info.GetValue("length", typeof(double));
+            //    Delay = (double)info.GetValue("delay", typeof(double));
+            //    Predecessor = (int)info.GetValue("predecessor", typeof(int));
+            //}
         }
     }
 }
