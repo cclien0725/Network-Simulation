@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Network_Simulation
 {
@@ -15,9 +16,15 @@ namespace Network_Simulation
         
         public int numberOfAttackers;
         public int numberOfVictims;
+        public List<int> idOfVictims;
 
         private double percentageOfAttackers;
         private string fileName;
+
+        private const int ATTACK_PACKET_PER_SEC = 1;
+        private const int NORMAL_PACKET_PER_SEC = 10;
+        private const int NUMBER_OF_ATTACK_PACKET = 300;
+        private const int NUMBER_OF_NORMAL_PACKET = 30;
 
         /// <summary>
         /// Constructor.
@@ -29,6 +36,8 @@ namespace Network_Simulation
             // Create instance of nodes.
             Nodes = new List<Node>();
             Edges = new List<Edge>();
+
+            idOfVictims = new List<int>();
 
             // Initialize environment parameters.
             this.percentageOfAttackers = percentageOfAttackers;
@@ -51,8 +60,11 @@ namespace Network_Simulation
 
             // Select victims.
             for (; randomArrayIndex < numberOfVictims; randomArrayIndex++)
+            {
+                idOfVictims.Add(randomArray[randomArrayIndex]);
                 Nodes[randomArray[randomArrayIndex]].Type = NodeType.Victim;
-            
+            }
+
             // Select attackers.
             for (; randomArrayIndex < numberOfAttackers + numberOfVictims; randomArrayIndex++)
                 Nodes[randomArray[randomArrayIndex]].Type = NodeType.Attacker;
@@ -78,7 +90,25 @@ namespace Network_Simulation
             if (Nodes.Count == 0)
                 throw new Exception("Run() Fail: There are 0 nodes in the network.");
 
+            Random rd = new Random();
+            int victim;
+            List<int> path;
 
+            foreach (Node node in Nodes)
+            {
+                victim = idOfVictims[rd.Next(idOfVictims.Count)];
+                path = Path(node.ID, Nodes[victim].ID);
+                switch (node.Type)
+                {
+                    case NodeType.Attacker:
+                        
+                        break;
+
+                    case NodeType.Normal:
+
+                        break;
+                }
+            }
 
         }
 
@@ -120,7 +150,16 @@ namespace Network_Simulation
                         {
                             string[] data = lines[i].Split(' ', '\t');
                             Nodes.Add(new Node() { ID = Convert.ToInt32(data[0]), Xpos = Convert.ToDouble(data[1]), Ypos = Convert.ToDouble(data[2]) });
-                            //NodeIndexTable.Add(Convert.ToInt32(data[0]), Nodes.Count - 1);
+                        }
+
+                        // Create the space of adjacent matrix
+                        AdjacentMatrix = new Adjacency[numberOfNodes, numberOfNodes];
+
+                        // If the file of shortest path is exist, then load into memory
+                        if (File.Exists(shortestPathFileName))
+                        {
+                            ReadShortestPathFile(shortestPathFileName);
+                            break;
                         }
                     }
                     // Reading edges
@@ -172,27 +211,37 @@ namespace Network_Simulation
             Console.WriteLine("Reading shortest path file...");
 
             // Create the space of adjacent matrix
-            if (AdjacentMatrix == null)
-                AdjacentMatrix = new Adjacency[Nodes.Count, Nodes.Count];
+            //if (AdjacentMatrix == null)
+            //    AdjacentMatrix = new Adjacency[Nodes.Count, Nodes.Count];
 
-            using (BufferedStream bs = new BufferedStream(File.OpenRead(fileName)))
+            //using (BufferedStream bs = new BufferedStream(File.OpenRead(fileName)))
+            //{
+            //    using (StreamReader reader = new StreamReader(bs))
+            //    {
+            //        int i = 0;
+
+            //        while (!reader.EndOfStream)
+            //        {
+            //            string[] data = reader.ReadLine().Split(' ');
+
+            //            for (int j = 0; j < data.Length; j++)
+            //                if (!data[j].Equals("null"))
+            //                    AdjacentMatrix[i, j] = new Adjacency(data[j]);
+
+            //            i++;
+            //        }
+            //    }
+            //}
+            try
             {
-                using (StreamReader reader = new StreamReader(bs))
+                using (Stream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    int i = 0;
-
-                    while (!reader.EndOfStream)
-                    {
-                        string[] data = reader.ReadLine().Split(' ');
-
-                        for (int j = 0; j < data.Length; j++)
-                            if (!data[j].Equals("null"))
-                                AdjacentMatrix[i, j] = new Adjacency(data[j]);
-
-                        i++;
-                    }
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    AdjacentMatrix = formatter.Deserialize(stream) as Adjacency[,];
                 }
             }
+            catch (Exception ex)
+            { }
         }
 
         /// <summary>
@@ -202,26 +251,36 @@ namespace Network_Simulation
         {
             Console.WriteLine("Writing shortest path file...");
 
-            using (BufferedStream bs = new BufferedStream(File.OpenWrite(fileName)))
-            {
-                using (StreamWriter writer = new StreamWriter(bs))
-                {
-                    for (int i = 0; i < Nodes.Count; i++)
-                    {
-                        for (int j = 0; j < Nodes.Count; j++)
-                        {
-                            if (AdjacentMatrix[i, j] == null)
-                                writer.Write("null");
-                            else
-                                writer.Write(AdjacentMatrix[i, j].GetString());
+            //using (BufferedStream bs = new BufferedStream(File.OpenWrite(fileName)))
+            //{
+            //    using (StreamWriter writer = new StreamWriter(bs))
+            //    {
+            //        for (int i = 0; i < Nodes.Count; i++)
+            //        {
+            //            for (int j = 0; j < Nodes.Count; j++)
+            //            {
+            //                if (AdjacentMatrix[i, j] == null)
+            //                    writer.Write("null");
+            //                else
+            //                    writer.Write(AdjacentMatrix[i, j].GetString());
 
-                            if (j != Nodes.Count - 1)
-                                writer.Write(" ");
-                        }
-                        writer.WriteLine();
-                    }
+            //                if (j != Nodes.Count - 1)
+            //                    writer.Write(" ");
+            //            }
+            //            writer.WriteLine();
+            //        }
+            //    }
+            //}
+            try
+            {
+                using (FileStream fStream = File.OpenWrite(fileName))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    formatter.Serialize(fStream, AdjacentMatrix);
                 }
             }
+            catch (Exception ex)
+            { }
         }
     }
 }

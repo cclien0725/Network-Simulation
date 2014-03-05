@@ -11,6 +11,7 @@ namespace Network_Simulation
         long Time { get; set; }             // The event arise time.
         int SourceNodeId { get; set; }      // The id of the source node.
         int DestinationNodeId { get; set; } // The id of the destination node.
+
     }
 
     class PacketSendedEvent : PacketEvents

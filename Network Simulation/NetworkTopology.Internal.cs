@@ -42,6 +42,7 @@ namespace Network_Simulation
             }
         }
 
+        [Serializable()]
         public class Adjacency
         {
             public double Length { get; set; }
