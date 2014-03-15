@@ -21,10 +21,15 @@ namespace Network_Simulation
         private double percentageOfAttackers;
         private string fileName;
 
-        private const int ATTACK_PACKET_PER_SEC = 1;
-        private const int NORMAL_PACKET_PER_SEC = 10;
-        private const int NUMBER_OF_ATTACK_PACKET = 300;
-        private const int NUMBER_OF_NORMAL_PACKET = 30;
+        // The variable of drawing network topology.
+        private float m_scale_x;
+        private float m_scale_y;
+        private float m_pre_move_x;
+        private float m_pre_move_y;
+        private float m_move_x;
+        private float m_move_y;
+        private bool m_is_setup_control;
+        private bool m_is_mouse_down;
 
         /// <summary>
         /// Constructor.
@@ -51,6 +56,16 @@ namespace Network_Simulation
         {
             if (Nodes.Count == 0)
                 throw new Exception("Initilaize() Fail: There are 0 nodes in the network.");
+
+            // Initializing the drawing network variable.
+            m_scale_x = 1;
+            m_scale_y = 1;
+            m_pre_move_x = 0;
+            m_pre_move_y = 0;
+            m_move_x = 0;
+            m_move_y = 0;
+            m_is_setup_control = false;
+            m_is_mouse_down = false;
 
             // Create random array.
             int[] randomArray = DataUtility.RandomArray(Nodes.Count);

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
+using System.Drawing;
+using System.Reflection;
 
 namespace Network_Simulation
 {
@@ -118,11 +121,20 @@ namespace Network_Simulation
         public double Eccentricity(int NodeID)
         {
             double result = double.MinValue;
+            int nowCount;
 
-            for (int i = 0; i < Nodes.Count; i++)
-                if (AdjacentMatrix[NodeID2Index(NodeID), i] != null &&
-                    result < AdjacentMatrix[NodeID2Index(NodeID), i].Length)
-                    result = AdjacentMatrix[NodeID2Index(NodeID), i].Length;
+            //for (int i = 0; i < Nodes.Count; i++)
+            //    if (AdjacentMatrix[NodeID2Index(NodeID), i] != null &&
+            //        result < AdjacentMatrix[NodeID2Index(NodeID), i].Length)
+            //        result = AdjacentMatrix[NodeID2Index(NodeID), i].Length;
+
+            foreach (int id in Nodes.Where(n => n.ID != NodeID).Select(n => n.ID))
+            {
+                nowCount = Path(NodeID, id).Count;
+
+                if (result < nowCount)
+                    result = nowCount;
+            }
 
             return result;
         }
@@ -228,6 +240,240 @@ namespace Network_Simulation
             //}
 
             return result;
+        }
+
+        /// <summary>
+        /// Setting up the drawing control that draw network topology on the specific control.
+        /// </summary>
+        /// <param name="ctrl">The control to draw the network.</param>
+        public void SetupDrawingControl(Control ctrl)
+        {
+            if (m_is_setup_control)
+                throw new Exception("SetupDrawingControl() Fail: The control have been setted.");
+
+            m_is_setup_control = true;
+
+            // Changing the cursor.
+            ctrl.Cursor = Cursors.NoMove2D;
+
+            // Enabling DoubleBuffered.
+            typeof(Control).InvokeMember("DoubleBuffered",
+                                BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+                                null, ctrl, new object[] { true });
+
+            // Handling the MouseWheel event to zoom in or zoom out network topology.
+            ctrl.MouseWheel += (s, e) =>
+            {
+                // zoom in
+                if (e.Delta > 0)
+                {
+                    m_scale_x += 0.1f;
+                    m_scale_y += 0.1f;
+                    (s as Control).Invalidate();
+                }
+                // zoom out
+                else
+                {
+                    m_scale_x = (m_scale_x - 0.1f) > 0.1 ? (m_scale_x - 0.1f) : 0.1f;
+                    m_scale_y = (m_scale_y - 0.1f) > 0.1 ? (m_scale_y - 0.1f) : 0.1f;
+                    (s as Control).Invalidate();
+                }
+            };
+
+            // Handling the MouseEnter event to focus the specific control.
+            ctrl.MouseEnter += (s, e) =>
+            {
+                (s as Control).Focus();
+            };
+
+            // Handling the MouseLeave event to lost focus the specific control.
+            ctrl.MouseLeave += (s, e) =>
+            {
+                (s as Control).Focus();
+            };
+
+            // Handling the MouseDown event to move the network topology.
+            ctrl.MouseDown += (s, e) =>
+            {
+                if (e.Button == System.Windows.Forms.MouseButtons.Left)
+                {
+                    m_pre_move_x = e.Location.X;
+                    m_pre_move_y = e.Location.Y;
+                    m_is_mouse_down = true;
+                }
+            };
+
+            // Handling the MouseUp event to move the network topology.
+            ctrl.MouseUp += (s, e) =>
+            {
+                if (e.Button == System.Windows.Forms.MouseButtons.Left)
+                {
+                    m_move_x += e.Location.X - m_pre_move_x;
+                    m_move_y += e.Location.Y - m_pre_move_y;
+                    m_pre_move_x = e.Location.X;
+                    m_pre_move_y = e.Location.Y;
+                    (s as Control).Invalidate();
+                    m_is_mouse_down = false;
+                }
+            };
+
+            // Handling the MouseMove event to move the network topology.
+            ctrl.MouseMove += (s, e) =>
+            {
+                if (m_is_mouse_down)
+                {
+                    m_move_x += e.Location.X - m_pre_move_x;
+                    m_move_y += e.Location.Y - m_pre_move_y;
+                    m_pre_move_x = e.Location.X;
+                    m_pre_move_y = e.Location.Y;
+                    (s as Control).Invalidate();
+                }
+            };
+
+            // Handling the Resize event to redraw the network topology.
+            ctrl.Resize += (s, e) =>
+            {
+                (s as Control).Invalidate();
+            };
+
+            // Handling the Paint event to pain the network topology.
+            ctrl.Paint += (s, e) =>
+            {
+                // Using the BufferedGraphics to draw the network topology.
+                using (BufferedGraphics bg = BufferedGraphicsManager.Current.Allocate(e.Graphics, e.ClipRectangle))
+                {
+                    bg.Graphics.Clear(Color.Gray);
+                    bg.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighSpeed;
+
+                    // Setting up the transform to move or scale the network topology.
+                    bg.Graphics.TranslateTransform(m_move_x, m_move_y);
+                    bg.Graphics.ScaleTransform(m_scale_x, m_scale_y);
+
+                    // Drawing the edge of the network topology.
+                    foreach (var edge in Edges)
+                        drawEdge(bg.Graphics, edge);
+
+                    // Drawing the node of the network topology.
+                    foreach (var node in Nodes)
+                        drawNode(bg.Graphics, node);
+
+                    // Drawing the demonstration of the symbol.
+                    bg.Graphics.ResetTransform();
+                    bg.Graphics.ScaleTransform(0.8f, 0.8f);
+                    drawDemonstration(bg.Graphics);
+
+                    // Starting render the graph to specific graphics.
+                    bg.Render();
+                }
+            };
+        }
+
+        /// <summary>
+        /// Drawing node of the network topology.
+        /// </summary>
+        /// <param name="graph">The graphic to draw on.</param>
+        /// <param name="node">The node to draw on.</param>
+        private void drawNode(Graphics graph, Node node)
+        {
+            float x = (float)node.Xpos;
+            float y = (float)node.Ypos;
+            string str;
+            Brush brush;
+
+            switch (node.Tracer)
+            {
+                case TracerType.None:
+                    brush = DRAW_NORMAL_BRUSH;
+                    break;
+                case TracerType.Filtering:
+                    brush = DRAW_FILTERING_BRUSH;
+                    break;
+                case TracerType.Marking:
+                    brush = DRAW_MARKING_BRUSH;
+                    break;
+                case TracerType.Tunneling:
+                    brush = DRAW_TUNNELING_BRUSH;
+                    break;
+                default:
+                    brush = Brushes.White;
+                    break;
+            }
+
+            switch (node.Type)
+            {
+                case NodeType.Normal:
+#if DEBUG
+                    str = node.ID.ToString();
+#else
+                    str = string.Empty;
+#endif
+                    break;
+                case NodeType.Attacker:
+                    str = "A";
+                    break;
+                case NodeType.Victim:
+                    str = "V";
+                    break;
+                default:
+                    str = string.Empty;
+                    break;
+            }
+
+            graph.FillEllipse(brush, x, y, 30, 30);
+#if DEBUG
+            graph.DrawString(str, new Font(DRAW_FONT_FAMILY, 12), Brushes.White, x + 15 - 11, y + 15 - 11);
+#else
+            graph.DrawString(str, new Font(DRAW_FONT_FAMILY, 12), Brushes.White, x + 15 - 8, y + 15 - 11);
+#endif
+        }
+
+        /// <summary>
+        /// Drawing edge of the network topology.
+        /// </summary>
+        /// <param name="graph">The graphic to draw on.</param>
+        /// <param name="edge">The edge to draw on.</param>
+        private void drawEdge(Graphics graph, Edge edge)
+        {
+            Node node1 = Nodes[NodeID2Index(edge.Node1)];
+            Node node2 = Nodes[NodeID2Index(edge.Node2)];
+
+            graph.DrawLine(Pens.Black, (float)node1.Xpos + 15, (float)node1.Ypos + 15, (float)node2.Xpos + 15, (float)node2.Ypos + 15);
+        }
+
+        /// <summary>
+        /// Drawing demonstration of the symbol on the network topology.
+        /// </summary>
+        /// <param name="graph">The graphic to draw on.</param>
+        private void drawDemonstration(Graphics graph)
+        {
+            float width = 200;
+            float height = 220;
+            float left_top_x = graph.VisibleClipBounds.Width - width;
+            float left_top_y = graph.VisibleClipBounds.Height - height;
+            float margin = 10;
+            float padding = 10;
+            float now_row_height = 0;
+            Font font = new Font(DRAW_FONT_FAMILY, 12);
+
+            graph.FillRectangle(Brushes.DimGray, left_top_x, left_top_y, width - margin, height - margin);
+
+            graph.FillEllipse(DRAW_NORMAL_BRUSH, left_top_x + padding, left_top_y + padding + now_row_height, 30, 30);
+            graph.DrawString("Normal Node", font, Brushes.White, left_top_x + padding + 40 + 15 - 11, left_top_y + padding + now_row_height + 15 - 11);
+
+            now_row_height += 40;
+            graph.FillEllipse(DRAW_FILTERING_BRUSH, left_top_x + padding, left_top_y + padding + now_row_height, 30, 30);
+            graph.DrawString("Filtering Node", font, Brushes.White, left_top_x + padding + 40 + 15 - 11, left_top_y + padding + now_row_height + 15 - 11);
+
+            now_row_height += 40;
+            graph.FillEllipse(DRAW_MARKING_BRUSH, left_top_x + padding, left_top_y + padding + now_row_height, 30, 30);
+            graph.DrawString("Marking Node", font, Brushes.White, left_top_x + padding + 40 + 15 - 11, left_top_y + padding + now_row_height + 15 - 11);
+
+            now_row_height += 40;
+            graph.FillEllipse(DRAW_TUNNELING_BRUSH, left_top_x + padding, left_top_y + padding + now_row_height, 30, 30);
+            graph.DrawString("Tunneling Node", font, Brushes.White, left_top_x + padding + 40 + 15 - 11, left_top_y + padding + now_row_height + 15 - 11);
+
+            now_row_height += 40;
+            graph.DrawString("V: Victim; A: Attacker", font, Brushes.White, left_top_x + padding + 15 - 11, left_top_y + padding + now_row_height + 15 - 11);
         }
 
         private long Poisson(double lambda)

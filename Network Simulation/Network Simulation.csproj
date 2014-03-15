@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="DataUtility.cs" />
     <Compile Include="Deployment\Deployment.cs" />
+    <Compile Include="NetworkTopology.Config.cs" />
     <Compile Include="PacketEvents.cs" />
     <Compile Include="NetworkTopology.cs" />
     <Compile Include="NetworkTopology.Internal.cs" />

@@ -30,7 +30,7 @@ namespace Deployment_Simulation
                 scope_net_topo.Nodes.Add(tmp_src_net_topo.Nodes[tmp_src_net_topo.NodeID2Index(centerID)]);
 
                 // Starting run algorithm with this level.
-                tmp_src_net_topo = startAlgorithm(tmp_src_net_topo, 4, 4, ref scope_net_topo, ref deployNodes);
+                tmp_src_net_topo = startAlgorithm(tmp_src_net_topo, 12, 10, ref scope_net_topo, ref deployNodes);
 
                 // Adding this round generated scope network topology to list.
                 allRoundScopeList.Add(scope_net_topo);
@@ -80,7 +80,7 @@ namespace Deployment_Simulation
                                 NetworkTopology complement = (src_net_topo - scope_net_topo);
                                 int degree = complement.Degree(neighbor);
 
-                                if (degree < 3 && minDegree > degree)
+                                if (minDegree > degree)
                                 {
                                     minDegree = degree;
                                     selectNode = neighbor;

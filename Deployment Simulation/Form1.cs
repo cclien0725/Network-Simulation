@@ -18,8 +18,10 @@ namespace Deployment_Simulation
         static extern bool AllocConsole();
 
         //private string fileName = string.Format(@"C:\Users\{0}\Dropbox\RCLab\Personal Paper\TestMap3.brite", Environment.UserName);
-        private string fileName = @"C:\Users\Chia-Chun Lien\Desktop\n1kd4_4.brite";
+        //private string fileName = @"C:\Users\Chia-Chun Lien\Desktop\n1kd4_4.brite";
         //private string fileName = @"C:\Users\Chia-Chun Lien\Desktop\TestMap4.brite";
+        private string fileName = @"C:\Users\Chia-Chun Lien\Desktop\test.brite";
+        private NetworkTopology networkTopology;
 
         public Form1()
         {
@@ -34,15 +36,16 @@ namespace Deployment_Simulation
                 AllocConsole();
 
                 // Read network topology and initialize the attackers and victim.
-                NetworkTopology networkTopology = new NetworkTopology(10, 1);
+                networkTopology = new NetworkTopology(10, 1);
+                networkTopology.SetupDrawingControl(this.panel1);
                 networkTopology.ReadBriteFile(fileName);
 
                 // Using randomly depolyment method.
                 KCutWithClusteringDeployment clusteringDeploy = new KCutWithClusteringDeployment(30, 20, 10);
                 networkTopology.Deploy(clusteringDeploy);
-                networkTopology.Run();
+                //networkTopology.Run();
             }
-            catch (Exception exception)
+            catch (Exception exception) 
             {
                 Console.WriteLine(exception.Message);
             }
