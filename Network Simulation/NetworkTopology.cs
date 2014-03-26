@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Network_Simulation
 {
@@ -15,9 +14,11 @@ namespace Network_Simulation
         public Adjacency[,] AdjacentMatrix;
         
         public int numberOfAttackers;
+        public int numberOfNormalUsers;
         public int numberOfVictims;
         public List<int> idOfVictims;
 
+        private double percentageOfNormalUser;
         private double percentageOfAttackers;
         private string fileName;
 
@@ -31,12 +32,17 @@ namespace Network_Simulation
         private bool m_is_setup_control;
         private bool m_is_mouse_down;
 
+        private SQLiteUtility sql;
+
+
+
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="percentageOfAttackers">The percentage of attackers.</param>
+        /// <param name="percentageOfNormalUser">The percentage of normal users.</param>
         /// <param name="numberOfVictims">The number of victim.</param>
-        public NetworkTopology(double percentageOfAttackers, int numberOfVictims)
+        public NetworkTopology(double percentageOfAttackers, double percentageOfNormalUser, int numberOfVictims)
         {
             // Create instance of nodes.
             Nodes = new List<Node>();
@@ -46,6 +52,7 @@ namespace Network_Simulation
 
             // Initialize environment parameters.
             this.percentageOfAttackers = percentageOfAttackers;
+            this.percentageOfNormalUser = percentageOfNormalUser;
             this.numberOfVictims = numberOfVictims;
         }
 
@@ -72,6 +79,7 @@ namespace Network_Simulation
             int randomArrayIndex = 0;
 
             numberOfAttackers = Convert.ToInt32(Math.Round(percentageOfAttackers * Nodes.Count / 100, 0, MidpointRounding.AwayFromZero));
+            numberOfNormalUsers = Convert.ToInt32(Math.Round(percentageOfNormalUser * Nodes.Count / 100 , 0, MidpointRounding.AwayFromZero));
 
             // Select victims.
             for (; randomArrayIndex < numberOfVictims; randomArrayIndex++)
@@ -83,6 +91,10 @@ namespace Network_Simulation
             // Select attackers.
             for (; randomArrayIndex < numberOfAttackers + numberOfVictims; randomArrayIndex++)
                 Nodes[randomArray[randomArrayIndex]].Type = NodeType.Attacker;
+
+            // Select normal users.
+            for (; randomArrayIndex < numberOfNormalUsers + numberOfAttackers + numberOfVictims; randomArrayIndex++)
+                Nodes[randomArray[randomArrayIndex]].Type = NodeType.Normal;
         }
 
         /// <summary>
@@ -100,31 +112,94 @@ namespace Network_Simulation
         /// <summary>
         /// Start simulate.
         /// </summary>
-        public void Run()
+        public void Run(string dbName, string methodName)
         {
             if (Nodes.Count == 0)
                 throw new Exception("Run() Fail: There are 0 nodes in the network.");
 
+            if (sql == null)
+                sql = new SQLiteUtility(dbName);
+
+            sql.CreateTable(methodName);
+
             Random rd = new Random();
             int victim;
+            int packetCount = 0;
             List<int> path;
 
-            foreach (Node node in Nodes)
+            var attackNodes = from node in Nodes
+                              where node.Type == NodeType.Attacker
+                              select node;
+            var normalUser = from node in Nodes
+                             where node.Type == NodeType.Normal
+                             select node;
+
+            foreach (var node in attackNodes)
             {
+                int time = 0;
                 victim = idOfVictims[rd.Next(idOfVictims.Count)];
                 path = Path(node.ID, Nodes[victim].ID);
-                switch (node.Type)
+
+                for (int i = 0; i < NUMBER_OF_ATTACK_PACKET; i++)
                 {
-                    case NodeType.Attacker:
-                        
-                        break;
+                    bool isTunneling = false;
+                    bool isMarking = false;
+                    bool isFiltering = false;
 
-                    case NodeType.Normal:
+                    PacketEvent packetEvent = new PacketEvent()
+                    {
+                        PacketID = packetCount++,
+                        Source = node.ID,
+                        Destination = Nodes[victim].ID,
+                        Time = i == 0 ? time : time + Convert.ToInt32(Poisson(ATTACK_PACKET_PER_SEC))
+                    };
 
-                        break;
+                    for (int j = 0; j < path.Count - 1; j++)
+                    {
+                        packetEvent.Time = j == 0 ? packetEvent.Time : packetEvent.Time += AdjacentMatrix[j - 1, j].Delay;
+
+                        switch (Nodes[path[j]].Tracer)
+                        {
+                            case TracerType.Tunneling:
+                                if (!isTunneling && !isMarking && rd.NextDouble() <= PROBIBILITY_OF_PACKET_TUNNELING)
+                                {
+                                    TunnelingEvent tunnelingEvent = packetEvent as TunnelingEvent;
+                                    tunnelingEvent.TunnelingSrc = path[j];
+                                    //tunnelingEvent.TunnelingDst = marking node or filtering node. and when tunnel to filtering node?
+                                    sql.InsertTunnelingEvent(tunnelingEvent);
+                                    //TODO: re-computing path... 
+                                    isTunneling = true;
+                                }
+                                break;
+                            case TracerType.Marking:
+                                if (!isMarking && rd.NextDouble() <= PROBIBILITY_OF_PACKET_MARKING)
+                                {
+                                    MarkingEvent markingEvent = packetEvent as MarkingEvent;
+                                    markingEvent.MarkingNodeID = path[j];
+                                    sql.InsertMarkingEvent(markingEvent);
+                                    isMarking = true;
+                                }
+                                break;
+                            case TracerType.Filtering:
+                                FilteringEvent filteringEvent = packetEvent as FilteringEvent;
+                                filteringEvent.FilteringNodeID = path[j];
+                                sql.InsertFilteringEvent(filteringEvent);
+                                isFiltering = true;
+                                break;
+                        }
+
+                        if (isFiltering)
+                            break;
+
+                        PacketSentEvent packetSentEvent = packetEvent as PacketSentEvent;
+                        packetSentEvent.CurrentNodeID = path[j];
+                        packetSentEvent.NextHopID = path[j + 1];
+                        packetSentEvent.Length = AdjacentMatrix[j, j + 1].Length;
+
+                        sql.InsertPacketSentEvent(packetSentEvent);
+                    }
                 }
             }
-
         }
 
         /// <summary>
@@ -237,18 +312,6 @@ namespace Network_Simulation
                     }
                 }
             }
-            //try
-            //{
-            //    using (BufferedStream bs = new BufferedStream(File.OpenRead(fileName)))
-            //    {
-            //        BinaryFormatter formatter = new BinaryFormatter();
-            //        AdjacentMatrix = formatter.Deserialize(bs) as Adjacency[,];
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw ex;
-            //}
         }
 
         /// <summary>
@@ -278,18 +341,6 @@ namespace Network_Simulation
                     }
                 }
             }
-            //try
-            //{
-            //    using (FileStream fStream = File.OpenWrite(fileName))
-            //    {
-            //        BinaryFormatter formatter = new BinaryFormatter();
-            //        formatter.Serialize(fStream, AdjacentMatrix);
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw ex;
-            //}
         }
     }
 }

@@ -226,7 +226,7 @@ namespace Network_Simulation
         /// <returns>The complement set between the two network topologies.</returns>
         public static NetworkTopology operator -(NetworkTopology left_n, NetworkTopology right_n)
         {
-            NetworkTopology result = new NetworkTopology(left_n.percentageOfAttackers, left_n.numberOfVictims);
+            NetworkTopology result = new NetworkTopology(left_n.percentageOfAttackers, left_n.percentageOfNormalUser, left_n.numberOfVictims);
 
             result.Nodes = left_n.Nodes.Except(right_n.Nodes).ToList();
             result.Edges = left_n.Edges.Except(right_n.Edges).ToList();
@@ -476,6 +476,10 @@ namespace Network_Simulation
             graph.DrawString("V: Victim; A: Attacker", font, Brushes.White, left_top_x + padding + 15 - 11, left_top_y + padding + now_row_height + 15 - 11);
         }
 
+        /// Return the poisson random number.
+        /// </summary>
+        /// <param name="lambda">Lambda.</param>
+        /// <returns>Random number.</returns>
         private long Poisson(double lambda)
         {
             Random rd = new Random();

@@ -5,38 +5,34 @@ using System.Text;
 
 namespace Network_Simulation
 {
-    abstract class PacketEvents
+    public class PacketEvent
     {
-        int Id { get; set; }                // The id of packet event.
-        long Time { get; set; }             // The event arise time.
-        int SourceNodeId { get; set; }      // The id of the source node.
-        int DestinationNodeId { get; set; } // The id of the destination node.
-
+        public int PacketID { get; set; }
+        public double Time { get; set; }
+        public int Source { get; set; }
+        public int Destination { get; set; }
     }
 
-    class PacketSendedEvent : PacketEvents
+    public class PacketSentEvent : PacketEvent
     {
-        int SendNodeId { get; set; }
+        public int CurrentNodeID { get; set; }
+        public int NextHopID { get; set; }
+        public double Length { get; set; }
     }
 
-    class PacketArriveEvent : PacketEvents
+    public class TunnelingEvent : PacketEvent
     {
-        int ArrivalNodeId { get; set; }
+        public int TunnelingSrc { get; set; }
+        public int TunnelingDst { get; set; }
     }
 
-    class PacketTunnelingEvent : PacketEvents
+    public class MarkingEvent : PacketEvent
     {
-        int TunnelingSourceNodeId { get; set; }
-        int TunnelingDestinationNodeId { get; set; }
+        public int MarkingNodeID { get; set; }
     }
 
-    class PacketMarkingEvent : PacketEvents 
+    public class FilteringEvent : PacketEvent
     {
-        int MarkingNodeId { get; set; }
-    }
-
-    class PacketFilteringEvent : PacketEvents 
-    {
-        int FilteringNodeId { get; set; }
+        public int FilteringNodeID { get; set; }
     }
 }

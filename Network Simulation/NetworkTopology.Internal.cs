@@ -8,7 +8,7 @@ namespace Network_Simulation
 {
     public partial class NetworkTopology
     {
-        public enum NodeType { Normal, Attacker, Victim }
+        public enum NodeType { None, Normal, Attacker, Victim }
         public enum TracerType { None, Marking, Tunneling, Filtering }
 
         public class Node
@@ -22,7 +22,7 @@ namespace Network_Simulation
             public Node()
             {
                 // Default value.
-                Type = NodeType.Normal;
+                Type = NodeType.None;
                 Tracer = TracerType.None;
             }
         }

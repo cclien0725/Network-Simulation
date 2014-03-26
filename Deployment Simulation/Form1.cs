@@ -35,8 +35,8 @@ namespace Deployment_Simulation
                 // Show console window
                 AllocConsole();
 
-                // Read network topology and initialize the attackers and victim.
-                networkTopology = new NetworkTopology(10, 1);
+                // Read network topology and initialize the attackers, normal users and victim.
+                NetworkTopology networkTopology = new NetworkTopology(10, 10, 1);
                 networkTopology.SetupDrawingControl(this.panel1);
                 networkTopology.ReadBriteFile(fileName);
 
