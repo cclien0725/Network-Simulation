@@ -14,6 +14,8 @@ namespace Deployment_Simulation
 
         public override void Deploy(NetworkTopology networkTopology)
         {
+            base.Deploy(networkTopology);
+
             List<NetworkTopology> allRoundScopeList = new List<NetworkTopology>();
             List<int> deployNodes = new List<int>();
             NetworkTopology tmp_src_net_topo = networkTopology;

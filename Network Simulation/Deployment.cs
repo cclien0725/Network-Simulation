@@ -22,13 +22,21 @@ namespace Network_Simulation
             this.percentageOfFilteringTracer = percentageOfFilteringTracer;
         }
 
-        public void Initialize(NetworkTopology networkTopology)
+        private void Initialize(NetworkTopology networkTopology)
         {
             numberOfTTracer = Convert.ToInt32(Math.Round(percentageOfTunnelingTracer * networkTopology.Nodes.Count / 100, 0, MidpointRounding.AwayFromZero));
             numberOfMTracer = Convert.ToInt32(Math.Round(percentageOfMarkingTracer * networkTopology.Nodes.Count / 100, 0, MidpointRounding.AwayFromZero));
             numberOfFTracer = Convert.ToInt32(Math.Round(percentageOfFilteringTracer * networkTopology.Nodes.Count / 100, 0, MidpointRounding.AwayFromZero));
+
+            // Clear the deployment method.
+            foreach (NetworkTopology.Node node in networkTopology.Nodes)
+                node.Tracer = NetworkTopology.TracerType.None;
         }
 
-        abstract public void Deploy(NetworkTopology networkTopology);
+        virtual public void Deploy(NetworkTopology networkTopology)
+        {
+            Initialize(networkTopology);
+
+        }
     }
 }

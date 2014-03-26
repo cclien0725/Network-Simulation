@@ -52,13 +52,14 @@ namespace Heterogenerous_Simulation
 
                 // Using randomly depolyment method.
                 RandomDeployment randomDeploy = new RandomDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text));
-                networkTopology.Deploy(randomDeploy);
-                networkTopology.Run(dbName, "Random");
+                randomDeploy.Deploy(networkTopology);
+                //networkTopology.Run(dbName, "Random");
 
                 // Using tomato deployment method.
                 TomatoDeployment tomatoDeploy = new TomatoDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text));
-                networkTopology.Deploy(tomatoDeploy);
-                networkTopology.Run(dbName, "Tomato");
+                tomatoDeploy.Deploy(networkTopology);
+
+                //networkTopology.Run(dbName, "Tomato");
             }
             catch (Exception exception)
             {

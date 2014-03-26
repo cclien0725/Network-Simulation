@@ -14,6 +14,8 @@ namespace Heterogenerous_Simulation
 
         public override void Deploy(NetworkTopology networkTopology)
         {
+            base.Deploy(networkTopology);
+
             // Create random array.
             int[] randomArray = DataUtility.RandomArray(networkTopology.Nodes.Count);
             int randomArrayIndex = 0;
