@@ -78,6 +78,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Heterogenerous Simulation\Heterogenerous Simulation.csproj">
+      <Project>{9644E6D8-A54B-4604-A002-B2AFC3820BCC}</Project>
+      <Name>Heterogenerous Simulation</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Network Simulation\Network Simulation.csproj">
       <Project>{5E75DCBF-0796-474F-85E9-8818223CABA9}</Project>
       <Name>Network Simulation</Name>

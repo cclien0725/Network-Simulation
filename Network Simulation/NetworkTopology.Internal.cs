@@ -18,6 +18,7 @@ namespace Network_Simulation
             public double Ypos { get; set; }
             public NodeType Type { get; set; }
             public TracerType Tracer { get; set; }
+            public int Eccentricity { get; set; }
 
             public Node()
             {

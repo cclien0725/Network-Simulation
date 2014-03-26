@@ -30,5 +30,13 @@ namespace Network_Simulation
 
             return randomArray;
         }
+
+        public static void Log(string msg, bool isShowDate = true)
+        {
+            if (isShowDate)
+                Console.Write("[{0}]: {1}", DateTime.Now.ToLongTimeString(), msg);
+            else
+                Console.Write("{0}", msg);
+        }
     }
 }

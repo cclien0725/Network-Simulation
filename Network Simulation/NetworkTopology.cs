@@ -34,7 +34,7 @@ namespace Network_Simulation
 
         private SQLiteUtility sql;
 
-
+        private List<Node> m_nodes;
 
         /// <summary>
         /// Constructor.
@@ -50,6 +50,16 @@ namespace Network_Simulation
 
             idOfVictims = new List<int>();
 
+            // Initializing the drawing network variable.
+            m_scale_x = 1;
+            m_scale_y = 1;
+            m_pre_move_x = 0;
+            m_pre_move_y = 0;
+            m_move_x = 0;
+            m_move_y = 0;
+            m_is_setup_control = false;
+            m_is_mouse_down = false;
+
             // Initialize environment parameters.
             this.percentageOfAttackers = percentageOfAttackers;
             this.percentageOfNormalUser = percentageOfNormalUser;
@@ -63,16 +73,6 @@ namespace Network_Simulation
         {
             if (Nodes.Count == 0)
                 throw new Exception("Initilaize() Fail: There are 0 nodes in the network.");
-
-            // Initializing the drawing network variable.
-            m_scale_x = 1;
-            m_scale_y = 1;
-            m_pre_move_x = 0;
-            m_pre_move_y = 0;
-            m_move_x = 0;
-            m_move_y = 0;
-            m_is_setup_control = false;
-            m_is_mouse_down = false;
 
             // Create random array.
             int[] randomArray = DataUtility.RandomArray(Nodes.Count);
@@ -223,7 +223,7 @@ namespace Network_Simulation
             this.fileName = fileName;
             try
             {
-                Console.WriteLine("Start reading brite file...");
+               DataUtility.Log("Reading brite file...");
 
                 int numberOfNodes;
                 int numberOfEdges;
@@ -256,24 +256,26 @@ namespace Network_Simulation
 
                             Edges.Add(new Edge() { Node1 = node1, Node2 = node2, Length = length, Delay = delay });
                         }
-
-                        // If the file of shortest path is exist, then load into memory
-                        if (File.Exists(shortestPathFileName))
-                        {
-                            ReadShortestPathFile(shortestPathFileName);
-                            break;
-                        }
-                        // Computing shortest path
-                        else
-                        {
-                            ComputingShortestPath();
-
-                            // Output the result to the file. (XXX.ShortestPath)
-                            WriteShortestPathFile(shortestPathFileName);
-                        }
                     }
                 }
 
+                DataUtility.Log("Done.\n", false);
+
+                // If the file of shortest path is exist, then load into memory
+                if (File.Exists(shortestPathFileName))
+                    ReadShortestPathFile(shortestPathFileName);
+
+                // Computing shortest path
+                else
+                {
+                    ComputingShortestPath();
+
+                    // Output the result to the file. (XXX.ShortestPath)
+                    WriteShortestPathFile(shortestPathFileName);
+                }
+
+                m_nodes = new List<Node>(Nodes);
+                ComputingAllEccentricity();
                 Initialize();
             }
             catch(Exception exception)
@@ -288,7 +290,7 @@ namespace Network_Simulation
         /// <param name="fileName">Shortest path file name. EX:n1kd4_14.brite.ShortestPath</param>
         private void ReadShortestPathFile(string fileName)
         {
-            Console.WriteLine("Reading shortest path file...");
+            DataUtility.Log("Reading shortest path file...");
 
             // Create the space of adjacent matrix
             if (AdjacentMatrix == null)
@@ -312,6 +314,8 @@ namespace Network_Simulation
                     }
                 }
             }
+
+            DataUtility.Log("Done.\n", false);
         }
 
         /// <summary>
@@ -319,7 +323,7 @@ namespace Network_Simulation
         /// </summary>
         private void WriteShortestPathFile(string fileName)
         {
-            Console.WriteLine("Writing shortest path file...");
+            DataUtility.Log("Writing shortest path file...");
 
             using (BufferedStream bs = new BufferedStream(File.OpenWrite(fileName)))
             {
@@ -341,6 +345,7 @@ namespace Network_Simulation
                     }
                 }
             }
+            DataUtility.Log("Done.\n", false);
         }
     }
 }

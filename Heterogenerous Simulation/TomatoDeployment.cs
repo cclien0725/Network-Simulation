@@ -6,7 +6,7 @@ using Network_Simulation;
 
 namespace Heterogenerous_Simulation
 {
-    class TomatoDeployment : Deployment
+    public class TomatoDeployment : Deployment
     {
         public TomatoDeployment(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer)
             : base(percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer)
@@ -14,8 +14,6 @@ namespace Heterogenerous_Simulation
 
         public override void Deploy(NetworkTopology networkTopology)
         {
-            Console.WriteLine("Tomato deployment.");
-
             List<NetworkTopology> allRoundScopeList = new List<NetworkTopology>();
             List<int> deployNodes = new List<int>();
             NetworkTopology tmp_src_net_topo = networkTopology;
@@ -35,9 +33,9 @@ namespace Heterogenerous_Simulation
                 // Adding this round generated scope network topology to list.
                 allRoundScopeList.Add(scope_net_topo);
 
-                Console.WriteLine("====================================");
-                Console.WriteLine("Scope Count:\t{0}", scope_net_topo.Nodes.Count);
-                Console.WriteLine("Deploy Count:\t{0}", deployNodes.Count);
+                DataUtility.Log(string.Format("================= Level {0} ==================\n", allRoundScopeList.Count));
+                DataUtility.Log(string.Format("Scope Count:\t{0}\n", scope_net_topo.Nodes.Count));
+                DataUtility.Log(string.Format("Deploy Count/Node Count:\t{0}/{1} = {2:0.0000}\n", deployNodes.Count, networkTopology.Nodes.Count, (float)deployNodes.Count / (float)networkTopology.Nodes.Count));
             }
 
             // Adding the remain nodes to deployment node list.
@@ -96,7 +94,7 @@ namespace Heterogenerous_Simulation
                     {
                         scope_net_topo.Edges.AddRange(src_net_topo.Edges.Where(e =>
                                                     e.Node1 == scopeNode.ID && e.Node2 == selectNode ||
-                                                    e.Node1 == selectNode & e.Node2 == scopeNode.ID)
+                                                    e.Node1 == selectNode && e.Node2 == scopeNode.ID)
                                                     .ToList());
                     }
 
@@ -136,7 +134,7 @@ namespace Heterogenerous_Simulation
             // Computing the complement set between source and scope network topology.
             remain_topo = src_net_topo - scope_net_topo;
             // Computing the complement set's shortest path.
-            remain_topo.ComputingShortestPath();
+            //remain_topo.ComputingShortestPath();
 
             // Removing deployment nodes and edges from scope network topology.
             foreach (int id in tmp)

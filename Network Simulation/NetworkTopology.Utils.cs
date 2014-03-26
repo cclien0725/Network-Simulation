@@ -19,9 +19,13 @@ namespace Network_Simulation
         {
             if (Nodes.Count == 0)
                 throw new Exception("NodeID2Index() Fail: There is 0 node on the network.");
-            
+
             if (!Nodes.Exists(x => x.ID == NodeID))
-                throw new Exception(string.Format("NodeID2Index() Fail: There is no match NodeID: {0} on our structure.", NodeID));
+                if (!m_nodes.Exists(x => x.ID == NodeID))
+                    throw new Exception(string.Format("NodeID2Index() Fail: There is no match NodeID: {0} on our structure.", NodeID));
+                else
+                    return m_nodes.FindIndex(x => x.ID == NodeID);
+
 
             return Nodes.FindIndex(x => x.ID == NodeID);
         }
@@ -37,7 +41,12 @@ namespace Network_Simulation
                 throw new Exception("NodeIndex2ID() Fail: There is 0 node on the network.");
 
             if (NodeIndex >= Nodes.Count || NodeIndex < 0)
-                throw new Exception(string.Format("NodeIndex2ID() Fail: Out of range on our structure of the index: {0}.", NodeIndex));
+            {
+                if (NodeIndex < m_nodes.Count)
+                    return m_nodes[NodeIndex].ID;
+                else
+                    throw new Exception(string.Format("NodeIndex2ID() Fail: Out of range on our structure of the index: {0}.", NodeIndex));
+            }
 
             return Nodes[NodeIndex].ID;
         }
@@ -47,7 +56,7 @@ namespace Network_Simulation
         /// </summary>
         public void ComputingShortestPath()
         {
-            Console.WriteLine("Computing shortest path...");
+            DataUtility.Log("Computing shortest path...");
 
             // Create the space of adjacent matrix
             AdjacentMatrix = null;
@@ -82,6 +91,8 @@ namespace Network_Simulation
                     }
                 }
             }
+
+            DataUtility.Log("Done.\n", false);
         }
 
         /// <summary>
@@ -113,20 +124,25 @@ namespace Network_Simulation
             return path;
         }
 
+        public void ComputingAllEccentricity()
+        {
+            DataUtility.Log("Computing all eccentricity value...");
+
+            foreach (var node in Nodes)
+                node.Eccentricity = Eccentricity(node.ID);
+
+            DataUtility.Log("Done.\n", false);
+        }
+
         /// <summary>
         /// Return the eccentricity value of the specific node ID on the network topology.
         /// </summary>
         /// <param name="NodeID">The node ID on the network topology.</param>
         /// <returns>The eccentricity value for the node ID on the network topology.</returns>
-        public double Eccentricity(int NodeID)
+        public int Eccentricity(int NodeID)
         {
-            double result = double.MinValue;
+            int result = int.MinValue;
             int nowCount;
-
-            //for (int i = 0; i < Nodes.Count; i++)
-            //    if (AdjacentMatrix[NodeID2Index(NodeID), i] != null &&
-            //        result < AdjacentMatrix[NodeID2Index(NodeID), i].Length)
-            //        result = AdjacentMatrix[NodeID2Index(NodeID), i].Length;
 
             foreach (int id in Nodes.Where(n => n.ID != NodeID).Select(n => n.ID))
             {
@@ -197,23 +213,26 @@ namespace Network_Simulation
         /// <returns>Do the network topology can find the center node id.</returns>
         public bool FindCenterNodeID(out int centerID)
         {
-            double minE = int.MaxValue;
-            double eccentricity;
+            DataUtility.Log("Finding center node...");
+            int minE = int.MaxValue;
+            int eccentricity;
             centerID = -1;
 
-            foreach (var item in Nodes)
+            foreach (var node in Nodes)
             {
-                eccentricity = Eccentricity(item.ID);
+                eccentricity = node.Eccentricity;
 
-                if (minE > eccentricity && eccentricity != double.MinValue)
+                if (minE > eccentricity && eccentricity != int.MinValue)
                 {
                     minE = eccentricity;
-                    centerID = item.ID;
+                    centerID = node.ID;
                 }
                 else if (minE == eccentricity)
-                    if (Degree(centerID) > Degree(item.ID))
-                        centerID = item.ID;
+                    if (Degree(centerID) > Degree(node.ID))
+                        centerID = node.ID;
             }
+
+            DataUtility.Log("Done.\n", false);
 
             return centerID != -1;
         }
@@ -233,11 +252,8 @@ namespace Network_Simulation
             foreach (var n in right_n.Nodes)
                 result.Edges.RemoveAll(e => e.Node1 == n.ID || e.Node2 == n.ID);
 
-            //if (result.Nodes.Count > 0)
-            //{
-            //    result.Initialize();
-            //    result.ComputingShortestPath();
-            //}
+            result.m_nodes = new List<Node>(left_n.m_nodes);
+            result.AdjacentMatrix = left_n.AdjacentMatrix;
 
             return result;
         }
@@ -401,12 +417,9 @@ namespace Network_Simulation
 
             switch (node.Type)
             {
+#if !DEBUG
                 case NodeType.Normal:
-#if DEBUG
-                    str = node.ID.ToString();
-#else
                     str = string.Empty;
-#endif
                     break;
                 case NodeType.Attacker:
                     str = "A";
@@ -414,8 +427,9 @@ namespace Network_Simulation
                 case NodeType.Victim:
                     str = "V";
                     break;
+#endif
                 default:
-                    str = string.Empty;
+                    str = node.ID.ToString();;
                     break;
             }
 

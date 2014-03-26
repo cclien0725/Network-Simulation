@@ -14,8 +14,6 @@ namespace Deployment_Simulation
 
         public override void Deploy(NetworkTopology networkTopology)
         {
-            Console.WriteLine("KCut With Clustering Deployment.");
-
             List<NetworkTopology> allRoundScopeList = new List<NetworkTopology>();
             List<int> deployNodes = new List<int>();
             NetworkTopology tmp_src_net_topo = networkTopology;
@@ -30,14 +28,14 @@ namespace Deployment_Simulation
                 scope_net_topo.Nodes.Add(tmp_src_net_topo.Nodes[tmp_src_net_topo.NodeID2Index(centerID)]);
 
                 // Starting run algorithm with this level.
-                tmp_src_net_topo = startAlgorithm(tmp_src_net_topo, 12, 10, ref scope_net_topo, ref deployNodes);
+                tmp_src_net_topo = startAlgorithm(tmp_src_net_topo, 4, 13, ref scope_net_topo, ref deployNodes);
 
                 // Adding this round generated scope network topology to list.
                 allRoundScopeList.Add(scope_net_topo);
 
-                Console.WriteLine("====================================");
-                Console.WriteLine("Scope Count:\t{0}", scope_net_topo.Nodes.Count);
-                Console.WriteLine("Deploy Count:\t{0}", deployNodes.Count);
+                DataUtility.Log(string.Format("================= Level {0} ==================\n", allRoundScopeList.Count));
+                DataUtility.Log(string.Format("Scope Count:\t{0}\n", scope_net_topo.Nodes.Count));
+                DataUtility.Log(string.Format("Deploy Count/Node Count:\t{0}/{1} = {2:0.0000}\n", deployNodes.Count, networkTopology.Nodes.Count, (float)deployNodes.Count / (float)networkTopology.Nodes.Count));
             }
 
             // Adding the remain nodes to deployment node list.
@@ -104,7 +102,7 @@ namespace Deployment_Simulation
                     {
                         scope_net_topo.Edges.AddRange(src_net_topo.Edges.Where(e =>
                                                     e.Node1 == scopeNode.ID && e.Node2 == selectNode ||
-                                                    e.Node1 == selectNode & e.Node2 == scopeNode.ID)
+                                                    e.Node1 == selectNode && e.Node2 == scopeNode.ID)
                                                     .ToList());
                     }
 
@@ -144,7 +142,7 @@ namespace Deployment_Simulation
             // Computing the complement set between source and scope network topology.
             remain_topo = src_net_topo - scope_net_topo;
             // Computing the complement set's shortest path.
-            remain_topo.ComputingShortestPath();
+            //remain_topo.ComputingShortestPath();
 
             // Removing deployment nodes and edges from scope network topology.
             foreach (int id in tmp)

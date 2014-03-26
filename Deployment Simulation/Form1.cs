@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using Network_Simulation;
 using System.Runtime.InteropServices;
+using Heterogenerous_Simulation;
 
 namespace Deployment_Simulation
 {
@@ -21,6 +22,7 @@ namespace Deployment_Simulation
         //private string fileName = @"C:\Users\Chia-Chun Lien\Desktop\n1kd4_4.brite";
         //private string fileName = @"C:\Users\Chia-Chun Lien\Desktop\TestMap4.brite";
         private string fileName = @"C:\Users\Chia-Chun Lien\Desktop\test.brite";
+        //private string fileName = @"C:\Users\Chia-Chun Lien\Desktop\n5kd6_20.brite";
         private NetworkTopology networkTopology;
 
         public Form1()
@@ -36,18 +38,23 @@ namespace Deployment_Simulation
                 AllocConsole();
 
                 // Read network topology and initialize the attackers, normal users and victim.
-                NetworkTopology networkTopology = new NetworkTopology(10, 10, 1);
+                networkTopology = new NetworkTopology(10, 10, 1);
                 networkTopology.SetupDrawingControl(this.panel1);
                 networkTopology.ReadBriteFile(fileName);
 
-                // Using randomly depolyment method.
+                // Using kcutwithclustering depolyment method.
                 KCutWithClusteringDeployment clusteringDeploy = new KCutWithClusteringDeployment(30, 20, 10);
                 networkTopology.Deploy(clusteringDeploy);
+
+                //TomatoDeployment tomato = new TomatoDeployment(30, 20, 10);
+                //networkTopology.Deploy(tomato);
                 //networkTopology.Run();
             }
             catch (Exception exception) 
             {
-                Console.WriteLine(exception.Message);
+                Console.WriteLine("\n========== {0} ==========", exception.Message);
+                Console.WriteLine(exception.StackTrace);
+                Console.WriteLine("".PadLeft(exception.Message.Length + 22, '='));
             }
         }
     }
