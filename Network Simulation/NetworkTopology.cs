@@ -17,6 +17,20 @@ namespace Network_Simulation
         public int numberOfNormalUsers;
         public int numberOfVictims;
         public List<int> idOfVictims;
+        public string FileName
+        {
+            get
+            {
+                return Path.GetFileNameWithoutExtension(fileName);
+            }
+        }
+        public int Diameter
+        {
+            get
+            {
+                return m_diameter;
+            }
+        }
 
         private double percentageOfNormalUser;
         private double percentageOfAttackers;
@@ -32,9 +46,10 @@ namespace Network_Simulation
         private bool m_is_setup_control;
         private bool m_is_mouse_down;
 
+        private int m_diameter;
         private SQLiteUtility sql;
 
-        private List<Node> m_nodes;
+        private List<Node> m_src_nodes;
 
         /// <summary>
         /// Constructor.
@@ -95,6 +110,12 @@ namespace Network_Simulation
             // Select normal users.
             for (; randomArrayIndex < numberOfNormalUsers + numberOfAttackers + numberOfVictims; randomArrayIndex++)
                 Nodes[randomArray[randomArrayIndex]].Type = NodeType.Normal;
+
+            // Finding diameter of the network topology.
+            m_diameter = int.MinValue;
+            foreach (var node in Nodes)
+                if (m_diameter < node.Eccentricity)
+                    m_diameter = node.Eccentricity;
         }
 
         ///// <summary>
@@ -221,14 +242,18 @@ namespace Network_Simulation
         public void ReadBriteFile(string fileName)
         {
             this.fileName = fileName;
-            try
-            {
+            Nodes.Clear();
+            Edges.Clear();
+
+            //try
+            //{
                DataUtility.Log("Reading brite file...");
 
                 int numberOfNodes;
                 int numberOfEdges;
                 string[] lines = File.ReadAllLines(fileName);
                 string shortestPathFileName = string.Format(@"{0}.ShortestPath", fileName);
+                string eccDegPathFileName = string.Format(@"{0}.EccDeg", fileName);
 
                 for (int i = 0; i < lines.Length; i++)
                 {
@@ -261,10 +286,11 @@ namespace Network_Simulation
 
                 DataUtility.Log("Done.\n", false);
 
+                m_src_nodes = new List<Node>(Nodes);
+
                 // If the file of shortest path is exist, then load into memory
                 if (File.Exists(shortestPathFileName))
                     ReadShortestPathFile(shortestPathFileName);
-
                 // Computing shortest path
                 else
                 {
@@ -274,14 +300,22 @@ namespace Network_Simulation
                     WriteShortestPathFile(shortestPathFileName);
                 }
 
-                m_nodes = new List<Node>(Nodes);
-                ComputingAllEccentricity();
+                if (File.Exists(eccDegPathFileName))
+                    ReadEccentricityDegreeFile(eccDegPathFileName);
+                else
+                {
+                    ComputingAllDegree();
+                    ComputingAllEccentricity();
+
+                    WriteEccentricityDegreeFile(eccDegPathFileName);
+                }
+                
                 Initialize();
-            }
-            catch(Exception exception)
-            {
-                throw exception;
-            }
+            //}
+            //catch(Exception exception)
+            //{
+            //    throw exception;
+            //}
         }
 
         /// <summary>
@@ -293,8 +327,7 @@ namespace Network_Simulation
             DataUtility.Log("Reading shortest path file...");
 
             // Create the space of adjacent matrix
-            if (AdjacentMatrix == null)
-                AdjacentMatrix = new Adjacency[Nodes.Count, Nodes.Count];
+            AdjacentMatrix = new Adjacency[Nodes.Count, Nodes.Count];
 
             using (BufferedStream bs = new BufferedStream(File.OpenRead(fileName)))
             {
@@ -345,6 +378,61 @@ namespace Network_Simulation
                     }
                 }
             }
+            DataUtility.Log("Done.\n", false);
+        }
+
+        private void ReadEccentricityDegreeFile(string fileName)
+        {
+            DataUtility.Log("Reading eccentricity and degree file...");
+
+            using (BufferedStream bs = new BufferedStream(File.OpenRead(fileName)))
+            {
+                using (StreamReader reader = new StreamReader(bs))
+                {
+                    int i = 0;
+
+                    while (!reader.EndOfStream)
+                    {
+                        string data = reader.ReadLine();
+
+                        string[] str = data.Split(',');
+
+                        if (str.Length == 3)
+                        {
+                            int id = Convert.ToInt32(str[0]);
+                            int ecc = Convert.ToInt32(str[1]);
+                            int deg = Convert.ToInt32(str[2]);
+
+                            Nodes.Find(n => n.ID == id).Eccentricity = ecc;
+                            Nodes.Find(n => n.ID == id).Degree = deg;
+                        }
+
+                        i++;
+                    }
+                }
+            }
+
+            DataUtility.Log("Done.\n", false);
+        }
+
+        private void WriteEccentricityDegreeFile(string fileName)
+        {
+            DataUtility.Log("Writing eccentricity and degree file...");
+
+            using (BufferedStream bs = new BufferedStream(File.OpenWrite(fileName)))
+            {
+                using (StreamWriter writer = new StreamWriter(bs))
+                {
+                    for (int i = 0; i < Nodes.Count; i++)
+                    {
+                        writer.Write(string.Format("{0},{1},{2}", Nodes[i].ID, Nodes[i].Eccentricity, Nodes[i].Degree));
+
+                        if (i != Nodes.Count - 1)
+                            writer.Write("\n");
+                    }
+                }
+            }
+
             DataUtility.Log("Done.\n", false);
         }
     }

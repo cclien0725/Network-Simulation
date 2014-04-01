@@ -12,7 +12,7 @@ namespace Heterogenerous_Simulation
             : base(percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer)
         { }
 
-        public override void Deploy(NetworkTopology networkTopology)
+        protected override void doDeploy(NetworkTopology networkTopology)
         {
             base.Deploy(networkTopology);
 
@@ -31,6 +31,11 @@ namespace Heterogenerous_Simulation
             // Randomly select filtering tracer.
             for (; randomArrayIndex < numberOfTTracer + numberOfMTracer + numberOfFTracer; randomArrayIndex++)
                 networkTopology.Nodes[randomArray[randomArrayIndex]].Tracer = NetworkTopology.TracerType.Filtering;
+        }
+
+        protected override void write2SQLite(NetworkTopology networkTopology)
+        {
+            //throw new NotImplementedException();
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Deployment_Simulation
+namespace Network_Simulation
 {
     static class Program
     {
@@ -15,7 +15,7 @@ namespace Deployment_Simulation
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            Application.Run(new PrecomputingForm());
         }
     }
 }

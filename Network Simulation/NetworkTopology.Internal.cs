@@ -19,6 +19,7 @@ namespace Network_Simulation
             public NodeType Type { get; set; }
             public TracerType Tracer { get; set; }
             public int Eccentricity { get; set; }
+            public int Degree { get; set; }
 
             public Node()
             {

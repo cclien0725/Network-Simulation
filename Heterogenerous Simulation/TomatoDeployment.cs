@@ -12,22 +12,21 @@ namespace Heterogenerous_Simulation
             : base(percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer)
         { }
 
-        public override void Deploy(NetworkTopology networkTopology)
+        protected override void doDeploy(NetworkTopology networkTopology)
         {
-            base.Deploy(networkTopology);
-
             List<NetworkTopology> allRoundScopeList = new List<NetworkTopology>();
             List<int> deployNodes = new List<int>();
             NetworkTopology tmp_src_net_topo = networkTopology;
             int centerID;
+            int e;
 
             // Finding the center node to run all level's process.
-            while (tmp_src_net_topo.FindCenterNodeID(out centerID))
+            while (tmp_src_net_topo.FindCenterNodeID(out centerID, out e))
             {
                 NetworkTopology scope_net_topo = new NetworkTopology(0, 0, 0);
 
                 // Adding the center node to scope network topology.
-                scope_net_topo.Nodes.Add(tmp_src_net_topo.Nodes[tmp_src_net_topo.NodeID2Index(centerID)]);
+                scope_net_topo.Nodes.Add(tmp_src_net_topo.Nodes.Find(n => n.ID == centerID));
 
                 // Starting run algorithm with this level.
                 tmp_src_net_topo = startAlgorithm(tmp_src_net_topo, 4, ref scope_net_topo, ref deployNodes);
@@ -45,7 +44,7 @@ namespace Heterogenerous_Simulation
 
             // Modifying actual tracer type on network topology depend on computed deployment node.
             foreach (int id in deployNodes)
-                networkTopology.Nodes[networkTopology.NodeID2Index(id)].Tracer = NetworkTopology.TracerType.Marking;
+                networkTopology.Nodes.Find(n => n.ID == id).Tracer = NetworkTopology.TracerType.Marking;
         }
 
         /// <summary>
@@ -75,9 +74,9 @@ namespace Heterogenerous_Simulation
                     {
                         if (!scope_net_topo.Nodes.Exists(x => x.ID == neighbor))
                         {
-                            if (minDegree > src_net_topo.Degree(neighbor))
+                            if (minDegree > src_net_topo.Nodes.Find(n => n.ID == neighbor).Degree)
                             {
-                                minDegree = src_net_topo.Degree(neighbor);
+                                minDegree = src_net_topo.Nodes.Find(n => n.ID == neighbor).Degree;
                                 selectNode = neighbor;
                             }
                         }
@@ -90,7 +89,7 @@ namespace Heterogenerous_Simulation
                 // adding the node to the scope set, and computing the max hop count.
                 else
                 {
-                    scope_net_topo.Nodes.Add(src_net_topo.Nodes[src_net_topo.NodeID2Index(selectNode)]);
+                    scope_net_topo.Nodes.Add(src_net_topo.Nodes.Find(n => n.ID == selectNode));
 
                     foreach (var scopeNode in scope_net_topo.Nodes)
                     {
@@ -105,7 +104,7 @@ namespace Heterogenerous_Simulation
                     foreach (var node1 in scope_net_topo.Nodes)
                         foreach (var node2 in scope_net_topo.Nodes)
                         {
-                            int hop_count = scope_net_topo.Path(node1.ID, node2.ID).Count;
+                            int hop_count = scope_net_topo.GetShortestPath(node1.ID, node2.ID).Count;
 
                             if (max_hop_count < hop_count)
                                 max_hop_count = hop_count;
@@ -146,6 +145,11 @@ namespace Heterogenerous_Simulation
             }
 
             return remain_topo;
+        }
+
+        protected override void write2SQLite(NetworkTopology networkTopology)
+        {
+            //throw new NotImplementedException();
         }
     }
 }

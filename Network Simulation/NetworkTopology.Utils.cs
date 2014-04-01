@@ -11,44 +11,61 @@ namespace Network_Simulation
 	public partial class NetworkTopology
 	{
         /// <summary>
-        /// Translating to the index number on our structure with specific node ID.
+        /// Translating to the index number on our AdjacentMatrix structure with specific node ID.
         /// </summary>
         /// <param name="NodeID">The node ID that want to translating.</param>
-        /// <returns>The index on our structure.</returns>
+        /// <returns>The index on our AdjacentMatrix structure.</returns>
         public int NodeID2Index(int NodeID)
         {
-            if (Nodes.Count == 0)
-                throw new Exception("NodeID2Index() Fail: There is 0 node on the network.");
+            if (m_src_nodes != null)
+            {
+                if (m_src_nodes.Count == 0)
+                    throw new Exception("NodeID2Index() Fail: There is 0 node on the network.");
 
-            if (!Nodes.Exists(x => x.ID == NodeID))
-                if (!m_nodes.Exists(x => x.ID == NodeID))
+                if (!m_src_nodes.Exists(x => x.ID == NodeID))
                     throw new Exception(string.Format("NodeID2Index() Fail: There is no match NodeID: {0} on our structure.", NodeID));
-                else
-                    return m_nodes.FindIndex(x => x.ID == NodeID);
+                
+                return m_src_nodes.FindIndex(x => x.ID == NodeID);
+            }
+            else
+            {
+                if (Nodes.Count == 0)
+                    throw new Exception("NodeID2Index() Fail: There is 0 node on the network.");
 
+                if (!Nodes.Exists(x => x.ID == NodeID))
+                        throw new Exception(string.Format("NodeID2Index() Fail: There is no match NodeID: {0} on our structure.", NodeID));
 
-            return Nodes.FindIndex(x => x.ID == NodeID);
+                return Nodes.FindIndex(x => x.ID == NodeID);
+            }
         }
 
         /// <summary>
-        /// Translating to the node ID with specific index number on our structure.
+        /// Translating to the node ID with specific index number on our AdjacentMatrix structure.
         /// </summary>
         /// <param name="NodeIndex">The index number.</param>
         /// <returns>The node ID.</returns>
         public int NodeIndex2ID(int NodeIndex)
         {
-            if (Nodes.Count == 0)
-                throw new Exception("NodeIndex2ID() Fail: There is 0 node on the network.");
-
-            if (NodeIndex >= Nodes.Count || NodeIndex < 0)
+            if (m_src_nodes != null)
             {
-                if (NodeIndex < m_nodes.Count)
-                    return m_nodes[NodeIndex].ID;
-                else
-                    throw new Exception(string.Format("NodeIndex2ID() Fail: Out of range on our structure of the index: {0}.", NodeIndex));
-            }
+                if (m_src_nodes.Count == 0)
+                    throw new Exception("NodeIndex2ID() Fail: There is 0 node on the network.");
 
-            return Nodes[NodeIndex].ID;
+                if (NodeIndex >= m_src_nodes.Count || NodeIndex < 0)
+                    throw new Exception(string.Format("NodeIndex2ID() Fail: Out of range on our structure of the index: {0}.", NodeIndex));
+
+                return m_src_nodes[NodeIndex].ID;
+            }
+            else
+            {
+                if (Nodes.Count == 0)
+                    throw new Exception("NodeIndex2ID() Fail: There is 0 node on the network.");
+
+                if (NodeIndex >= Nodes.Count || NodeIndex < 0)
+                    throw new Exception(string.Format("NodeIndex2ID() Fail: Out of range on our structure of the index: {0}.", NodeIndex));
+
+                return Nodes[NodeIndex].ID;
+            }
         }
 
         /// <summary>
@@ -101,7 +118,7 @@ namespace Network_Simulation
         /// <param name="SourceNodeId">The source node id.</param>
         /// <param name="DestinationNodeId">The destination node id.</param>
         /// <returns>The sequence of the node id, which is shortest path.</returns>
-        public List<int> Path(int SourceNodeId, int DestinationNodeId)
+        public List<int> GetShortestPath(int SourceNodeId, int DestinationNodeId)
         {
             if (Nodes.Count == 0)
                 throw new Exception("Path() Fail: There are 0 nodes in the network.");
@@ -142,17 +159,30 @@ namespace Network_Simulation
         public int Eccentricity(int NodeID)
         {
             int result = int.MinValue;
-            int nowCount;
 
             foreach (int id in Nodes.Where(n => n.ID != NodeID).Select(n => n.ID))
             {
-                nowCount = Path(NodeID, id).Count;
+                List<int> path = GetShortestPath(NodeID, id);
+                int nowCount = 0;
+
+                if (path.Except(Nodes.Select(n => n.ID)).Count() == 0)
+                    nowCount = path.Count;
 
                 if (result < nowCount)
                     result = nowCount;
             }
 
             return result;
+        }
+
+        public void ComputingAllDegree()
+        {
+            DataUtility.Log("Computing all degree value...");
+
+            foreach (var node in Nodes)
+                node.Degree = Degree(node.ID);
+
+            DataUtility.Log("Done.\n", false);
         }
 
         /// <summary>
@@ -211,15 +241,18 @@ namespace Network_Simulation
         /// </summary>
         /// <param name="centerID">The center node id will output.</param>
         /// <returns>Do the network topology can find the center node id.</returns>
-        public bool FindCenterNodeID(out int centerID)
+        public bool FindCenterNodeID(out int centerID, out int minE, bool isNeedRecompute = false)
         {
             DataUtility.Log("Finding center node...");
-            int minE = int.MaxValue;
+            minE = int.MaxValue;
             int eccentricity;
             centerID = -1;
 
             foreach (var node in Nodes)
             {
+                if (isNeedRecompute)
+                    node.Eccentricity = Eccentricity(node.ID);
+                
                 eccentricity = node.Eccentricity;
 
                 if (minE > eccentricity && eccentricity != int.MinValue)
@@ -228,8 +261,11 @@ namespace Network_Simulation
                     centerID = node.ID;
                 }
                 else if (minE == eccentricity)
-                    if (Degree(centerID) > Degree(node.ID))
+                {
+                    int tmpCenter = centerID;
+                    if (Nodes.Find(n => n.ID == tmpCenter).Degree > Nodes.Find(n => n.ID == node.ID).Degree)
                         centerID = node.ID;
+                }
             }
 
             DataUtility.Log("Done.\n", false);
@@ -252,7 +288,7 @@ namespace Network_Simulation
             foreach (var n in right_n.Nodes)
                 result.Edges.RemoveAll(e => e.Node1 == n.ID || e.Node2 == n.ID);
 
-            result.m_nodes = new List<Node>(left_n.m_nodes);
+            result.m_src_nodes = new List<Node>(left_n.m_src_nodes);
             result.AdjacentMatrix = left_n.AdjacentMatrix;
 
             return result;
@@ -448,8 +484,8 @@ namespace Network_Simulation
         /// <param name="edge">The edge to draw on.</param>
         private void drawEdge(Graphics graph, Edge edge)
         {
-            Node node1 = Nodes[NodeID2Index(edge.Node1)];
-            Node node2 = Nodes[NodeID2Index(edge.Node2)];
+            Node node1 = Nodes.Find(n => n.ID == edge.Node1);
+            Node node2 = Nodes.Find(n => n.ID == edge.Node2);
 
             graph.DrawLine(Pens.Black, (float)node1.Xpos + 15, (float)node1.Ypos + 15, (float)node2.Xpos + 15, (float)node2.Ypos + 15);
         }
