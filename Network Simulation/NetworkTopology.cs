@@ -47,7 +47,6 @@ namespace Network_Simulation
         private bool m_is_mouse_down;
 
         private int m_diameter;
-        private SQLiteUtility sql;
 
         private List<Node> m_src_nodes;
 
@@ -119,121 +118,15 @@ namespace Network_Simulation
         }
 
         ///// <summary>
-        ///// Clear the deployment method.
-        ///// </summary>
-        //private void ResetDeployment()
-        //{
-        //    if (Nodes.Count == 0)
-        //        throw new Exception("Initilaize() Fail: There are 0 nodes in the network.");
-
-        //    foreach (Node n in Nodes)
-        //        n.Tracer = TracerType.None;
-        //}
-
-        ///// <summary>
         ///// Start simulate.
         ///// </summary>
         //public void Run(string dbName, string methodName)
         //{
-        //    if (Nodes.Count == 0)
-        //        throw new Exception("Run() Fail: There are 0 nodes in the network.");
 
-        //    if (sql == null)
-        //        sql = new SQLiteUtility(dbName);
 
-        //    sql.CreateTable(methodName);
-
-        //    Random rd = new Random();
-        //    int victim;
-        //    int packetCount = 0;
-        //    List<int> path;
-
-        //    var attackNodes = from node in Nodes
-        //                      where node.Type == NodeType.Attacker
-        //                      select node;
-        //    var normalUser = from node in Nodes
-        //                     where node.Type == NodeType.Normal
-        //                     select node;
-
-        //    foreach (var node in attackNodes)
-        //    {
-        //        int time = 0;
-        //        victim = idOfVictims[rd.Next(idOfVictims.Count)];
-        //        path = Path(node.ID, Nodes[victim].ID);
-
-        //        for (int i = 0; i < NUMBER_OF_ATTACK_PACKET; i++)
-        //        {
-        //            bool isTunneling = false;
-        //            bool isMarking = false;
-        //            bool isFiltering = false;
-
-        //            PacketEvent packetEvent = new PacketEvent()
-        //            {
-        //                PacketID = packetCount++,
-        //                Source = node.ID,
-        //                Destination = Nodes[victim].ID,
-        //                Time = i == 0 ? time : time + Convert.ToInt32(Poisson(ATTACK_PACKET_PER_SEC))
-        //            };
-
-        //            for (int j = 0; j < path.Count - 1; j++)
-        //            {
-        //                packetEvent.Time = j == 0 ? packetEvent.Time : packetEvent.Time += AdjacentMatrix[j - 1, j].Delay;
-
-        //                switch (Nodes[path[j]].Tracer)
-        //                {
-        //                    case TracerType.Tunneling:
-        //                        if (!isTunneling && !isMarking && rd.NextDouble() <= PROBIBILITY_OF_PACKET_TUNNELING)
-        //                        {
-        //                            TunnelingEvent tunnelingEvent = packetEvent as TunnelingEvent;
-        //                            tunnelingEvent.TunnelingSrc = path[j];
-        //                            //tunnelingEvent.TunnelingDst = marking node or filtering node. and when tunnel to filtering node?
-        //                            sql.InsertTunnelingEvent(tunnelingEvent);
-        //                            //TODO: re-computing path... 
-        //                            isTunneling = true;
-        //                        }
-        //                        break;
-        //                    case TracerType.Marking:
-        //                        if (!isMarking && rd.NextDouble() <= PROBIBILITY_OF_PACKET_MARKING)
-        //                        {
-        //                            MarkingEvent markingEvent = packetEvent as MarkingEvent;
-        //                            markingEvent.MarkingNodeID = path[j];
-        //                            sql.InsertMarkingEvent(markingEvent);
-        //                            isMarking = true;
-        //                        }
-        //                        break;
-        //                    case TracerType.Filtering:
-        //                        FilteringEvent filteringEvent = packetEvent as FilteringEvent;
-        //                        filteringEvent.FilteringNodeID = path[j];
-        //                        sql.InsertFilteringEvent(filteringEvent);
-        //                        isFiltering = true;
-        //                        break;
-        //                }
-
-        //                if (isFiltering)
-        //                    break;
-
-        //                PacketSentEvent packetSentEvent = packetEvent as PacketSentEvent;
-        //                packetSentEvent.CurrentNodeID = path[j];
-        //                packetSentEvent.NextHopID = path[j + 1];
-        //                packetSentEvent.Length = AdjacentMatrix[j, j + 1].Length;
-
-        //                sql.InsertPacketSentEvent(packetSentEvent);
-        //            }
-        //        }
-        //    }
+        
         //}
 
-        ///// <summary>
-        ///// Deploy the tracer depends on provider's deployment method.
-        ///// </summary>
-        ///// <param name="deployment">Deployment method.</param>
-        //public void Deploy(Deployment deployment)
-        //{
-        //    ResetDeployment();
-
-        //    deployment.Initialize(this);
-        //    deployment.Deploy(this);
-        //}
 
         /// <summary>
         /// Reading brite file and convert to our data structure.

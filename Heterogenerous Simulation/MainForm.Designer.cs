@@ -143,7 +143,7 @@
             this.AttackNodes.Name = "AttackNodes";
             this.AttackNodes.Size = new System.Drawing.Size(100, 22);
             this.AttackNodes.TabIndex = 11;
-            this.AttackNodes.Text = "10";
+            this.AttackNodes.Text = "80";
             // 
             // label7
             // 

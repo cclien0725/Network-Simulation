@@ -31,6 +31,9 @@ namespace Network_Simulation
             }
         }
 
+        public List<int> MarkingTracerID;
+        public List<int> FilteringTracerID;
+
         public Deployment(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer)
         {
             this.percentageOfTunnelingTracer = percentageOfTunnelingTracer;
@@ -56,10 +59,13 @@ namespace Network_Simulation
 
         private void initialize(NetworkTopology networkTopology)
         {
+            if (networkTopology.Nodes.Count == 0)
+                throw new Exception("Initilaize() Fail: There are 0 nodes in the network.");
+
             numberOfTTracer = Convert.ToInt32(Math.Round(percentageOfTunnelingTracer * networkTopology.Nodes.Count / 100, 0, MidpointRounding.AwayFromZero));
             numberOfMTracer = Convert.ToInt32(Math.Round(percentageOfMarkingTracer * networkTopology.Nodes.Count / 100, 0, MidpointRounding.AwayFromZero));
             numberOfFTracer = Convert.ToInt32(Math.Round(percentageOfFilteringTracer * networkTopology.Nodes.Count / 100, 0, MidpointRounding.AwayFromZero));
-
+            
             // Clear the deployment method.
             foreach (NetworkTopology.Node node in networkTopology.Nodes)
                 node.Tracer = NetworkTopology.TracerType.None;

@@ -530,7 +530,7 @@ namespace Network_Simulation
         /// </summary>
         /// <param name="lambda">Lambda.</param>
         /// <returns>Random number.</returns>
-        private long Poisson(double lambda)
+        public long Poisson(double lambda)
         {
             Random rd = new Random();
             long k = 0;
@@ -544,7 +544,7 @@ namespace Network_Simulation
                 p *= r;
             } while (p > L);
 
-            return --k;
+            return k == 1 ? k : --k;
         }
 	}
 }
