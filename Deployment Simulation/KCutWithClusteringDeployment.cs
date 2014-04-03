@@ -68,6 +68,19 @@ namespace Deployment_Simulation
                     DataUtility.Log(string.Format("All Scope Node Count/Run Level:\t{0}/{1} = {2:0.0000}\n", allLevelScopeCount, allRoundScopeList.Count, (float)allLevelScopeCount / (float)allRoundScopeList.Count));
                     DataUtility.Log(string.Format("Deploy Count/Node Count:\t{0}/{1} = {2:0.0000}\n", deployNodes.Count, networkTopology.Nodes.Count, (float)deployNodes.Count / (float)networkTopology.Nodes.Count));
                 }
+
+                if (process_topo.Nodes.Count != 0)
+                    allRoundScopeList.Add(process_topo);
+            }
+
+            int c, e;
+
+            foreach (var scope in allRoundScopeList)
+            {
+                if (scope.FindCenterNodeID(out c, out e, true))
+                    DataUtility.Log(string.Format("center ID: {0}\n", c));
+                else
+                    DataUtility.Log(string.Format("center ID: {0}\n", scope.Nodes[0].ID));
             }
 
             // Modifying actual tracer type on network topology depend on computed deployment node.
@@ -320,17 +333,61 @@ namespace Deployment_Simulation
 
             if (dv != null & dv.Count > 0)
             {
+                int now_level;
+                int pre_level = -1;
+                NetworkTopology scope = null;
+
                 for (int i = 0; i < dv.Count; i++)
                 {
                     switch (Convert.ToString(dv[i]["deploy_type"]))
                     {
                         case "Scope":
-                            
+                            now_level = Convert.ToInt32(dv[i]["level"]);
+
+                            if (now_level != pre_level)
+                            {
+                                if (scope != null)
+                                {
+                                    for (int e1 = 0; e1 < scope.Nodes.Count; e1++)
+                                    {
+                                        for (int e2 = 0; e2 < scope.Nodes.Count; e2++)
+                                            scope.Edges.AddRange(topo.Edges.Where(e => e.Node1 == scope.Nodes[e1].ID && e.Node2 == scope.Nodes[e2].ID ||
+                                                                                        e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
+                                    }
+                                    scope.Edges = scope.Edges.Distinct().ToList();
+                                    scope.ComputingShortestPath();
+
+                                    allRoundScopeList.Add(scope);
+                                }
+                                scope = new NetworkTopology(0, 0, 0);
+
+                                scope.Nodes.Add(topo.Nodes.Where(n => n.ID == Convert.ToInt32(dv[i]["node_id"])).First());
+                            }
+                            else
+                            {
+                                scope.Nodes.Add(topo.Nodes.Where(n => n.ID == Convert.ToInt32(dv[i]["node_id"])).First());
+                            }
+
+                            pre_level = now_level;
                             break;
                         case "Deploy":
                             deployNodes.Add(Convert.ToInt32(dv[i]["node_id"]));
                             break;
                     }
+                }
+
+                if (scope != null)
+                {
+                    for (int e1 = 0; e1 < scope.Nodes.Count; e1++)
+                    {
+                        for (int e2 = 0; e2 < scope.Nodes.Count; e2++)
+                            scope.Edges.AddRange(topo.Edges.Where(e => e.Node1 == scope.Nodes[e1].ID && e.Node2 == scope.Nodes[e2].ID ||
+                                                                        e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
+                    }
+                    scope.Edges = scope.Edges.Distinct().ToList();
+                    scope.ComputingShortestPath();
+
+                    allRoundScopeList.Add(scope);
                 }
                 return true;
             }
