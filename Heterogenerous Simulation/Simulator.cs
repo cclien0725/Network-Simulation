@@ -8,14 +8,10 @@ namespace Heterogenerous_Simulation
 {
     public class Simulator
     {
-        internal class Config
+        public class ReportArgument : EventArgs
         {
-            internal const int ATTACK_PACKET_PER_SEC = 1;
-            internal const int NORMAL_PACKET_PER_SEC = 10;
-            internal const int NUMBER_OF_ATTACK_PACKET = 300;
-            internal const int NUMBER_OF_NORMAL_PACKET = 30;
-            internal const double PROBIBILITY_OF_PACKET_TUNNELING = 0.5;
-            internal const double PROBIBILITY_OF_PACKET_MARKING = 0.5;
+            public int CurrentNode { get; set; }
+            public int TotalActiveNode { get; set; }
         }
 
         private SQLiteUtility sql;
@@ -23,6 +19,8 @@ namespace Heterogenerous_Simulation
         private Deployment deployment;
 
         private List<NetworkTopology.Node> activeNode;
+
+        public event EventHandler<ReportArgument> onReportOccur;
 
         public Simulator(string dbName, Deployment deployment, NetworkTopology topology)
         {
@@ -49,7 +47,7 @@ namespace Heterogenerous_Simulation
             activeNode.AddRange(normalUser.ToList());
         }
 
-        public void Run()
+        public void Run(int attackPacketPerSec, int normalPacketPerSec, int numberOfAttackPacket, int numberOfNormalPacket, double probibilityOfPacketTunneling, double probibilityOfPacketMarking, double StartFiltering)
         {
             Random rd = new Random();
             int victim;
@@ -65,12 +63,12 @@ namespace Heterogenerous_Simulation
                 switch (node.Type)
                 {
                     case NetworkTopology.NodeType.Normal:
-                        totalPacket = Config.NUMBER_OF_NORMAL_PACKET;
-                        packetPerSec = Config.NORMAL_PACKET_PER_SEC;
+                        totalPacket = numberOfNormalPacket;
+                        packetPerSec = normalPacketPerSec;
                         break;
                     case NetworkTopology.NodeType.Attacker:
-                        totalPacket = Config.NUMBER_OF_ATTACK_PACKET;
-                        packetPerSec = Config.ATTACK_PACKET_PER_SEC;
+                        totalPacket = numberOfAttackPacket;
+                        packetPerSec = attackPacketPerSec;
                         break;
                 }
 
@@ -104,10 +102,10 @@ namespace Heterogenerous_Simulation
                         switch (topology.Nodes[topology.NodeID2Index(path[j])].Tracer)
                         {
                             case NetworkTopology.TracerType.Tunneling:
-                                if (!isTunneling && !isMarking && rd.NextDouble() <= Config.PROBIBILITY_OF_PACKET_TUNNELING)
+                                if (!isTunneling && !isMarking && rd.NextDouble() <= probibilityOfPacketTunneling)
                                 {
                                     //re-computing path...
-                                    if (i < totalPacket / 2)
+                                    if (i < StartFiltering * totalPacket / 100)
                                     {
                                         path = ChooseTunnelingNode(path, j, NetworkTopology.TracerType.Marking);
                                         shouldMarking = true;
@@ -126,7 +124,7 @@ namespace Heterogenerous_Simulation
                                 }
                                 break;
                             case NetworkTopology.TracerType.Marking:
-                                if ((!isMarking && rd.NextDouble() <= Config.PROBIBILITY_OF_PACKET_MARKING && i < totalPacket / 2 && !shouldFiltering) || shouldMarking)
+                                if ((!isMarking && rd.NextDouble() <= probibilityOfPacketMarking && i < StartFiltering * totalPacket / 100 && !shouldFiltering) || shouldMarking)
                                 {
                                     MarkingEvent markingEvent = new MarkingEvent(packetEvent);
                                     markingEvent.MarkingNodeID = path[j];
@@ -136,7 +134,7 @@ namespace Heterogenerous_Simulation
                                 }
                                 break;
                             case NetworkTopology.TracerType.Filtering:
-                                if (shouldFiltering || i >= totalPacket / 2)
+                                if (shouldFiltering || i >= StartFiltering * totalPacket / 100)
                                 {
                                     if (packetEvent.Type == NetworkTopology.NodeType.Attacker)
                                     {
@@ -161,6 +159,7 @@ namespace Heterogenerous_Simulation
                         sql.InsertPacketSentEvent(packetSentEvent);
                     }
                 }
+                Report(activeNode.IndexOf(node) + 1, activeNode.Count);
             }
         }
 
@@ -185,9 +184,17 @@ namespace Heterogenerous_Simulation
                 List<int> tmpPath = new List<int>();
                 double tmpTotalDelay = 0;
 
-                tmpPath = topology.GetShortestPath(path[source], topology.NodeIndex2ID(tunnelingNodeID));
-                tmpPath.Remove(tmpPath.Last());
-                tmpPath.AddRange(topology.GetShortestPath(topology.NodeIndex2ID(tunnelingNodeID), path.Last()));
+                if (!path.Contains(tunnelingNodeID))
+                {
+                    tmpPath = topology.GetShortestPath(path[source], topology.NodeIndex2ID(tunnelingNodeID));
+                    tmpPath.Remove(tmpPath.Last());
+                    tmpPath.AddRange(topology.GetShortestPath(topology.NodeIndex2ID(tunnelingNodeID), path.Last()));
+                }
+                else 
+                {
+                    tmpPath = path;
+                }
+
 
                 for (int i = 0; i < tmpPath.Count - 1; i++)
                 {
@@ -207,6 +214,12 @@ namespace Heterogenerous_Simulation
             }
 
             return newPath;
+        }
+
+        private void Report(int currentNode, int totalActiveNode)
+        {
+            if (onReportOccur != null)
+                onReportOccur.Invoke(this, new ReportArgument() { CurrentNode = currentNode, TotalActiveNode = totalActiveNode });
         }
     }
 }
