@@ -322,7 +322,7 @@
             this.NumberOfAttackPacket.Name = "NumberOfAttackPacket";
             this.NumberOfAttackPacket.Size = new System.Drawing.Size(100, 22);
             this.NumberOfAttackPacket.TabIndex = 15;
-            this.NumberOfAttackPacket.Text = "300";
+            this.NumberOfAttackPacket.Text = "100";
             // 
             // label9
             // 
@@ -374,7 +374,7 @@
             this.NumberOfNormalPacket.Name = "NumberOfNormalPacket";
             this.NumberOfNormalPacket.Size = new System.Drawing.Size(100, 22);
             this.NumberOfNormalPacket.TabIndex = 13;
-            this.NumberOfNormalPacket.Text = "30";
+            this.NumberOfNormalPacket.Text = "10";
             // 
             // listView1
             // 
@@ -389,6 +389,7 @@
             this.listView1.TabIndex = 20;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
+            this.listView1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listView1_MouseDoubleClick);
             // 
             // columnHeader1
             // 
@@ -407,7 +408,7 @@
             // 
             // columnHeader4
             // 
-            this.columnHeader4.Text = "Tomato Deplyment";
+            this.columnHeader4.Text = "KCut Deployment";
             this.columnHeader4.Width = 120;
             // 
             // label15

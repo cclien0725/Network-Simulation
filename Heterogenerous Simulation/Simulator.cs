@@ -22,15 +22,17 @@ namespace Heterogenerous_Simulation
 
         public event EventHandler<ReportArgument> onReportOccur;
 
-        public Simulator(string dbName, Deployment deployment, NetworkTopology topology)
+        public Simulator(Deployment deployment, NetworkTopology topology, SQLiteUtility sql)
         {
             if (topology.Nodes.Count == 0)
                 throw new Exception("Run() Fail: There are 0 nodes in the network.");
 
-            if (sql == null)
-                sql = new SQLiteUtility(dbName);
+            //if (sql == null)
+            //    sql = new SQLiteUtility(dbName);
 
-            sql.CreateTable(deployment.GetType().Name);
+            //sql.CreateTable(deployment.GetType().Name);
+            this.sql = sql;
+
             this.topology = topology;
             this.deployment = deployment;
 
@@ -45,6 +47,8 @@ namespace Heterogenerous_Simulation
 
             activeNode.AddRange(attackNodes.ToList());
             activeNode.AddRange(normalUser.ToList());
+
+            sql.LogDeploymentResult(topology);
         }
 
         public void Run(int attackPacketPerSec, int normalPacketPerSec, int numberOfAttackPacket, int numberOfNormalPacket, double probibilityOfPacketTunneling, double probibilityOfPacketMarking, double StartFiltering)
@@ -184,7 +188,7 @@ namespace Heterogenerous_Simulation
                 List<int> tmpPath = new List<int>();
                 double tmpTotalDelay = 0;
 
-                if (!path.Contains(tunnelingNodeID))
+                if (!path.Contains(topology.NodeIndex2ID(tunnelingNodeID)))
                 {
                     tmpPath = topology.GetShortestPath(path[source], topology.NodeIndex2ID(tunnelingNodeID));
                     tmpPath.Remove(tmpPath.Last());
@@ -194,7 +198,6 @@ namespace Heterogenerous_Simulation
                 {
                     tmpPath = path;
                 }
-
 
                 for (int i = 0; i < tmpPath.Count - 1; i++)
                 {

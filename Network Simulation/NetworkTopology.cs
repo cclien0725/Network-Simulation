@@ -4,9 +4,12 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
 
 namespace Network_Simulation
 {
+    [Serializable]
     public partial class NetworkTopology
     {
         public List<Node> Nodes;
@@ -116,17 +119,6 @@ namespace Network_Simulation
                 if (m_diameter < node.Eccentricity)
                     m_diameter = node.Eccentricity;
         }
-
-        ///// <summary>
-        ///// Start simulate.
-        ///// </summary>
-        //public void Run(string dbName, string methodName)
-        //{
-
-
-        
-        //}
-
 
         /// <summary>
         /// Reading brite file and convert to our data structure.

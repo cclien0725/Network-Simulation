@@ -31,6 +31,15 @@ namespace Network_Simulation
             }
         }
 
+        public List<NetworkTopology> AllRoundScopeList 
+        { 
+            get 
+            {
+                List<NetworkTopology> result = new List<NetworkTopology>(allRoundScopeList);
+                return result;
+            } 
+        }
+
         public List<int> MarkingTracerID;
         public List<int> FilteringTracerID;
 
@@ -142,7 +151,11 @@ namespace Network_Simulation
                         }
                     }
                 }
-                catch (Exception e) { DataUtility.Log(e.Message + "\n"); }
+                catch (SQLiteException ex)
+                {
+                    if (ex.ErrorCode != SQLiteErrorCode.Constraint)
+                        DataUtility.Log(ex.Message + "\n");
+                }
             }
 
             public DataView GetResult(string sqlcmd, List<SQLiteParameter> parameters)
@@ -188,7 +201,11 @@ namespace Network_Simulation
                         cmd.ExecuteNonQuery();
                     }
                 }
-                catch (Exception ex) { DataUtility.Log(ex.Message + "\n"); }
+                catch(SQLiteException ex)
+                {
+                    if (ex.ErrorCode != SQLiteErrorCode.Constraint)
+                        DataUtility.Log(ex.Message + "\n");
+                }
             }
 
             public void insertNetworkTopology(NetworkTopology topo)

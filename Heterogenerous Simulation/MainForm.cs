@@ -21,7 +21,7 @@ namespace Heterogenerous_Simulation
         protected List<string> filenames;
         protected BackgroundWorker bg;
 
-        protected enum StatusType { TotalProgress, NoneDeploymentStatus, RandomDeploymentStatus, TomatoDeploymentStatus}
+        protected enum StatusType { TotalProgress, NoneDeploymentStatus, RandomDeploymentStatus, KCutDeploymentStatus}
         protected class ProgressReportArg 
         {
             public string KEY { get; set; }
@@ -67,7 +67,7 @@ namespace Heterogenerous_Simulation
                 case StatusType.RandomDeploymentStatus:
                     listView1.Items[pra.KEY].SubItems[2].Text = e.ProgressPercentage.ToString() + "%";
                     break;
-                case StatusType.TomatoDeploymentStatus:
+                case StatusType.KCutDeploymentStatus:
                     listView1.Items[pra.KEY].SubItems[3].Text = e.ProgressPercentage.ToString() + "%";
                     break;
                 default:
@@ -89,14 +89,17 @@ namespace Heterogenerous_Simulation
                                                                                NormalUsers.Text,
                                                                                VictimNodes.Text);
 
+                    SQLiteUtility sql = new SQLiteUtility(dbName);
+
                     // Read network topology and initialize the attackers, normal users and victim.
                     NetworkTopology networkTopology = new NetworkTopology(Convert.ToDouble(AttackNodes.Text), Convert.ToDouble(NormalUsers.Text), Convert.ToInt32(VictimNodes.Text));
                     networkTopology.ReadBriteFile(filename);
 
                     //// Doesn't use any deployment method.
                     NoneDeployment noneDeply = new NoneDeployment(0, 0, 0);
+                    sql.CreateTable(noneDeply.GetType().Name);
                     noneDeply.Deploy(networkTopology);
-                    Simulator noneSimulator = new Simulator(dbName, noneDeply, networkTopology);
+                    Simulator noneSimulator = new Simulator(noneDeply, networkTopology, sql);
                     noneSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
                     {
                         bg.ReportProgress(ra.CurrentNode * 100 / ra.TotalActiveNode, new ProgressReportArg() { KEY = filename, ST = StatusType.NoneDeploymentStatus });
@@ -107,8 +110,9 @@ namespace Heterogenerous_Simulation
 
                     //// Using randomly depolyment method.
                     RandomDeployment randomDeploy = new RandomDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text));
+                    sql.CreateTable(randomDeploy.GetType().Name);
                     randomDeploy.Deploy(networkTopology);
-                    Simulator randomSimulator = new Simulator(dbName, randomDeploy, networkTopology);
+                    Simulator randomSimulator = new Simulator(randomDeploy, networkTopology, sql);
                     randomSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
                     {
                         bg.ReportProgress(ra.CurrentNode * 100 / ra.TotalActiveNode, new ProgressReportArg() { KEY = filename, ST = StatusType.RandomDeploymentStatus });
@@ -117,11 +121,18 @@ namespace Heterogenerous_Simulation
 
                     bg.ReportProgress((filenames.IndexOf(filename) + 1) * 100 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
 
+                    //// Using KCut deployment method.
+                    KCutDeployment kCutDeploy = new KCutDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text));
+                    sql.CreateTable(kCutDeploy.GetType().Name);
+                    kCutDeploy.Deploy(networkTopology);
+
+
                     //// Using tomato deployment method.
-                    //TomatoDeployment tomatoDeploy = new TomatoDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text));
-                    //tomatoDeploy.Deploy(networkTopology);
-                    //Simulator tomatoSimulator = new Simulator(dbName, tomatoDeploy, networkTopology);
-                    //tomatoSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(NumberOfAttackPacket.Text), Convert.ToInt32(NumberOfNormalPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text));
+                    //tomatodeployment tomatodeploy = new tomatodeployment(convert.todouble(tunnelingtracer.text), convert.todouble(markingtracer.text), convert.todouble(filteringtracer.text));
+                    //sql.createtable(tomatodeploy.gettype().name);
+                    //tomatodeploy.deploy(networktopology);
+                    //simulator tomatosimulator = new simulator(tomatodeploy, networktopology);
+                    //tomatosimulator.run(convert.toint32(attackpacketpersec.text), convert.toint32(normalpacketpersec.text), convert.toint32(numberofattackpacket.text), convert.toint32(numberofnormalpacket.text), convert.todouble(probibilityofpackettunneling.text), convert.todouble(probibilityofpacketmarking.text), convert.todouble(startfiltering.text));
                 }
             //}
             //catch (Exception exception)
@@ -164,6 +175,15 @@ namespace Heterogenerous_Simulation
                 item.SubItems.Add(new ListViewItem.ListViewSubItem() { Text = "" });
                 item.SubItems.Add(new ListViewItem.ListViewSubItem() { Text = "" });
                 item.SubItems.Add(new ListViewItem.ListViewSubItem() { Text = "" });
+            }
+        }
+
+        private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (listView1.SelectedIndices.Count > 0)
+            {
+                ListViewItem item = listView1.Items[listView1.SelectedIndices[0]];
+
             }
         }
     }

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Data.SQLite;
+using Network_Simulation;
+using System.Data;
 
 namespace Heterogenerous_Simulation
 {
@@ -19,7 +21,8 @@ namespace Heterogenerous_Simulation
             {"PacketSentEvents", "ID INTEGER PRIMARY KEY, PacketID INTEGER, Time REAL, CurrentNodeID INTEGER, NextHopID INTEGER, Length REAL"},
             {"TunnelingEvents", "ID INTEGER PRIMARY KEY, PacketID INTEGER, Time REAL, TunnelingSrc INTEGER, TunnelingDst INTEGER"},
             {"MarkingEvents", "ID INTEGER PRIMARY KEY, PacketID INTEGER, Time REAL, MarkingNodeID INTEGER"},
-            {"FilteringEvents", "ID INTEGER PRIMARY KEY, PacketID INTEGER, Time REAL, FilteringNodeId INTEGER"}
+            {"FilteringEvents", "ID INTEGER PRIMARY KEY, PacketID INTEGER, Time REAL, FilteringNodeId INTEGER"},
+            {"Deployment", "NodeID INTEGER PRIMARY KEY, TracerType INTEGER, NodeType INTEGER"}
         };
 
         private string baseDirectory = Path.Combine(Environment.CurrentDirectory, "Log");
@@ -174,6 +177,33 @@ namespace Heterogenerous_Simulation
                     cmd.Parameters.Add("@Destination", System.Data.DbType.Int32).Value = packetEvent.Destination;
                     cmd.Parameters.Add("@Type", System.Data.DbType.Boolean).Value = packetEvent.Type == Network_Simulation.NetworkTopology.NodeType.Attacker ? true : false;
                     cmd.ExecuteNonQuery();
+                    trans.Commit();
+                }
+            }
+            catch { }
+        }
+
+        public void LogDeploymentResult(NetworkTopology networkTopology)
+        {
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    SQLiteTransaction trans = connection.BeginTransaction();
+                    SQLiteCommand cmd = connection.CreateCommand();
+                    cmd = connection.CreateCommand();
+                    cmd.CommandText = string.Format("INSERT INTO {0}_Deployment(NodeID, TracerType, NodeType) VALUES(@NodeID, @TracerType, @NodeType)", prefixNameOfTable);
+
+                    foreach (Network_Simulation.NetworkTopology.Node node in networkTopology.Nodes)
+                    {
+                        cmd.Parameters.Add("@NodeID", DbType.Int32).Value = node.ID;
+                        cmd.Parameters.Add("@TracerType", DbType.Int32).Value = node.Tracer;
+                        cmd.Parameters.Add("@NodeType", DbType.Int32).Value = node.Type;
+                        cmd.ExecuteNonQuery();
+                    }
+
                     trans.Commit();
                 }
             }

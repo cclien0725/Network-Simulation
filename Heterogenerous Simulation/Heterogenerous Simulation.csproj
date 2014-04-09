@@ -50,11 +50,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KCutDeployment.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NetworkViewForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NetworkViewForm.Designer.cs">
+      <DependentUpon>NetworkViewForm.cs</DependentUpon>
     </Compile>
     <Compile Include="NoneDeployment.cs" />
     <Compile Include="PacketEvents.cs" />
@@ -66,6 +73,9 @@
     <Compile Include="TomatoDeployment.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NetworkViewForm.resx">
+      <DependentUpon>NetworkViewForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -87,6 +97,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Deployment Simulation\Deployment Simulation.csproj">
+      <Project>{FA83D011-E706-49B9-BBC4-053C6A99C615}</Project>
+      <Name>Deployment Simulation</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Network Simulation\Network Simulation.csproj">
       <Project>{5E75DCBF-0796-474F-85E9-8818223CABA9}</Project>
       <Name>Network Simulation</Name>

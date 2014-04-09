@@ -14,8 +14,6 @@ namespace Heterogenerous_Simulation
 
         protected override void doDeploy(NetworkTopology networkTopology)
         {
-            //base.Deploy(networkTopology);
-
             MarkingTracerID = new List<int>();
             FilteringTracerID = new List<int>();
 

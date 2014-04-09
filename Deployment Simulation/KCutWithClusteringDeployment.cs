@@ -73,16 +73,6 @@ namespace Deployment_Simulation
                     allRoundScopeList.Add(process_topo);
             }
 
-            int c, e;
-
-            foreach (var scope in allRoundScopeList)
-            {
-                if (scope.FindCenterNodeID(out c, out e, true))
-                    DataUtility.Log(string.Format("center ID: {0}\n", c));
-                else
-                    DataUtility.Log(string.Format("center ID: {0}\n", scope.Nodes[0].ID));
-            }
-
             // Modifying actual tracer type on network topology depend on computed deployment node.
             foreach (int id in deployNodes)
                 networkTopology.Nodes.Find(n => n.ID == id).Tracer = NetworkTopology.TracerType.Marking;
