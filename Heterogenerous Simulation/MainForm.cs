@@ -70,8 +70,6 @@ namespace Heterogenerous_Simulation
                 case StatusType.KCutDeploymentStatus:
                     listView1.Items[pra.KEY].SubItems[3].Text = e.ProgressPercentage.ToString() + "%";
                     break;
-                default:
-                    break;
             }
         }
 
@@ -125,7 +123,14 @@ namespace Heterogenerous_Simulation
                     KCutDeployment kCutDeploy = new KCutDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text));
                     sql.CreateTable(kCutDeploy.GetType().Name);
                     kCutDeploy.Deploy(networkTopology);
+                    Simulator kCutSimulator = new Simulator(kCutDeploy.Deployment, networkTopology, sql);
+                    kCutSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
+                    {
+                        bg.ReportProgress(ra.CurrentNode * 100 / ra.TotalActiveNode, new ProgressReportArg() { KEY = filename, ST = StatusType.KCutDeploymentStatus });
+                    };
+                    kCutSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(NumberOfAttackPacket.Text), Convert.ToInt32(NumberOfNormalPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text));
 
+                    bg.ReportProgress((filenames.IndexOf(filename) + 1) * 100 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
 
                     //// Using tomato deployment method.
                     //tomatodeployment tomatodeploy = new tomatodeployment(convert.todouble(tunnelingtracer.text), convert.todouble(markingtracer.text), convert.todouble(filteringtracer.text));
@@ -169,6 +174,7 @@ namespace Heterogenerous_Simulation
 
         private void RefreshListView()
         {
+            listView1.Items.Clear();
             foreach (string filename in filenames)
             {
                 ListViewItem item = listView1.Items.Add(new ListViewItem() { Name = filename, Text = Path.GetFileName(filename) });
