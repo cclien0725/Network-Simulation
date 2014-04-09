@@ -78,12 +78,15 @@ namespace Deployment_Simulation
 
                         m_topo.ReadBriteFile(files[i]);
 
-                        KCutWithClusteringDeployment deployment = null;
+                        Deployment deployment = null;
                         List<int> last_deploy_count;
+                        int satisfy_count;
 
                         for (K = 1; K <= m_topo.Diameter; K++)
                         {
                             N = 0;
+                            satisfy_count = 0;
+
                             do
                             {
                                 if (deployment != null)
@@ -91,7 +94,7 @@ namespace Deployment_Simulation
                                 else
                                     last_deploy_count = new List<int>();
 
-                                deployment = new KCutWithClusteringDeployment(30, 20, 10, K, ++N);
+                                deployment = new KCutWithClusteringCompareCenterAndMinDegreeDeployment(30, 20, 10, K, ++N);
 
                                 m_simulation_worker.ReportProgress((int)((double)K / (double)m_topo.Diameter * 100),
                                                     new object[] { false, string.Format("Starting Deployment with K: {0}, N: {1}...", K, N), true, files[i], K, N });
@@ -100,7 +103,16 @@ namespace Deployment_Simulation
 
                                 m_simulation_worker.ReportProgress((int)((double)K / (double)m_topo.Diameter * 100),
                                                    new object[] { false, string.Format("Completed for K: {0}, N: {1}.", K, N), true, files[i], K, N });
-                            } while (deployment.DeployNodes.Except(last_deploy_count).Count() != 0 || last_deploy_count.Except(deployment.DeployNodes).Count() != 0);
+
+                                if (deployment.DeployNodes.Except(last_deploy_count).Count() == 0 && last_deploy_count.Except(deployment.DeployNodes).Count() == 0)
+                                {
+                                    satisfy_count++;
+                                }
+                                else
+                                {
+                                    satisfy_count = 0;
+                                }
+                            } while (satisfy_count < 2);
                         }
                     }
 

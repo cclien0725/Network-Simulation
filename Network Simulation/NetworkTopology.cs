@@ -203,6 +203,19 @@ namespace Network_Simulation
             //}
         }
 
+        public void Reset()
+        {
+            string shortestPathFileName = string.Format(@"{0}.ShortestPath", fileName);
+            string eccDegPathFileName = string.Format(@"{0}.EccDeg", fileName);
+
+            // If the file of shortest path is exist, then load into memory
+            if (File.Exists(shortestPathFileName))
+                ReadShortestPathFile(shortestPathFileName);
+
+            if (File.Exists(eccDegPathFileName))
+                ReadEccentricityDegreeFile(eccDegPathFileName);
+        }
+
         /// <summary>
         /// Read the shortest path file of the specific brite file.
         /// </summary>

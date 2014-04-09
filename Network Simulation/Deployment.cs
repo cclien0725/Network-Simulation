@@ -64,6 +64,8 @@ namespace Network_Simulation
 
             if (isNeedWriteing2SQLite)
                 write2SQLite(networkTopology);
+
+            networkTopology.Reset();
         }
 
         private void initialize(NetworkTopology networkTopology)
@@ -81,6 +83,9 @@ namespace Network_Simulation
 
             jobID = DateTime.Now.Subtract(new DateTime(1970, 1, 1)).Ticks;
             isNeedWriteing2SQLite = true;
+
+            allRoundScopeList.Clear();
+            deployNodes.Clear();
 
             sqlite_utility.insertNetworkTopology(networkTopology);
         }
