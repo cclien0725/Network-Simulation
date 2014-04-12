@@ -281,14 +281,13 @@ namespace Network_Simulation
         /// <returns>The complement set between the two network topologies.</returns>
         public static NetworkTopology operator -(NetworkTopology left_n, NetworkTopology right_n)
         {
-            NetworkTopology result = new NetworkTopology(left_n.percentageOfAttackers, left_n.percentageOfNormalUser, left_n.numberOfVictims);
+            NetworkTopology result = new NetworkTopology(left_n.m_src_nodes);
 
             result.Nodes = left_n.Nodes.Except(right_n.Nodes).ToList();
             result.Edges = left_n.Edges.Except(right_n.Edges).ToList();
             foreach (var n in right_n.Nodes)
                 result.Edges.RemoveAll(e => e.Node1 == n.ID || e.Node2 == n.ID);
 
-            result.m_src_nodes = new List<Node>(left_n.m_src_nodes);
             result.AdjacentMatrix = left_n.AdjacentMatrix;
 
             return result;

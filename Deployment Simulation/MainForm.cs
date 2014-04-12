@@ -26,7 +26,7 @@ namespace Deployment_Simulation
 
             AllocConsole();
 
-            m_topo = new NetworkTopology(10, 10, 1);
+            m_topo = new NetworkTopology(0, 0, 0);
 
             m_simulation_worker = new BackgroundWorker();
             m_simulation_worker.WorkerSupportsCancellation = true;
@@ -43,6 +43,7 @@ namespace Deployment_Simulation
         {
             m_simulation_worker.DoWork += (s, e) =>
             {
+                Deployment deployment = null;
                 string[] files = tb_select_file.Text.Split(';');
                 int K, N;
 
@@ -65,7 +66,7 @@ namespace Deployment_Simulation
                                                 new object[] { false, string.Format("Starting Deployment with K: {0}, N: {1}...", K, N), true, files[i], K, N });
 
                         // Using kcutwithclustering depolyment method.
-                        KCutWithClusteringDeployment deployment = new KCutWithClusteringDeployment(30, 20, 10, K, N);
+                        deployment = new KCutWithClusteringCompareCenterAndMinDegreeDeployment(30, 20, 10, K, N);
                         deployment.Deploy(m_topo);
 
                         m_simulation_worker.ReportProgress(100,
@@ -77,12 +78,11 @@ namespace Deployment_Simulation
                                                 new object[] { false, "Preprocessing file...", true, files[i], 0, 0 });
 
                         m_topo.ReadBriteFile(files[i]);
-
-                        Deployment deployment = null;
+                        
                         List<int> last_deploy_count;
                         int satisfy_count;
 
-                        for (K = 1; K <= m_topo.Diameter; K++)
+                        for (K = 1; K <= m_topo.Diameter; K += 2)
                         {
                             N = 0;
                             satisfy_count = 0;
@@ -105,13 +105,10 @@ namespace Deployment_Simulation
                                                    new object[] { false, string.Format("Completed for K: {0}, N: {1}.", K, N), true, files[i], K, N });
 
                                 if (deployment.DeployNodes.Except(last_deploy_count).Count() == 0 && last_deploy_count.Except(deployment.DeployNodes).Count() == 0)
-                                {
                                     satisfy_count++;
-                                }
                                 else
-                                {
                                     satisfy_count = 0;
-                                }
+
                             } while (satisfy_count < 2);
                         }
                     }

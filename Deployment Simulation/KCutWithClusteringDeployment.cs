@@ -43,7 +43,9 @@ namespace Deployment_Simulation
                 //while (tmp_src_net_topo.FindCenterNodeID(out centerID, isNeedRecompute))
                 while (selectStartNode(process_topo, out centerID, isNeedRecompute))
                 {
-                    NetworkTopology scope_net_topo = new NetworkTopology(0, 0, 0);
+                    NetworkTopology scope_net_topo = new NetworkTopology(networkTopology.Nodes);
+                    scope_net_topo.AdjacentMatrix = networkTopology.AdjacentMatrix;
+
                     List<int> now_level_depoly_id = new List<int>();
 
                     // Adding the center node to scope network topology.
@@ -139,7 +141,6 @@ namespace Deployment_Simulation
 
             while (max_hop_count < K)
             {
-                int minDegree = int.MaxValue;
                 int selectNode = -1;
                 List<int> neighbor = new List<int>();
 
@@ -165,48 +166,6 @@ namespace Deployment_Simulation
                 else if (scope_net_topo.Nodes.Count >= N - 1 && scope_net_topo.Nodes.Count <= N && maxC < 0.6)
                     selectNode = -1;
 
-                //if (!isNeedconsiderClustering(src_net_topo, scope_net_topo, N, out selectNode) && scope_net_topo.Nodes.Count < N)
-                //{
-                    // to finding the neighbor node with minimum degree
-                    //foreach (var scopeNode in scope_net_topo.Nodes)
-                    //{
-                    //    foreach (int neighbor in src_net_topo.GetNeighborNodeIDs(scopeNode.ID))
-                    //    {
-                    //        if (!scope_net_topo.Nodes.Exists(x => x.ID == neighbor))
-                    //        {
-                    //            NetworkTopology complement = (src_net_topo - scope_net_topo);
-                    //            int degree = complement.Degree(neighbor);
-
-                    //            if (minDegree > degree)
-                    //            {
-                    //                minDegree = degree;
-                    //                selectNode = neighbor;
-                    //            }
-                    //            else if (minDegree == degree && complement.ClusteringCoefficeint(neighbor) > complement.ClusteringCoefficeint(selectNode))
-                    //                selectNode = neighbor;
-                    //        }
-                    //    } 
-                    //}
-
-                //    foreach (var scopeNode in scope_net_topo.Nodes)
-                //        neighbor.AddRange(src_net_topo.GetNeighborNodeIDs(scopeNode.ID).Except(scope_net_topo.Nodes.Select(x => x.ID)));
-                //    neighbor = neighbor.Distinct().ToList();
-
-                //    double max = double.MinValue;
-
-                //    foreach (int id in neighbor)
-                //    {
-                //        double tmpc = src_net_topo.ClusteringCoefficeint(id);
-
-                //        if (max < tmpc)
-                //        {
-                //            max = tmpc;
-                //            selectNode = id;
-                //        }
-                //    }
-                    
-                //}
-
                 // if nothing found, break the loop.
                 if (selectNode == -1)
                     break;
@@ -223,7 +182,7 @@ namespace Deployment_Simulation
                                                     .ToList());
                     }
 
-                    scope_net_topo.ComputingShortestPath();
+                    //scope_net_topo.ComputingShortestPath();
 
                     foreach (var node1 in scope_net_topo.Nodes)
                         foreach (var node2 in scope_net_topo.Nodes)
@@ -317,44 +276,6 @@ namespace Deployment_Simulation
             return isSelected;
         }
 
-        //private bool isNeedconsiderClustering(NetworkTopology src, NetworkTopology scope, int N, out int select_node)
-        //{
-        //    List<int> neighbor = new List<int>();
-        //    select_node = -1;
-
-        //    if (scope.Nodes.Count >= N - 1 && scope.Nodes.Count <= N)
-        //    {
-        //        foreach (var scopeNode in scope.Nodes)
-        //            neighbor.AddRange(src.GetNeighborNodeIDs(scopeNode.ID).Except(scope.Nodes.Select(x => x.ID)));
-        //        neighbor = neighbor.Distinct().ToList();
-
-        //        double max = double.MinValue;
-
-        //        foreach (int id in neighbor)
-        //        {
-        //            double tmp = src.ClusteringCoefficeint(id);
-
-        //            if (max < tmp)
-        //            {
-        //                max = tmp;
-        //                select_node = id;
-        //            }
-        //        }
-
-        //        if (max >= 0.8 && max <= 1)
-        //            return true;
-        //        else
-        //        {
-        //            select_node = -1;
-        //            return false;
-        //        }
-        //    }
-        //    else if (scope.Nodes.Count > N)
-        //        return true;
-        //    else
-        //        return false;
-        //}
-
         private bool checkHaveRunned(NetworkTopology topo)
         {
             string cmd = "SELECT node_id,level,deploy_type FROM NetworkTopology AS N JOIN DeploySimulation AS D on D.n_id=N.n_id JOIN LevelRecord AS L on D.job_id=L.job_id WHERE N.file_name LIKE @file_name AND D.k = @k AND D.n = @n AND D.deploy_name LIKE @deploy_name ORDER BY L.level,L.node_id";
@@ -392,11 +313,12 @@ namespace Deployment_Simulation
                                                                                         e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
                                     }
                                     scope.Edges = scope.Edges.Distinct().ToList();
-                                    scope.ComputingShortestPath();
+                                    //scope.ComputingShortestPath();
 
                                     allRoundScopeList.Add(scope);
                                 }
-                                scope = new NetworkTopology(0, 0, 0);
+                                scope = new NetworkTopology(topo.Nodes);
+                                scope.AdjacentMatrix = topo.AdjacentMatrix;
 
                                 scope.Nodes.Add(topo.Nodes.Where(n => n.ID == Convert.ToInt32(dv[i]["node_id"])).First());
                             }
@@ -422,7 +344,7 @@ namespace Deployment_Simulation
                                                                         e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
                     }
                     scope.Edges = scope.Edges.Distinct().ToList();
-                    scope.ComputingShortestPath();
+                    //scope.ComputingShortestPath();
 
                     allRoundScopeList.Add(scope);
                 }

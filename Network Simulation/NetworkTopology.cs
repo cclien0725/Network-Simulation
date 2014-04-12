@@ -83,6 +83,15 @@ namespace Network_Simulation
             this.numberOfVictims = numberOfVictims;
         }
 
+        public NetworkTopology(List<Node> src_node_list)
+        {
+            // Create instance of nodes.
+            Nodes = new List<Node>();
+            Edges = new List<Edge>();
+
+            m_src_nodes = new List<Node>(src_node_list);
+        }
+
         /// <summary>
         /// Randomly choose attackers and victim.
         /// </summary>

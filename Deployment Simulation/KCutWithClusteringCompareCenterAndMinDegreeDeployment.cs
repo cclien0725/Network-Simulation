@@ -59,11 +59,14 @@ namespace Deployment_Simulation
                         }
                     }
 
-                    NetworkTopology center_scope_net_topo = new NetworkTopology(0, 0, 0);
-                    NetworkTopology side_scope_net_topo = new NetworkTopology(0, 0, 0);
+                    NetworkTopology center_scope_net_topo = new NetworkTopology(networkTopology.Nodes);
+                    NetworkTopology side_scope_net_topo = new NetworkTopology(networkTopology.Nodes);
 
                     List<int> center_deploy = new List<int>();
                     List<int> side_deploy = new List<int>();
+
+                    center_scope_net_topo.AdjacentMatrix = networkTopology.AdjacentMatrix;
+                    side_scope_net_topo.AdjacentMatrix = networkTopology.AdjacentMatrix;
 
                     if (centerNode != -1)
                     {
@@ -83,6 +86,11 @@ namespace Deployment_Simulation
                         allRoundScopeList.Add(center_scope_net_topo);
                         deployNodes.AddRange(center_deploy);
                         allLevelDeploy.Add(center_deploy);
+
+                        DataUtility.Log(string.Format("================= Level {0} ==================\n", allRoundScopeList.Count));
+                        DataUtility.Log(string.Format("Start From Center Node:\t{0}\n", center_scope_net_topo.Nodes[0].ID));
+                        DataUtility.Log(string.Format("Scope Node Count:\t{0}\n", center_scope_net_topo.Nodes.Count));
+                        DataUtility.Log(string.Format("Deploy Count/Node Count:\t{0}/{1} = {2:0.0000}\n", deployNodes.Count, networkTopology.Nodes.Count, (float)deployNodes.Count / (float)networkTopology.Nodes.Count));
                     }
                     else
                     {
@@ -90,6 +98,11 @@ namespace Deployment_Simulation
                         allRoundScopeList.Add(side_scope_net_topo);
                         deployNodes.AddRange(side_deploy);
                         allLevelDeploy.Add(side_deploy);
+
+                        DataUtility.Log(string.Format("================= Level {0} ==================\n", allRoundScopeList.Count));
+                        DataUtility.Log(string.Format("Start From Side Node:\t{0}\n", side_scope_net_topo.Nodes[0].ID));
+                        DataUtility.Log(string.Format("Scope Node Count:\t{0}\n", side_scope_net_topo.Nodes.Count));
+                        DataUtility.Log(string.Format("Deploy Count/Node Count:\t{0}/{1} = {2:0.0000}\n", deployNodes.Count, networkTopology.Nodes.Count, (float)deployNodes.Count / (float)networkTopology.Nodes.Count));
                     }
 
                     isNeedRecompute = deployNodes.Count != lastDeployCount;
@@ -205,7 +218,7 @@ namespace Deployment_Simulation
                                                     .ToList());
                     }
 
-                    scope_net_topo.ComputingShortestPath();
+                    //scope_net_topo.ComputingShortestPath();
 
                     foreach (var node1 in scope_net_topo.Nodes)
                         foreach (var node2 in scope_net_topo.Nodes)
@@ -288,11 +301,12 @@ namespace Deployment_Simulation
                                                                                         e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
                                     }
                                     scope.Edges = scope.Edges.Distinct().ToList();
-                                    scope.ComputingShortestPath();
+                                    //scope.ComputingShortestPath();
 
                                     allRoundScopeList.Add(scope);
                                 }
-                                scope = new NetworkTopology(0, 0, 0);
+                                scope = new NetworkTopology(topo.Nodes);
+                                scope.AdjacentMatrix = topo.AdjacentMatrix;
 
                                 scope.Nodes.Add(topo.Nodes.Where(n => n.ID == Convert.ToInt32(dv[i]["node_id"])).First());
                             }
@@ -318,7 +332,7 @@ namespace Deployment_Simulation
                                                                         e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
                     }
                     scope.Edges = scope.Edges.Distinct().ToList();
-                    scope.ComputingShortestPath();
+                    //scope.ComputingShortestPath();
 
                     allRoundScopeList.Add(scope);
                 }
