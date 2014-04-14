@@ -31,14 +31,14 @@ namespace Heterogenerous_Simulation
             for (; randomArrayIndex < numberOfTTracer + numberOfMTracer; randomArrayIndex++)
             {
                 networkTopology.Nodes[randomArray[randomArrayIndex]].Tracer = NetworkTopology.TracerType.Marking;
-                MarkingTracerID.Add(randomArray[randomArrayIndex]);
+                MarkingTracerID.Add(networkTopology.Nodes[randomArray[randomArrayIndex]].ID);
             }
 
             // Randomly select filtering tracer.
             for (; randomArrayIndex < numberOfTTracer + numberOfMTracer + numberOfFTracer; randomArrayIndex++)
             {
                 networkTopology.Nodes[randomArray[randomArrayIndex]].Tracer = NetworkTopology.TracerType.Filtering;
-                FilteringTracerID.Add(randomArray[randomArrayIndex]);
+                FilteringTracerID.Add(networkTopology.Nodes[randomArray[randomArrayIndex]].ID);
             }
         }
 

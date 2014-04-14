@@ -26,7 +26,7 @@ namespace Deployment_Simulation
 
             AllocConsole();
 
-            m_topo = new NetworkTopology(0, 0, 0);
+            m_topo = new NetworkTopology(0, 0);
 
             m_simulation_worker = new BackgroundWorker();
             m_simulation_worker.WorkerSupportsCancellation = true;

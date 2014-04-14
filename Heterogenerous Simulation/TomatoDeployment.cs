@@ -23,7 +23,7 @@ namespace Heterogenerous_Simulation
             // Finding the center node to run all level's process.
             while (tmp_src_net_topo.FindCenterNodeID(out centerID, out e))
             {
-                NetworkTopology scope_net_topo = new NetworkTopology(0, 0, 0);
+                NetworkTopology scope_net_topo = new NetworkTopology(0, 0);
 
                 // Adding the center node to scope network topology.
                 scope_net_topo.Nodes.Add(tmp_src_net_topo.Nodes.Find(n => n.ID == centerID));

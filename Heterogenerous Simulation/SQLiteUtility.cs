@@ -34,7 +34,7 @@ namespace Heterogenerous_Simulation
         /// SQLite constructor: create db file.
         /// </summary>
         /// <param name="dbFileName">The file name of database.</param>
-        public SQLiteUtility(string dbFileName)
+        public SQLiteUtility(ref string dbFileName)
         {
             try
             {
@@ -50,6 +50,7 @@ namespace Heterogenerous_Simulation
                 SQLiteConnection.CreateFile(fileName);
 
                 connectionString += fileName;
+                dbFileName = fileName;
             }
             catch { }
         }

@@ -19,6 +19,7 @@ namespace Heterogenerous_Simulation
         static extern bool AllocConsole();
 
         protected List<string> filenames;
+        protected int postfixIndex;
         protected BackgroundWorker bg;
 
         protected enum StatusType { TotalProgress, NoneDeploymentStatus, RandomDeploymentStatus, KCutDeploymentStatus}
@@ -79,45 +80,46 @@ namespace Heterogenerous_Simulation
             //{
                 foreach (string filename in filenames)
                 {
-                    string dbName = string.Format("{0}_T{1}M{2}F{3}_A{4}N{5}V{6}", Path.GetFileNameWithoutExtension(filename),
+                    string dbName = string.Format("{0}_T{1}M{2}F{3}_A{4}V{5}_Pkt{6}", Path.GetFileNameWithoutExtension(filename),
                                                                                TunnelingTracer.Text,
                                                                                MarkingTracer.Text,
                                                                                FilteringTracer.Text,
                                                                                AttackNodes.Text,
-                                                                               NormalUsers.Text,
-                                                                               VictimNodes.Text);
+                                                                               VictimNodes.Text,
+                                                                               TotalPacket.Text);
 
-                    SQLiteUtility sql = new SQLiteUtility(dbName);
+                    SQLiteUtility sql = new SQLiteUtility(ref dbName);
+                    postfixIndex = Convert.ToInt32(Path.GetFileNameWithoutExtension(dbName).Split('_').Last());
 
                     // Read network topology and initialize the attackers, normal users and victim.
-                    NetworkTopology networkTopology = new NetworkTopology(Convert.ToDouble(AttackNodes.Text), Convert.ToDouble(NormalUsers.Text), Convert.ToInt32(VictimNodes.Text));
+                    NetworkTopology networkTopology = new NetworkTopology(Convert.ToDouble(AttackNodes.Text), Convert.ToInt32(VictimNodes.Text));
                     networkTopology.ReadBriteFile(filename);
 
                     //// Doesn't use any deployment method.
-                    NoneDeployment noneDeply = new NoneDeployment(0, 0, 0);
-                    sql.CreateTable(noneDeply.GetType().Name);
-                    noneDeply.Deploy(networkTopology);
-                    Simulator noneSimulator = new Simulator(noneDeply, networkTopology, sql);
-                    noneSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
-                    {
-                        bg.ReportProgress(ra.CurrentNode * 100 / ra.TotalActiveNode, new ProgressReportArg() { KEY = filename, ST = StatusType.NoneDeploymentStatus });
-                    };
-                    noneSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(NumberOfAttackPacket.Text), Convert.ToInt32(NumberOfNormalPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text));
+                    //NoneDeployment noneDeply = new NoneDeployment(0, 0, 0);
+                    //sql.CreateTable(noneDeply.GetType().Name);
+                    //noneDeply.Deploy(networkTopology);
+                    //Simulator noneSimulator = new Simulator(noneDeply, networkTopology, sql);
+                    //noneSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
+                    //{
+                    //    bg.ReportProgress(ra.CurrentPacket * 100 / ra.TotalPacket, new ProgressReportArg() { KEY = filename, ST = StatusType.NoneDeploymentStatus });
+                    //};
+                    //noneSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(TotalPacket.Text), Convert.ToInt32(PercentageOfAttackPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text), Convert.ToInt32(InitTimeOfAttackPacket.Text));
 
-                    bg.ReportProgress((filenames.IndexOf(filename) + 1) * 100 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
+                    //bg.ReportProgress((filenames.IndexOf(filename) + 1) * 33 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
 
-                    //// Using randomly depolyment method.
-                    RandomDeployment randomDeploy = new RandomDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text));
-                    sql.CreateTable(randomDeploy.GetType().Name);
-                    randomDeploy.Deploy(networkTopology);
-                    Simulator randomSimulator = new Simulator(randomDeploy, networkTopology, sql);
-                    randomSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
-                    {
-                        bg.ReportProgress(ra.CurrentNode * 100 / ra.TotalActiveNode, new ProgressReportArg() { KEY = filename, ST = StatusType.RandomDeploymentStatus });
-                    };
-                    randomSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(NumberOfAttackPacket.Text), Convert.ToInt32(NumberOfNormalPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text));
+                    ////// Using randomly depolyment method.
+                    //RandomDeployment randomDeploy = new RandomDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text));
+                    //sql.CreateTable(randomDeploy.GetType().Name);
+                    //randomDeploy.Deploy(networkTopology);
+                    //Simulator randomSimulator = new Simulator(randomDeploy, networkTopology, sql);
+                    //randomSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
+                    //{
+                    //    bg.ReportProgress(ra.CurrentPacket * 100 / ra.TotalPacket, new ProgressReportArg() { KEY = filename, ST = StatusType.RandomDeploymentStatus });
+                    //};
+                    //randomSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(TotalPacket.Text), Convert.ToInt32(PercentageOfAttackPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text), Convert.ToInt32(InitTimeOfAttackPacket.Text));
 
-                    bg.ReportProgress((filenames.IndexOf(filename) + 1) * 100 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
+                    //bg.ReportProgress((filenames.IndexOf(filename) + 1) * 66 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
 
                     //// Using KCut deployment method.
                     KCutDeployment kCutDeploy = new KCutDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text));
@@ -126,9 +128,9 @@ namespace Heterogenerous_Simulation
                     Simulator kCutSimulator = new Simulator(kCutDeploy.Deployment, networkTopology, sql);
                     kCutSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
                     {
-                        bg.ReportProgress(ra.CurrentNode * 100 / ra.TotalActiveNode, new ProgressReportArg() { KEY = filename, ST = StatusType.KCutDeploymentStatus });
+                        bg.ReportProgress(ra.CurrentPacket * 100 / ra.TotalPacket, new ProgressReportArg() { KEY = filename, ST = StatusType.KCutDeploymentStatus });
                     };
-                    kCutSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(NumberOfAttackPacket.Text), Convert.ToInt32(NumberOfNormalPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text));
+                    kCutSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(TotalPacket.Text), Convert.ToInt32(PercentageOfAttackPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text), Convert.ToInt32(InitTimeOfAttackPacket.Text));
 
                     bg.ReportProgress((filenames.IndexOf(filename) + 1) * 100 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
 
@@ -163,6 +165,7 @@ namespace Heterogenerous_Simulation
         private void MapFile_Click(object sender, EventArgs e)
         {
             OpenFileDialog op = new OpenFileDialog();
+            op.Filter = "Brite File | *.brite";
             op.Multiselect = true;
 
             if (op.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -189,7 +192,18 @@ namespace Heterogenerous_Simulation
             if (listView1.SelectedIndices.Count > 0)
             {
                 ListViewItem item = listView1.Items[listView1.SelectedIndices[0]];
-
+                string dbFileName = string.Format("{0}_T{1}M{2}F{3}_A{4}V{5}_Pkt{6}_{7}.db", Path.GetFileNameWithoutExtension(item.Name),
+                                                                                   TunnelingTracer.Text,
+                                                                                   MarkingTracer.Text,
+                                                                                   FilteringTracer.Text,
+                                                                                   AttackNodes.Text,
+                                                                                   VictimNodes.Text,
+                                                                                   TotalPacket.Text,
+                                                                                   postfixIndex);
+                using (NetworkViewForm nvf = new NetworkViewForm(item.Name, dbFileName)) 
+                {
+                    nvf.ShowDialog();
+                }
             }
         }
     }

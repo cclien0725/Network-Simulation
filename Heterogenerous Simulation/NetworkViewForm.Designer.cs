@@ -48,11 +48,13 @@
             this.comboBox1.Items.AddRange(new object[] {
             "None Deployment",
             "Random Deployment",
-            "Tomato Deployment"});
+            "KCut Deployment"});
             this.comboBox1.Location = new System.Drawing.Point(695, 12);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(151, 20);
             this.comboBox1.TabIndex = 0;
+            this.comboBox1.Text = "None Deployment";
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // NetworkViewForm
             // 
@@ -62,7 +64,6 @@
             this.Controls.Add(this.panel1);
             this.Name = "NetworkViewForm";
             this.Text = "NetworkViewForm";
-            this.Load += new System.EventHandler(this.NetworkViewForm_Load);
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
 

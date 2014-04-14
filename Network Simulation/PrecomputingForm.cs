@@ -37,7 +37,7 @@ namespace Network_Simulation
                 {
                     worker.ReportProgress(m_now_index);
 
-                    NetworkTopology topo = new NetworkTopology(10, 10, 10);
+                    NetworkTopology topo = new NetworkTopology(10, 10);
                     topo.ReadBriteFile(item.SubItems[0].Text);
                 }
             };

@@ -35,7 +35,6 @@ namespace Network_Simulation
             }
         }
 
-        private double percentageOfNormalUser;
         private double percentageOfAttackers;
         private string fileName;
 
@@ -57,9 +56,8 @@ namespace Network_Simulation
         /// Constructor.
         /// </summary>
         /// <param name="percentageOfAttackers">The percentage of attackers.</param>
-        /// <param name="percentageOfNormalUser">The percentage of normal users.</param>
         /// <param name="numberOfVictims">The number of victim.</param>
-        public NetworkTopology(double percentageOfAttackers, double percentageOfNormalUser, int numberOfVictims)
+        public NetworkTopology(double percentageOfAttackers, int numberOfVictims)
         {
             // Create instance of nodes.
             Nodes = new List<Node>();
@@ -79,7 +77,6 @@ namespace Network_Simulation
 
             // Initialize environment parameters.
             this.percentageOfAttackers = percentageOfAttackers;
-            this.percentageOfNormalUser = percentageOfNormalUser;
             this.numberOfVictims = numberOfVictims;
         }
 
@@ -105,12 +102,12 @@ namespace Network_Simulation
             int randomArrayIndex = 0;
 
             numberOfAttackers = Convert.ToInt32(Math.Round(percentageOfAttackers * Nodes.Count / 100, 0, MidpointRounding.AwayFromZero));
-            numberOfNormalUsers = Convert.ToInt32(Math.Round(percentageOfNormalUser * Nodes.Count / 100 , 0, MidpointRounding.AwayFromZero));
+            //numberOfNormalUsers = Convert.ToInt32(Math.Round(percentageOfNormalUser * Nodes.Count / 100 , 0, MidpointRounding.AwayFromZero));
 
             // Select victims.
             for (; randomArrayIndex < numberOfVictims; randomArrayIndex++)
             {
-                idOfVictims.Add(randomArray[randomArrayIndex]);
+                idOfVictims.Add(Nodes[randomArray[randomArrayIndex]].ID);
                 Nodes[randomArray[randomArrayIndex]].Type = NodeType.Victim;
             }
 
@@ -118,9 +115,9 @@ namespace Network_Simulation
             for (; randomArrayIndex < numberOfAttackers + numberOfVictims; randomArrayIndex++)
                 Nodes[randomArray[randomArrayIndex]].Type = NodeType.Attacker;
 
-            // Select normal users.
-            for (; randomArrayIndex < numberOfNormalUsers + numberOfAttackers + numberOfVictims; randomArrayIndex++)
-                Nodes[randomArray[randomArrayIndex]].Type = NodeType.Normal;
+            //// Select normal users.
+            //for (; randomArrayIndex < numberOfNormalUsers + numberOfAttackers + numberOfVictims; randomArrayIndex++)
+            //    Nodes[randomArray[randomArrayIndex]].Type = NodeType.Normal;
 
             // Finding diameter of the network topology.
             m_diameter = int.MinValue;

@@ -10,15 +10,15 @@ namespace Heterogenerous_Simulation
     {
         public class ReportArgument : EventArgs
         {
-            public int CurrentNode { get; set; }
-            public int TotalActiveNode { get; set; }
+            public int CurrentPacket { get; set; }
+            public int TotalPacket { get; set; }
         }
 
         private SQLiteUtility sql;
         private NetworkTopology topology;
         private Deployment deployment;
 
-        private List<NetworkTopology.Node> activeNode;
+        private List<NetworkTopology.Node> attackNode;
 
         public event EventHandler<ReportArgument> onReportOccur;
 
@@ -27,147 +27,239 @@ namespace Heterogenerous_Simulation
             if (topology.Nodes.Count == 0)
                 throw new Exception("Run() Fail: There are 0 nodes in the network.");
 
-            //if (sql == null)
-            //    sql = new SQLiteUtility(dbName);
-
-            //sql.CreateTable(deployment.GetType().Name);
             this.sql = sql;
-
             this.topology = topology;
             this.deployment = deployment;
 
-            activeNode = new List<NetworkTopology.Node>();
-
-            var attackNodes = from node in topology.Nodes
-                              where node.Type == NetworkTopology.NodeType.Attacker
-                              select node;
-            var normalUser = from node in topology.Nodes
-                             where node.Type == NetworkTopology.NodeType.Normal
-                             select node;
-
-            activeNode.AddRange(attackNodes.ToList());
-            activeNode.AddRange(normalUser.ToList());
+            attackNode = topology.Nodes.Where(node => node.Type == NetworkTopology.NodeType.Attacker).ToList();
 
             sql.LogDeploymentResult(topology);
         }
 
-        public void Run(int attackPacketPerSec, int normalPacketPerSec, int numberOfAttackPacket, int numberOfNormalPacket, double probibilityOfPacketTunneling, double probibilityOfPacketMarking, double StartFiltering)
+        public void Run(int attackPacketPerSec, int normalPacketPerSec, int totalPacket, int percentageOfAttackPacket, double probibilityOfPacketTunneling, double probibilityOfPacketMarking, double startFiltering, int InitialTimeOfAttackPacket)
         {
             Random rd = new Random();
-            int victim;
-            int packetCount = 0;
+            int victimID;
+            //int packetCount = 0;
             List<int> path;
 
-            foreach (var node in activeNode)
+            int totalAttackPacket = percentageOfAttackPacket * totalPacket / 100;
+            int totalNormalPacket = totalPacket - totalAttackPacket;
+
+            for (int i = 0; i < totalPacket; i++)
             {
-                int time = 0;
-                int totalPacket = 0;
-                int packetPerSec = 0;
+                bool isTunneling = false;
+                bool isMarking = false;
+                bool isFiltering = false;
 
-                switch (node.Type)
+                bool shouldMarking = false;
+                bool shouldFiltering = false;
+
+                NetworkTopology.Node SourceNode;
+                victimID = topology.idOfVictims[rd.Next(topology.idOfVictims.Count)];
+
+                do
                 {
-                    case NetworkTopology.NodeType.Normal:
-                        totalPacket = numberOfNormalPacket;
-                        packetPerSec = normalPacketPerSec;
-                        break;
-                    case NetworkTopology.NodeType.Attacker:
-                        totalPacket = numberOfAttackPacket;
-                        packetPerSec = attackPacketPerSec;
-                        break;
-                }
+                    if (i < totalAttackPacket)
+                    {
+                        SourceNode = attackNode[i % attackNode.Count];
+                    }
+                    else
+                    {
+                        SourceNode = topology.Nodes[rd.Next(topology.Nodes.Count)];
+                    }
+                } while (SourceNode.ID == victimID);
 
-                victim = topology.idOfVictims[rd.Next(topology.idOfVictims.Count)];
+                
+                path = topology.GetShortestPath(SourceNode.ID, victimID);
 
-                for (int i = 0; i < totalPacket; i++)
+                PacketEvent packetEvent = new PacketEvent()
                 {
-                    bool isTunneling = false;
-                    bool isMarking = false;
-                    bool isFiltering = false;
+                    PacketID = i,
+                    Source = SourceNode.ID,
+                    Destination = victimID,
+                    Time = SourceNode.Type == NetworkTopology.NodeType.Attacker ? InitialTimeOfAttackPacket : 0,
+                    Type = SourceNode.Type
+                };
 
-                    bool shouldMarking = false;
-                    bool shouldFiltering = false;
+                sql.InsertPacketEvent(packetEvent);
 
-                    path = topology.GetShortestPath(node.ID, topology.Nodes[victim].ID);
+                for (int j = 0; j < path.Count - 1; j++)
+                {
+                    packetEvent.Time = j == 0 ? packetEvent.Time : packetEvent.Time += topology.AdjacentMatrix[topology.NodeID2Index(path[j - 1]), topology.NodeID2Index(path[j])].Delay;
 
-                    PacketEvent packetEvent = new PacketEvent()
+                    switch (topology.Nodes[topology.NodeID2Index(path[j])].Tracer)
                     {
-                        PacketID = packetCount++,
-                        Source = node.ID,
-                        Destination = topology.Nodes[victim].ID,
-                        Time = i == 0 ? time : time += Convert.ToInt32(topology.Poisson(packetPerSec)),
-                        Type = node.Type
-                    };
-                    sql.InsertPacketEvent(packetEvent);
+                        case NetworkTopology.TracerType.Tunneling:
+                            if (!isTunneling && !isMarking && rd.NextDouble() <= probibilityOfPacketTunneling)
+                            {
+                                TunnelingEvent tunnelingEvent = new TunnelingEvent(packetEvent);
+                                tunnelingEvent.TunnelingSrc = path[j];
 
-                    for (int j = 0; j < path.Count - 1; j++)
-                    {
-                        packetEvent.Time = j == 0 ? packetEvent.Time : packetEvent.Time += topology.AdjacentMatrix[topology.NodeID2Index(path[j - 1]), topology.NodeID2Index(path[j])].Delay;
-
-                        switch (topology.Nodes[topology.NodeID2Index(path[j])].Tracer)
-                        {
-                            case NetworkTopology.TracerType.Tunneling:
-                                if (!isTunneling && !isMarking && rd.NextDouble() <= probibilityOfPacketTunneling)
+                                // Re-computing path.
+                                if (i < startFiltering * totalPacket / 100)
                                 {
-                                    //re-computing path...
-                                    if (i < StartFiltering * totalPacket / 100)
-                                    {
-                                        path = ChooseTunnelingNode(path, j, NetworkTopology.TracerType.Marking);
-                                        shouldMarking = true;
-                                    }
-                                    else
-                                    {
-                                        path = ChooseTunnelingNode(path, j, NetworkTopology.TracerType.Filtering);
-                                        shouldFiltering = true;
-                                    }
-
-                                    TunnelingEvent tunnelingEvent = new TunnelingEvent(packetEvent);
-                                    tunnelingEvent.TunnelingSrc = path[j];
-                                    tunnelingEvent.TunnelingDst = path[j + 1];
-                                    sql.InsertTunnelingEvent(tunnelingEvent);
-                                    isTunneling = true;
+                                    path = ChooseTunnelingNode(path, j, NetworkTopology.TracerType.Marking, ref tunnelingEvent);
+                                    shouldMarking = true;
                                 }
-                                break;
-                            case NetworkTopology.TracerType.Marking:
-                                if ((!isMarking && rd.NextDouble() <= probibilityOfPacketMarking && i < StartFiltering * totalPacket / 100 && !shouldFiltering) || shouldMarking)
+                                else
                                 {
-                                    MarkingEvent markingEvent = new MarkingEvent(packetEvent);
-                                    markingEvent.MarkingNodeID = path[j];
-                                    sql.InsertMarkingEvent(markingEvent);
-                                    isMarking = true;
-                                    shouldMarking = false;
-                                }
-                                break;
-                            case NetworkTopology.TracerType.Filtering:
-                                if (shouldFiltering || i >= StartFiltering * totalPacket / 100)
-                                {
-                                    if (packetEvent.Type == NetworkTopology.NodeType.Attacker)
-                                    {
-                                        FilteringEvent filteringEvent = new FilteringEvent(packetEvent);
-                                        filteringEvent.FilteringNodeID = path[j];
-                                        sql.InsertFilteringEvent(filteringEvent);
-                                        isFiltering = true;
-                                    }
+                                    path = ChooseTunnelingNode(path, j, NetworkTopology.TracerType.Filtering, ref tunnelingEvent);
                                     shouldFiltering = true;
                                 }
-                                break;
-                        }
 
-                        if (isFiltering)
+                                sql.InsertTunnelingEvent(tunnelingEvent);
+                                isTunneling = true;
+                            }
                             break;
-
-                        PacketSentEvent packetSentEvent = new PacketSentEvent(packetEvent);
-                        packetSentEvent.CurrentNodeID = path[j];
-                        packetSentEvent.NextHopID = path[j + 1];
-                        packetSentEvent.Length = topology.AdjacentMatrix[topology.NodeID2Index(path[j]), topology.NodeID2Index(path[j + 1])].Length;
-
-                        sql.InsertPacketSentEvent(packetSentEvent);
+                        case NetworkTopology.TracerType.Marking:
+                            if ((!isMarking && rd.NextDouble() <= probibilityOfPacketMarking && i < startFiltering * totalPacket / 100 && !shouldFiltering) || shouldMarking)
+                            {
+                                MarkingEvent markingEvent = new MarkingEvent(packetEvent);
+                                markingEvent.MarkingNodeID = path[j];
+                                sql.InsertMarkingEvent(markingEvent);
+                                isMarking = true;
+                                shouldMarking = false;
+                            }
+                            break;
+                        case NetworkTopology.TracerType.Filtering:
+                            if (shouldFiltering || i >= startFiltering * totalPacket / 100)
+                            {
+                                if (packetEvent.Type == NetworkTopology.NodeType.Attacker)
+                                {
+                                    FilteringEvent filteringEvent = new FilteringEvent(packetEvent);
+                                    filteringEvent.FilteringNodeID = path[j];
+                                    sql.InsertFilteringEvent(filteringEvent);
+                                    isFiltering = true;
+                                }
+                                shouldFiltering = true;
+                            }
+                            break;
                     }
+
+                    if (isFiltering)
+                        break;
+
+                    PacketSentEvent packetSentEvent = new PacketSentEvent(packetEvent);
+                    packetSentEvent.CurrentNodeID = path[j];
+                    packetSentEvent.NextHopID = path[j + 1];
+                    packetSentEvent.Length = topology.AdjacentMatrix[topology.NodeID2Index(path[j]), topology.NodeID2Index(path[j + 1])].Length;
+
+                    sql.InsertPacketSentEvent(packetSentEvent);
                 }
-                Report(activeNode.IndexOf(node) + 1, activeNode.Count);
+                Report(i + 1, totalPacket);
             }
+
+            //foreach (var node in attackNode)
+            //{
+            //    int time = 0;
+            //    int currentNodeTotalPacket = 0;
+            //    int packetPerSec = 0;
+
+            //    switch (node.Type)
+            //    {
+            //        case NetworkTopology.NodeType.Normal:
+            //            currentNodeTotalPacket = totalPacket - (totalPacket * percentageOfAttackPacket / 100);
+            //            packetPerSec = normalPacketPerSec;
+            //            break;
+            //        case NetworkTopology.NodeType.Attacker:
+            //            currentNodeTotalPacket = totalPacket * percentageOfAttackPacket / 100;
+            //            packetPerSec = attackPacketPerSec;
+            //            break;
+            //    }
+
+            //    victim = topology.idOfVictims[rd.Next(topology.idOfVictims.Count)];
+
+            //    for (int i = 0; i < currentNodeTotalPacket; i++)
+            //    {
+            //        bool isTunneling = false;
+            //        bool isMarking = false;
+            //        bool isFiltering = false;
+
+            //        bool shouldMarking = false;
+            //        bool shouldFiltering = false;
+
+            //        path = topology.GetShortestPath(node.ID, topology.Nodes[victim].ID);
+
+            //        PacketEvent packetEvent = new PacketEvent()
+            //        {
+            //            PacketID = packetCount++,
+            //            Source = node.ID,
+            //            Destination = topology.Nodes[victim].ID,
+            //            Time = i == 0 ? time : time += Convert.ToInt32(topology.Poisson(packetPerSec)),
+            //            Type = node.Type
+            //        };
+            //        sql.InsertPacketEvent(packetEvent);
+
+            //        for (int j = 0; j < path.Count - 1; j++)
+            //        {
+            //            packetEvent.Time = j == 0 ? packetEvent.Time : packetEvent.Time += topology.AdjacentMatrix[topology.NodeID2Index(path[j - 1]), topology.NodeID2Index(path[j])].Delay;
+
+            //            switch (topology.Nodes[topology.NodeID2Index(path[j])].Tracer)
+            //            {
+            //                case NetworkTopology.TracerType.Tunneling:
+            //                    if (!isTunneling && !isMarking && rd.NextDouble() <= probibilityOfPacketTunneling)
+            //                    {
+            //                        //re-computing path...
+            //                        if (i < startFiltering * totalPacket / 100)
+            //                        {
+            //                            path = ChooseTunnelingNode(path, j, NetworkTopology.TracerType.Marking);
+            //                            shouldMarking = true;
+            //                        }
+            //                        else
+            //                        {
+            //                            path = ChooseTunnelingNode(path, j, NetworkTopology.TracerType.Filtering);
+            //                            shouldFiltering = true;
+            //                        }
+
+            //                        TunnelingEvent tunnelingEvent = new TunnelingEvent(packetEvent);
+            //                        tunnelingEvent.TunnelingSrc = path[j];
+            //                        tunnelingEvent.TunnelingDst = path[j + 1];
+            //                        sql.InsertTunnelingEvent(tunnelingEvent);
+            //                        isTunneling = true;
+            //                    }
+            //                    break;
+            //                case NetworkTopology.TracerType.Marking:
+            //                    if ((!isMarking && rd.NextDouble() <= probibilityOfPacketMarking && i < startFiltering * totalPacket / 100 && !shouldFiltering) || shouldMarking)
+            //                    {
+            //                        MarkingEvent markingEvent = new MarkingEvent(packetEvent);
+            //                        markingEvent.MarkingNodeID = path[j];
+            //                        sql.InsertMarkingEvent(markingEvent);
+            //                        isMarking = true;
+            //                        shouldMarking = false;
+            //                    }
+            //                    break;
+            //                case NetworkTopology.TracerType.Filtering:
+            //                    if (shouldFiltering || i >= startFiltering * totalPacket / 100)
+            //                    {
+            //                        if (packetEvent.Type == NetworkTopology.NodeType.Attacker)
+            //                        {
+            //                            FilteringEvent filteringEvent = new FilteringEvent(packetEvent);
+            //                            filteringEvent.FilteringNodeID = path[j];
+            //                            sql.InsertFilteringEvent(filteringEvent);
+            //                            isFiltering = true;
+            //                        }
+            //                        shouldFiltering = true;
+            //                    }
+            //                    break;
+            //            }
+
+            //            if (isFiltering)
+            //                break;
+
+            //            PacketSentEvent packetSentEvent = new PacketSentEvent(packetEvent);
+            //            packetSentEvent.CurrentNodeID = path[j];
+            //            packetSentEvent.NextHopID = path[j + 1];
+            //            packetSentEvent.Length = topology.AdjacentMatrix[topology.NodeID2Index(path[j]), topology.NodeID2Index(path[j + 1])].Length;
+
+            //            sql.InsertPacketSentEvent(packetSentEvent);
+            //        }
+            //    }
+            //    Report(attackNode.IndexOf(node) + 1, attackNode.Count);
+            //}
         }
 
-        private List<int> ChooseTunnelingNode(List<int> path, int source, NetworkTopology.TracerType tracerType)
+        private List<int> ChooseTunnelingNode(List<int> path, int source, NetworkTopology.TracerType tracerType, ref TunnelingEvent tunelingEvent)
         {
             double totalDelay = double.MaxValue;
             List<int> newPath = new List<int>();
@@ -188,11 +280,16 @@ namespace Heterogenerous_Simulation
                 List<int> tmpPath = new List<int>();
                 double tmpTotalDelay = 0;
 
-                if (!path.Contains(topology.NodeIndex2ID(tunnelingNodeID)))
+                if (!path.GetRange(source, path.Count - source).Contains(tunnelingNodeID))
                 {
-                    tmpPath = topology.GetShortestPath(path[source], topology.NodeIndex2ID(tunnelingNodeID));
+                    tmpPath = topology.GetShortestPath(path[source], tunnelingNodeID);
                     tmpPath.Remove(tmpPath.Last());
-                    tmpPath.AddRange(topology.GetShortestPath(topology.NodeIndex2ID(tunnelingNodeID), path.Last()));
+                    tmpPath.AddRange(topology.GetShortestPath(tunnelingNodeID, path.Last()));
+
+                    for (int i = source - 1; i >= 0; i--)
+                    {
+                        tmpPath.Insert(0, path[i]);
+                    }
                 }
                 else 
                 {
@@ -208,12 +305,8 @@ namespace Heterogenerous_Simulation
                 {
                     newPath = tmpPath;
                     totalDelay = tmpTotalDelay;
+                    tunelingEvent.TunnelingDst = tunnelingNodeID;
                 }
-            }
-
-            for (int i = source - 1; i >= 0; i--)
-            {
-                newPath.Insert(0, path[i]);
             }
 
             return newPath;
@@ -222,7 +315,7 @@ namespace Heterogenerous_Simulation
         private void Report(int currentNode, int totalActiveNode)
         {
             if (onReportOccur != null)
-                onReportOccur.Invoke(this, new ReportArgument() { CurrentNode = currentNode, TotalActiveNode = totalActiveNode });
+                onReportOccur.Invoke(this, new ReportArgument() { CurrentPacket = currentNode, TotalPacket = totalActiveNode });
         }
     }
 }

@@ -45,21 +45,21 @@
             this.StartFiltering = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.NormalUsers = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.label16 = new System.Windows.Forms.Label();
+            this.InitTimeOfAttackPacket = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
             this.ProbibilityOfPacketMarking = new System.Windows.Forms.TextBox();
             this.label13 = new System.Windows.Forms.Label();
             this.ProbibilityOfPacketTunneling = new System.Windows.Forms.TextBox();
             this.AttackPacketPerSec = new System.Windows.Forms.TextBox();
-            this.NumberOfAttackPacket = new System.Windows.Forms.TextBox();
+            this.TotalPacket = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.NormalPacketPerSec = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
-            this.NumberOfNormalPacket = new System.Windows.Forms.TextBox();
+            this.PercentageOfAttackPacket = new System.Windows.Forms.TextBox();
             this.listView1 = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -74,7 +74,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(888, 465);
+            this.button1.Location = new System.Drawing.Point(889, 492);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 0;
@@ -171,7 +171,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(56, 108);
+            this.label7.Location = new System.Drawing.Point(56, 76);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(93, 12);
             this.label7.TabIndex = 14;
@@ -179,7 +179,7 @@
             // 
             // VictimNodes
             // 
-            this.VictimNodes.Location = new System.Drawing.Point(155, 105);
+            this.VictimNodes.Location = new System.Drawing.Point(155, 73);
             this.VictimNodes.Name = "VictimNodes";
             this.VictimNodes.Size = new System.Drawing.Size(100, 22);
             this.VictimNodes.TabIndex = 13;
@@ -195,7 +195,7 @@
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.FilteringTracer);
             this.groupBox1.Controls.Add(this.label5);
-            this.groupBox1.Location = new System.Drawing.Point(12, 153);
+            this.groupBox1.Location = new System.Drawing.Point(12, 122);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(351, 135);
             this.groupBox1.TabIndex = 15;
@@ -221,8 +221,6 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.NormalUsers);
-            this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Controls.Add(this.label1);
             this.groupBox2.Controls.Add(this.MapFile);
             this.groupBox2.Controls.Add(this.AttackNodes);
@@ -231,48 +229,50 @@
             this.groupBox2.Controls.Add(this.VictimNodes);
             this.groupBox2.Location = new System.Drawing.Point(12, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(351, 135);
+            this.groupBox2.Size = new System.Drawing.Size(351, 104);
             this.groupBox2.TabIndex = 18;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Map information";
             // 
-            // NormalUsers
-            // 
-            this.NormalUsers.Location = new System.Drawing.Point(155, 75);
-            this.NormalUsers.Name = "NormalUsers";
-            this.NormalUsers.Size = new System.Drawing.Size(100, 22);
-            this.NormalUsers.TabIndex = 15;
-            this.NormalUsers.Text = "10";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 78);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(140, 12);
-            this.label2.TabIndex = 16;
-            this.label2.Text = "Percentage of  Normal Users:";
-            // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.label16);
+            this.groupBox3.Controls.Add(this.InitTimeOfAttackPacket);
             this.groupBox3.Controls.Add(this.label14);
             this.groupBox3.Controls.Add(this.ProbibilityOfPacketMarking);
             this.groupBox3.Controls.Add(this.label13);
             this.groupBox3.Controls.Add(this.ProbibilityOfPacketTunneling);
             this.groupBox3.Controls.Add(this.AttackPacketPerSec);
-            this.groupBox3.Controls.Add(this.NumberOfAttackPacket);
+            this.groupBox3.Controls.Add(this.TotalPacket);
             this.groupBox3.Controls.Add(this.label9);
             this.groupBox3.Controls.Add(this.label10);
             this.groupBox3.Controls.Add(this.NormalPacketPerSec);
             this.groupBox3.Controls.Add(this.label11);
             this.groupBox3.Controls.Add(this.label12);
-            this.groupBox3.Controls.Add(this.NumberOfNormalPacket);
-            this.groupBox3.Location = new System.Drawing.Point(12, 294);
+            this.groupBox3.Controls.Add(this.PercentageOfAttackPacket);
+            this.groupBox3.Location = new System.Drawing.Point(12, 265);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(351, 194);
+            this.groupBox3.Size = new System.Drawing.Size(351, 220);
             this.groupBox3.TabIndex = 19;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Packet Setting";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(30, 192);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(141, 12);
+            this.label16.TabIndex = 23;
+            this.label16.Text = "Initial Time of Attack Packet:";
+            // 
+            // InitTimeOfAttackPacket
+            // 
+            this.InitTimeOfAttackPacket.Location = new System.Drawing.Point(177, 189);
+            this.InitTimeOfAttackPacket.Name = "InitTimeOfAttackPacket";
+            this.InitTimeOfAttackPacket.Size = new System.Drawing.Size(100, 22);
+            this.InitTimeOfAttackPacket.TabIndex = 22;
+            this.InitTimeOfAttackPacket.Text = "1";
             // 
             // label14
             // 
@@ -316,22 +316,22 @@
             this.AttackPacketPerSec.TabIndex = 17;
             this.AttackPacketPerSec.Text = "1";
             // 
-            // NumberOfAttackPacket
+            // TotalPacket
             // 
-            this.NumberOfAttackPacket.Location = new System.Drawing.Point(177, 75);
-            this.NumberOfAttackPacket.Name = "NumberOfAttackPacket";
-            this.NumberOfAttackPacket.Size = new System.Drawing.Size(100, 22);
-            this.NumberOfAttackPacket.TabIndex = 15;
-            this.NumberOfAttackPacket.Text = "100";
+            this.TotalPacket.Location = new System.Drawing.Point(177, 75);
+            this.TotalPacket.Name = "TotalPacket";
+            this.TotalPacket.Size = new System.Drawing.Size(100, 22);
+            this.TotalPacket.TabIndex = 15;
+            this.TotalPacket.Text = "5000";
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(46, 78);
+            this.label9.Location = new System.Drawing.Point(106, 78);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(125, 12);
+            this.label9.Size = new System.Drawing.Size(65, 12);
             this.label9.TabIndex = 16;
-            this.label9.Text = "Number of Attack Packet:";
+            this.label9.Text = "Total Packet:";
             // 
             // label10
             // 
@@ -364,17 +364,17 @@
             this.label12.AutoSize = true;
             this.label12.Location = new System.Drawing.Point(41, 108);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(130, 12);
+            this.label12.Size = new System.Drawing.Size(127, 12);
             this.label12.TabIndex = 14;
-            this.label12.Text = "Number of Normal Packet:";
+            this.label12.Text = "PercentageOfAttackPacket";
             // 
-            // NumberOfNormalPacket
+            // PercentageOfAttackPacket
             // 
-            this.NumberOfNormalPacket.Location = new System.Drawing.Point(177, 105);
-            this.NumberOfNormalPacket.Name = "NumberOfNormalPacket";
-            this.NumberOfNormalPacket.Size = new System.Drawing.Size(100, 22);
-            this.NumberOfNormalPacket.TabIndex = 13;
-            this.NumberOfNormalPacket.Text = "10";
+            this.PercentageOfAttackPacket.Location = new System.Drawing.Point(177, 105);
+            this.PercentageOfAttackPacket.Name = "PercentageOfAttackPacket";
+            this.PercentageOfAttackPacket.Size = new System.Drawing.Size(100, 22);
+            this.PercentageOfAttackPacket.TabIndex = 13;
+            this.PercentageOfAttackPacket.Text = "30";
             // 
             // listView1
             // 
@@ -385,7 +385,7 @@
             this.columnHeader4});
             this.listView1.Location = new System.Drawing.Point(369, 12);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(594, 447);
+            this.listView1.Size = new System.Drawing.Size(594, 473);
             this.listView1.TabIndex = 20;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -414,7 +414,7 @@
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(369, 470);
+            this.label15.Location = new System.Drawing.Point(10, 497);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(68, 12);
             this.label15.TabIndex = 21;
@@ -422,16 +422,16 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(444, 464);
+            this.progressBar1.Location = new System.Drawing.Point(84, 491);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(438, 23);
+            this.progressBar1.Size = new System.Drawing.Size(799, 23);
             this.progressBar1.TabIndex = 22;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(975, 498);
+            this.ClientSize = new System.Drawing.Size(975, 523);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.label15);
             this.Controls.Add(this.listView1);
@@ -471,18 +471,16 @@
         private System.Windows.Forms.TextBox VictimNodes;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.TextBox NormalUsers;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox StartFiltering;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.TextBox NumberOfAttackPacket;
+        private System.Windows.Forms.TextBox TotalPacket;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox NormalPacketPerSec;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.TextBox NumberOfNormalPacket;
+        private System.Windows.Forms.TextBox PercentageOfAttackPacket;
         private System.Windows.Forms.TextBox AttackPacketPerSec;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.TextBox ProbibilityOfPacketMarking;
@@ -495,6 +493,8 @@
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.TextBox InitTimeOfAttackPacket;
     }
 }
 

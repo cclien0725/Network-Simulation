@@ -20,7 +20,8 @@ namespace Deployment_Simulation
 
             tb_file_name.Text = briteFilePath;
 
-            m_topo = new NetworkTopology(0, 0, 0);
+            m_topo = new NetworkTopology(0, 0);
+
             m_topo.SetupDrawingControl(draw_panel);
 
             tb_k.TextChanged += new EventHandler(checkValid);
