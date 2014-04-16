@@ -63,13 +63,16 @@ namespace Heterogenerous_Simulation
                     progressBar1.Value = e.ProgressPercentage;
                     break;
                 case StatusType.NoneDeploymentStatus:
-                    listView1.Items[pra.KEY].SubItems[1].Text = e.ProgressPercentage.ToString() + "%";
+                    if (listView1.Items[pra.KEY].SubItems[1].Text != e.ProgressPercentage.ToString() + "%")
+                        listView1.Items[pra.KEY].SubItems[1].Text = e.ProgressPercentage.ToString() + "%";
                     break;
                 case StatusType.RandomDeploymentStatus:
-                    listView1.Items[pra.KEY].SubItems[2].Text = e.ProgressPercentage.ToString() + "%";
+                    if (listView1.Items[pra.KEY].SubItems[2].Text != e.ProgressPercentage.ToString() + "%")
+                        listView1.Items[pra.KEY].SubItems[2].Text = e.ProgressPercentage.ToString() + "%";
                     break;
                 case StatusType.KCutDeploymentStatus:
-                    listView1.Items[pra.KEY].SubItems[3].Text = e.ProgressPercentage.ToString() + "%";
+                    if (listView1.Items[pra.KEY].SubItems[3].Text != e.ProgressPercentage.ToString() + "%")
+                        listView1.Items[pra.KEY].SubItems[3].Text = e.ProgressPercentage.ToString() + "%";
                     break;
             }
         }
@@ -96,30 +99,30 @@ namespace Heterogenerous_Simulation
                     networkTopology.ReadBriteFile(filename);
 
                     //// Doesn't use any deployment method.
-                    //NoneDeployment noneDeply = new NoneDeployment(0, 0, 0);
-                    //sql.CreateTable(noneDeply.GetType().Name);
-                    //noneDeply.Deploy(networkTopology);
-                    //Simulator noneSimulator = new Simulator(noneDeply, networkTopology, sql);
-                    //noneSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
-                    //{
-                    //    bg.ReportProgress(ra.CurrentPacket * 100 / ra.TotalPacket, new ProgressReportArg() { KEY = filename, ST = StatusType.NoneDeploymentStatus });
-                    //};
-                    //noneSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(TotalPacket.Text), Convert.ToInt32(PercentageOfAttackPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text), Convert.ToInt32(InitTimeOfAttackPacket.Text));
+                    NoneDeployment noneDeply = new NoneDeployment(0, 0, 0);
+                    sql.CreateTable(noneDeply.GetType().Name);
+                    noneDeply.Deploy(networkTopology);
+                    Simulator noneSimulator = new Simulator(noneDeply, networkTopology, sql);
+                    noneSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
+                    {
+                        bg.ReportProgress(ra.CurrentPacket * 100 / ra.TotalPacket, new ProgressReportArg() { KEY = filename, ST = StatusType.NoneDeploymentStatus });
+                    };
+                    noneSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(TotalPacket.Text), Convert.ToInt32(PercentageOfAttackPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text), Convert.ToInt32(InitTimeOfAttackPacket.Text), DynamicProbability.Checked);
 
-                    //bg.ReportProgress((filenames.IndexOf(filename) + 1) * 33 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
+                    bg.ReportProgress((filenames.IndexOf(filename) + 1) * 33 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
 
-                    ////// Using randomly depolyment method.
-                    //RandomDeployment randomDeploy = new RandomDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text));
-                    //sql.CreateTable(randomDeploy.GetType().Name);
-                    //randomDeploy.Deploy(networkTopology);
-                    //Simulator randomSimulator = new Simulator(randomDeploy, networkTopology, sql);
-                    //randomSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
-                    //{
-                    //    bg.ReportProgress(ra.CurrentPacket * 100 / ra.TotalPacket, new ProgressReportArg() { KEY = filename, ST = StatusType.RandomDeploymentStatus });
-                    //};
-                    //randomSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(TotalPacket.Text), Convert.ToInt32(PercentageOfAttackPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text), Convert.ToInt32(InitTimeOfAttackPacket.Text));
+                    //// Using randomly depolyment method.
+                    RandomDeployment randomDeploy = new RandomDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text));
+                    sql.CreateTable(randomDeploy.GetType().Name);
+                    randomDeploy.Deploy(networkTopology);
+                    Simulator randomSimulator = new Simulator(randomDeploy, networkTopology, sql);
+                    randomSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
+                    {
+                        bg.ReportProgress(ra.CurrentPacket * 100 / ra.TotalPacket, new ProgressReportArg() { KEY = filename, ST = StatusType.RandomDeploymentStatus });
+                    };
+                    randomSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(TotalPacket.Text), Convert.ToInt32(PercentageOfAttackPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text), Convert.ToInt32(InitTimeOfAttackPacket.Text), DynamicProbability.Checked);
 
-                    //bg.ReportProgress((filenames.IndexOf(filename) + 1) * 66 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
+                    bg.ReportProgress((filenames.IndexOf(filename) + 1) * 66 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
 
                     //// Using KCut deployment method.
                     KCutDeployment kCutDeploy = new KCutDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text));
@@ -130,7 +133,7 @@ namespace Heterogenerous_Simulation
                     {
                         bg.ReportProgress(ra.CurrentPacket * 100 / ra.TotalPacket, new ProgressReportArg() { KEY = filename, ST = StatusType.KCutDeploymentStatus });
                     };
-                    kCutSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(TotalPacket.Text), Convert.ToInt32(PercentageOfAttackPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text), Convert.ToInt32(InitTimeOfAttackPacket.Text));
+                    kCutSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(TotalPacket.Text), Convert.ToInt32(PercentageOfAttackPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text), Convert.ToInt32(InitTimeOfAttackPacket.Text), DynamicProbability.Checked);
 
                     bg.ReportProgress((filenames.IndexOf(filename) + 1) * 100 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
 

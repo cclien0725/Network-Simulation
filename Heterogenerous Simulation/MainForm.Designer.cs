@@ -67,6 +67,7 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.label15 = new System.Windows.Forms.Label();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.DynamicProbability = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -74,7 +75,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(889, 492);
+            this.button1.Location = new System.Drawing.Point(894, 518);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 0;
@@ -103,7 +104,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(77, 18);
+            this.label3.Location = new System.Drawing.Point(98, 18);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(155, 12);
             this.label3.TabIndex = 6;
@@ -111,16 +112,16 @@
             // 
             // TunnelingTracer
             // 
-            this.TunnelingTracer.Location = new System.Drawing.Point(238, 15);
+            this.TunnelingTracer.Location = new System.Drawing.Point(259, 15);
             this.TunnelingTracer.Name = "TunnelingTracer";
-            this.TunnelingTracer.Size = new System.Drawing.Size(100, 22);
+            this.TunnelingTracer.Size = new System.Drawing.Size(79, 22);
             this.TunnelingTracer.TabIndex = 5;
-            this.TunnelingTracer.Text = "30";
+            this.TunnelingTracer.Text = "50";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(85, 48);
+            this.label4.Location = new System.Drawing.Point(106, 48);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(147, 12);
             this.label4.TabIndex = 8;
@@ -128,16 +129,16 @@
             // 
             // MarkingTracer
             // 
-            this.MarkingTracer.Location = new System.Drawing.Point(238, 45);
+            this.MarkingTracer.Location = new System.Drawing.Point(259, 45);
             this.MarkingTracer.Name = "MarkingTracer";
-            this.MarkingTracer.Size = new System.Drawing.Size(100, 22);
+            this.MarkingTracer.Size = new System.Drawing.Size(79, 22);
             this.MarkingTracer.TabIndex = 7;
             this.MarkingTracer.Text = "20";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(86, 78);
+            this.label5.Location = new System.Drawing.Point(107, 78);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(146, 12);
             this.label5.TabIndex = 10;
@@ -145,9 +146,9 @@
             // 
             // FilteringTracer
             // 
-            this.FilteringTracer.Location = new System.Drawing.Point(238, 75);
+            this.FilteringTracer.Location = new System.Drawing.Point(259, 75);
             this.FilteringTracer.Name = "FilteringTracer";
-            this.FilteringTracer.Size = new System.Drawing.Size(100, 22);
+            this.FilteringTracer.Size = new System.Drawing.Size(79, 22);
             this.FilteringTracer.TabIndex = 9;
             this.FilteringTracer.Text = "10";
             // 
@@ -166,7 +167,7 @@
             this.AttackNodes.Name = "AttackNodes";
             this.AttackNodes.Size = new System.Drawing.Size(100, 22);
             this.AttackNodes.TabIndex = 11;
-            this.AttackNodes.Text = "50";
+            this.AttackNodes.Text = "10";
             // 
             // label7
             // 
@@ -204,20 +205,20 @@
             // 
             // StartFiltering
             // 
-            this.StartFiltering.Location = new System.Drawing.Point(238, 105);
+            this.StartFiltering.Location = new System.Drawing.Point(259, 105);
             this.StartFiltering.Name = "StartFiltering";
-            this.StartFiltering.Size = new System.Drawing.Size(100, 22);
+            this.StartFiltering.Size = new System.Drawing.Size(74, 22);
             this.StartFiltering.TabIndex = 11;
             this.StartFiltering.Text = "10";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(10, 108);
+            this.label8.Location = new System.Drawing.Point(6, 108);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(222, 12);
+            this.label8.Size = new System.Drawing.Size(247, 12);
             this.label8.TabIndex = 12;
-            this.label8.Text = "Percentage of Packet sent, then begin Filtering:";
+            this.label8.Text = "Percentage of Marking receive, then begin Filtering:";
             // 
             // groupBox2
             // 
@@ -236,6 +237,7 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.DynamicProbability);
             this.groupBox3.Controls.Add(this.label16);
             this.groupBox3.Controls.Add(this.InitTimeOfAttackPacket);
             this.groupBox3.Controls.Add(this.label14);
@@ -252,7 +254,7 @@
             this.groupBox3.Controls.Add(this.PercentageOfAttackPacket);
             this.groupBox3.Location = new System.Drawing.Point(12, 265);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(351, 220);
+            this.groupBox3.Size = new System.Drawing.Size(351, 246);
             this.groupBox3.TabIndex = 19;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Packet Setting";
@@ -260,7 +262,7 @@
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(30, 192);
+            this.label16.Location = new System.Drawing.Point(30, 136);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(141, 12);
             this.label16.TabIndex = 23;
@@ -268,7 +270,7 @@
             // 
             // InitTimeOfAttackPacket
             // 
-            this.InitTimeOfAttackPacket.Location = new System.Drawing.Point(177, 189);
+            this.InitTimeOfAttackPacket.Location = new System.Drawing.Point(177, 133);
             this.InitTimeOfAttackPacket.Name = "InitTimeOfAttackPacket";
             this.InitTimeOfAttackPacket.Size = new System.Drawing.Size(100, 22);
             this.InitTimeOfAttackPacket.TabIndex = 22;
@@ -277,15 +279,15 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(28, 164);
+            this.label14.Location = new System.Drawing.Point(26, 192);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(143, 12);
+            this.label14.Size = new System.Drawing.Size(145, 12);
             this.label14.TabIndex = 21;
-            this.label14.Text = "Probiblity of Packet Marking:";
+            this.label14.Text = "Probablity of Packet Marking:";
             // 
             // ProbibilityOfPacketMarking
             // 
-            this.ProbibilityOfPacketMarking.Location = new System.Drawing.Point(177, 161);
+            this.ProbibilityOfPacketMarking.Location = new System.Drawing.Point(177, 189);
             this.ProbibilityOfPacketMarking.Name = "ProbibilityOfPacketMarking";
             this.ProbibilityOfPacketMarking.Size = new System.Drawing.Size(100, 22);
             this.ProbibilityOfPacketMarking.TabIndex = 20;
@@ -294,15 +296,15 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(17, 136);
+            this.label13.Location = new System.Drawing.Point(15, 164);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(154, 12);
+            this.label13.Size = new System.Drawing.Size(156, 12);
             this.label13.TabIndex = 19;
-            this.label13.Text = "Probibility of Packet Tunneling:";
+            this.label13.Text = "Probability of Packet Tunneling:";
             // 
             // ProbibilityOfPacketTunneling
             // 
-            this.ProbibilityOfPacketTunneling.Location = new System.Drawing.Point(177, 133);
+            this.ProbibilityOfPacketTunneling.Location = new System.Drawing.Point(177, 161);
             this.ProbibilityOfPacketTunneling.Name = "ProbibilityOfPacketTunneling";
             this.ProbibilityOfPacketTunneling.Size = new System.Drawing.Size(100, 22);
             this.ProbibilityOfPacketTunneling.TabIndex = 18;
@@ -322,7 +324,7 @@
             this.TotalPacket.Name = "TotalPacket";
             this.TotalPacket.Size = new System.Drawing.Size(100, 22);
             this.TotalPacket.TabIndex = 15;
-            this.TotalPacket.Text = "5000";
+            this.TotalPacket.Text = "10000";
             // 
             // label9
             // 
@@ -362,11 +364,11 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(41, 108);
+            this.label12.Location = new System.Drawing.Point(32, 108);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(127, 12);
+            this.label12.Size = new System.Drawing.Size(139, 12);
             this.label12.TabIndex = 14;
-            this.label12.Text = "PercentageOfAttackPacket";
+            this.label12.Text = "Percentage Of Attack Packet:";
             // 
             // PercentageOfAttackPacket
             // 
@@ -385,7 +387,7 @@
             this.columnHeader4});
             this.listView1.Location = new System.Drawing.Point(369, 12);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(594, 473);
+            this.listView1.Size = new System.Drawing.Size(594, 499);
             this.listView1.TabIndex = 20;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -414,7 +416,7 @@
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(10, 497);
+            this.label15.Location = new System.Drawing.Point(15, 523);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(68, 12);
             this.label15.TabIndex = 21;
@@ -422,16 +424,26 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(84, 491);
+            this.progressBar1.Location = new System.Drawing.Point(89, 517);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(799, 23);
             this.progressBar1.TabIndex = 22;
+            // 
+            // DynamicProbability
+            // 
+            this.DynamicProbability.AutoSize = true;
+            this.DynamicProbability.Location = new System.Drawing.Point(177, 217);
+            this.DynamicProbability.Name = "DynamicProbability";
+            this.DynamicProbability.Size = new System.Drawing.Size(120, 16);
+            this.DynamicProbability.TabIndex = 24;
+            this.DynamicProbability.Text = "Dynamic Probability";
+            this.DynamicProbability.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(975, 523);
+            this.ClientSize = new System.Drawing.Size(975, 549);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.label15);
             this.Controls.Add(this.listView1);
@@ -495,6 +507,7 @@
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.TextBox InitTimeOfAttackPacket;
+        private System.Windows.Forms.CheckBox DynamicProbability;
     }
 }
 

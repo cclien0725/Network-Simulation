@@ -80,6 +80,32 @@ namespace Heterogenerous_Simulation
             catch { }
         }
 
+        public void InsertMarkingEvent(List<MarkingEvent> markingEventList)
+        {
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    SQLiteTransaction trans = connection.BeginTransaction();
+                    SQLiteCommand cmd = connection.CreateCommand();
+
+                    foreach (MarkingEvent markingEvent in markingEventList)
+                    {
+                        cmd.CommandText = string.Format("INSERT INTO {0}_MarkingEvents(PacketID, Time, MarkingNodeID) VALUES(@PacketID, @Time, @MarkingNodeID)", prefixNameOfTable);
+                        cmd.Parameters.Add("@PacketID", System.Data.DbType.Int32).Value = markingEvent.PacketID;
+                        cmd.Parameters.Add("@Time", System.Data.DbType.Double).Value = markingEvent.Time;
+                        cmd.Parameters.Add("@MarkingNodeID", System.Data.DbType.Int32).Value = markingEvent.MarkingNodeID;
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    trans.Commit();
+                }
+            }
+            catch { }
+        }
+
         public void InsertMarkingEvent(MarkingEvent markingEvent)
         {
             try 
@@ -94,6 +120,33 @@ namespace Heterogenerous_Simulation
                     cmd.Parameters.Add("@Time", System.Data.DbType.Double).Value = markingEvent.Time;
                     cmd.Parameters.Add("@MarkingNodeID", System.Data.DbType.Int32).Value = markingEvent.MarkingNodeID;
                     cmd.ExecuteNonQuery();
+                    trans.Commit();
+                }
+            }
+            catch { }
+        }
+
+        public void InsertTunnelingEvent(List<TunnelingEvent> tunnelingEventList)
+        {
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    SQLiteTransaction trans = connection.BeginTransaction();
+                    SQLiteCommand cmd = connection.CreateCommand();
+
+                    foreach (TunnelingEvent tunnelingEvent in tunnelingEventList)
+                    {
+                        cmd.CommandText = string.Format("INSERT INTO {0}_TunnelingEvents(PacketID, Time, TunnelingSrc, TunnelingDst) VALUES(@PacketID, @Time, @TunnelingSrc, @TunnelingDst)", prefixNameOfTable);
+                        cmd.Parameters.Add("@PacketID", System.Data.DbType.Int32).Value = tunnelingEvent.PacketID;
+                        cmd.Parameters.Add("@Time", System.Data.DbType.Double).Value = tunnelingEvent.Time;
+                        cmd.Parameters.Add("@TunnelingSrc", System.Data.DbType.Int32).Value = tunnelingEvent.TunnelingSrc;
+                        cmd.Parameters.Add("@TunnelingDst", System.Data.DbType.Int32).Value = tunnelingEvent.TunnelingDst;
+                        cmd.ExecuteNonQuery();
+                    }
+
                     trans.Commit();
                 }
             }
@@ -141,6 +194,32 @@ namespace Heterogenerous_Simulation
             catch { }
         }
 
+        public void InsertFilteringEvent(List<FilteringEvent> filteringEventList)
+        {
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    SQLiteTransaction trans = connection.BeginTransaction();
+                    SQLiteCommand cmd = connection.CreateCommand();
+
+                    foreach (FilteringEvent filteringEvent in filteringEventList)
+                    {
+                        cmd.CommandText = string.Format("INSERT INTO {0}_FilteringEvents(PacketID, Time, FilteringNodeId) VALUES(@PacketID, @Time, @FilteringNodeId)", prefixNameOfTable);
+                        cmd.Parameters.Add("@PacketID", System.Data.DbType.Int32).Value = filteringEvent.PacketID;
+                        cmd.Parameters.Add("@Time", System.Data.DbType.Double).Value = filteringEvent.Time;
+                        cmd.Parameters.Add("@FilteringNodeId", System.Data.DbType.Int32).Value = filteringEvent.FilteringNodeID;
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    trans.Commit();
+                }
+            }
+            catch { }
+        }
+
         public void InsertPacketSentEvent(PacketSentEvent packetSentEvent)
         {
             try
@@ -157,6 +236,34 @@ namespace Heterogenerous_Simulation
                     cmd.Parameters.Add("@NextHopID", System.Data.DbType.Int32).Value = packetSentEvent.NextHopID;
                     cmd.Parameters.Add("@Length", System.Data.DbType.Double).Value = packetSentEvent.Length;
                     cmd.ExecuteNonQuery();
+                    trans.Commit();
+                }
+            }
+            catch { }
+        }
+
+        public void InsertPacketSentEvent(List<PacketSentEvent> packetSentEventList)
+        {
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    SQLiteTransaction trans = connection.BeginTransaction();
+                    SQLiteCommand cmd = connection.CreateCommand();
+
+                    foreach (PacketSentEvent packetSentEvent in packetSentEventList)
+                    {
+                        cmd.CommandText = string.Format("INSERT INTO {0}_PacketSentEvents(PacketID, Time, CurrentNodeID, NextHopID, Length) VALUES(@PacketID, @Time, @CurrentNodeID, @NextHopID, @Length)", prefixNameOfTable);
+                        cmd.Parameters.Add("@PacketID", System.Data.DbType.Int32).Value = packetSentEvent.PacketID;
+                        cmd.Parameters.Add("@Time", System.Data.DbType.Double).Value = packetSentEvent.Time;
+                        cmd.Parameters.Add("@CurrentNodeID", System.Data.DbType.Int32).Value = packetSentEvent.CurrentNodeID;
+                        cmd.Parameters.Add("@NextHopID", System.Data.DbType.Int32).Value = packetSentEvent.NextHopID;
+                        cmd.Parameters.Add("@Length", System.Data.DbType.Double).Value = packetSentEvent.Length;
+                        cmd.ExecuteNonQuery();
+                    }
+
                     trans.Commit();
                 }
             }
@@ -184,6 +291,33 @@ namespace Heterogenerous_Simulation
             catch { }
         }
 
+        public void InsertPacketEvent(List<PacketEvent> packetEventList)
+        {
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    SQLiteTransaction trans = connection.BeginTransaction();
+                    SQLiteCommand cmd = connection.CreateCommand();
+
+                    foreach (PacketEvent packetEvent in packetEventList)
+                    {
+                        cmd.CommandText = string.Format("INSERT INTO {0}_PacketEvent(PacketID, Source, Destination, Type) VALUES(@PacketID, @Source, @Destination, @Type)", prefixNameOfTable);
+                        cmd.Parameters.Add("@PacketID", System.Data.DbType.Int32).Value = packetEvent.PacketID;
+                        cmd.Parameters.Add("@Source", System.Data.DbType.Int32).Value = packetEvent.Source;
+                        cmd.Parameters.Add("@Destination", System.Data.DbType.Int32).Value = packetEvent.Destination;
+                        cmd.Parameters.Add("@Type", System.Data.DbType.Boolean).Value = packetEvent.Type == Network_Simulation.NetworkTopology.NodeType.Attacker ? true : false;
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    trans.Commit();
+                }
+            }
+            catch { }
+        }
+
         public void LogDeploymentResult(NetworkTopology networkTopology)
         {
             try
@@ -194,7 +328,6 @@ namespace Heterogenerous_Simulation
 
                     SQLiteTransaction trans = connection.BeginTransaction();
                     SQLiteCommand cmd = connection.CreateCommand();
-                    cmd = connection.CreateCommand();
                     cmd.CommandText = string.Format("INSERT INTO {0}_Deployment(NodeID, TracerType, NodeType) VALUES(@NodeID, @TracerType, @NodeType)", prefixNameOfTable);
 
                     foreach (Network_Simulation.NetworkTopology.Node node in networkTopology.Nodes)

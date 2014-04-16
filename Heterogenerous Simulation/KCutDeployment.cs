@@ -111,18 +111,6 @@ namespace Heterogenerous_Simulation
             deployment.FilteringTracerID = new List<int>();
             deployment.MarkingTracerID = new List<int>();
 
-            //for (i = 0; i < numberOfFTracer; i++)
-            //{
-            //    networkTopology.Nodes.Find(n => n.ID == centerNode[i]).Tracer = NetworkTopology.TracerType.Filtering;
-            //    deployment.FilteringTracerID.Add(centerNode[i]);
-            //}
-
-            //for (; i < numberOfMTracer + numberOfFTracer; i++)
-            //{
-            //    networkTopology.Nodes.Find(n => n.ID == centerNode[i]).Tracer = NetworkTopology.TracerType.Marking;
-            //    deployment.MarkingTracerID.Add(centerNode[i]);
-            //}
-
             for (; i < centerNode.Count; i++)
             {
                 if (i < numberOfFTracer)
@@ -143,8 +131,11 @@ namespace Heterogenerous_Simulation
 
             for (; i < numberOfFTracer; i++, j++)
             {
-                deployment.AllRoundScopeList[j % deployment.AllRoundScopeList.Count].Nodes.Where(n => !centerNode.Contains(n.ID)).First().Tracer = NetworkTopology.TracerType.Filtering;
-                deployment.FilteringTracerID.Add(deployment.AllRoundScopeList[j % deployment.AllRoundScopeList.Count].Nodes.Where(n => !centerNode.Contains(n.ID)).First().ID);
+                if (deployment.AllRoundScopeList[j % deployment.AllRoundScopeList.Count].Nodes.Where(n => !centerNode.Contains(n.ID) && n.Tracer == NetworkTopology.TracerType.None).Count() > 0)
+                {
+                    deployment.AllRoundScopeList[j % deployment.AllRoundScopeList.Count].Nodes.Where(n => !centerNode.Contains(n.ID) && n.Tracer == NetworkTopology.TracerType.None).First().Tracer = NetworkTopology.TracerType.Filtering;
+                    deployment.FilteringTracerID.Add(deployment.AllRoundScopeList[j % deployment.AllRoundScopeList.Count].Nodes.Where(n => !centerNode.Contains(n.ID)).First().ID);
+                }
             }
 
             for (; i < numberOfFTracer + numberOfMTracer; i++, j++)
@@ -154,6 +145,7 @@ namespace Heterogenerous_Simulation
                     deployment.AllRoundScopeList[j % deployment.AllRoundScopeList.Count].Nodes.Where(n => !centerNode.Contains(n.ID) && n.Tracer == NetworkTopology.TracerType.None).First().Tracer = NetworkTopology.TracerType.Marking;
                     deployment.MarkingTracerID.Add(deployment.AllRoundScopeList[j % deployment.AllRoundScopeList.Count].Nodes.Where(n => !centerNode.Contains(n.ID)).First().ID);
                 }
+                else i--;
             }
 
             foreach (int id in deployment.DeployNodes)

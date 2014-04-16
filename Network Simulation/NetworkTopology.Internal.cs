@@ -20,6 +20,8 @@ namespace Network_Simulation
             public TracerType Tracer { get; set; }
             public int Eccentricity { get; set; }
             public int Degree { get; set; }
+            public double ProbabilityOfTunneling { get; set; }
+            public double FilteringCount { get; set; }
 
             public Node()
             {
