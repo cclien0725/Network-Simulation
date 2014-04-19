@@ -51,14 +51,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="KCutWithClusteringCompareCenterAndMinDegreeDeployment.cs" />
+    <Compile Include="KCutStartWithCenterNode.cs" />
+    <Compile Include="KCutStartWithCenterNodeConsiderCoefficient.cs" />
+    <Compile Include="KCutStartWithSideNode.cs" />
+    <Compile Include="KCutStartWithSideNodeConsiderCoefficient.cs" />
+    <Compile Include="KCutStartWithComparableConsiderCoefficient.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="KCutWithClusteringDeployment.cs" />
+    <Compile Include="KCutStartWithConsider2KConsiderCoefficient.cs" />
     <Compile Include="NetworkViewForm.cs">
       <SubType>Form</SubType>
     </Compile>

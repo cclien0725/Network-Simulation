@@ -19,6 +19,8 @@ namespace Deployment_Simulation
         private NetworkTopology m_topo;
         private BackgroundWorker m_simulation_worker;
         private BackgroundWorker m_data_worker;
+        private List<Type> m_deploy_types;
+        private string m_now_deployment_method;
 
         public MainForm()
         {
@@ -35,6 +37,20 @@ namespace Deployment_Simulation
             m_data_worker = new BackgroundWorker();
             m_data_worker.WorkerSupportsCancellation = true;
             m_data_worker.WorkerReportsProgress = true;
+
+            m_deploy_types = new List<Type>();
+            m_deploy_types.Add(typeof(KCutStartWithCenterNode));
+            m_deploy_types.Add(typeof(KCutStartWithCenterNodeConsiderCoefficient));
+            m_deploy_types.Add(typeof(KCutStartWithComparableConsiderCoefficient));
+            m_deploy_types.Add(typeof(KCutStartWithConsider2KConsiderCoefficient));
+            m_deploy_types.Add(typeof(KCutStartWithSideNode));
+            m_deploy_types.Add(typeof(KCutStartWithSideNodeConsiderCoefficient));
+
+            foreach (var t in m_deploy_types)
+                cb_deployment.Items.Add(t.Name);
+
+            cb_deployment.SelectedItem = typeof(KCutStartWithConsider2KConsiderCoefficient).Name;
+            m_now_deployment_method = typeof(KCutStartWithConsider2KConsiderCoefficient).Name;
 
             eventRegist();
         }
@@ -66,7 +82,7 @@ namespace Deployment_Simulation
                                                 new object[] { false, string.Format("Starting Deployment with K: {0}, N: {1}...", K, N), true, files[i], K, N });
 
                         // Using kcutwithclustering depolyment method.
-                        deployment = new KCutWithClusteringCompareCenterAndMinDegreeDeployment(30, 20, 10, K, N);
+                        deployment = Activator.CreateInstance(m_deploy_types.Where(t => t.Name == m_now_deployment_method).First(), new object[] { 30, 20, 10, K, N }) as Deployment;// new KCutStartWithConsider2KConsiderWithCoefficient(30, 20, 10, K, N);
                         deployment.Deploy(m_topo);
 
                         m_simulation_worker.ReportProgress(100,
@@ -94,7 +110,7 @@ namespace Deployment_Simulation
                                 else
                                     last_deploy_count = new List<int>();
 
-                                deployment = new KCutWithClusteringCompareCenterAndMinDegreeDeployment(30, 20, 10, K, ++N);
+                                deployment = Activator.CreateInstance(m_deploy_types.Where(t => t.Name == m_now_deployment_method).First(), new object[] { 30, 20, 10, K, ++N }) as Deployment; //new KCutStartWithConsider2KConsiderWithCoefficient(30, 20, 10, K, ++N);
 
                                 m_simulation_worker.ReportProgress((int)((double)K / (double)m_topo.Diameter * 100),
                                                     new object[] { false, string.Format("Starting Deployment with K: {0}, N: {1}...", K, N), true, files[i], K, N });
@@ -157,6 +173,7 @@ namespace Deployment_Simulation
             {
                 btn_run.Enabled = true;
                 groupBox2.Enabled = true;
+                cb_deployment.Enabled = true;
 
                 if (rdoBtn_specific.Checked)
                 {
@@ -178,13 +195,13 @@ namespace Deployment_Simulation
                 {
                     bool isQuery = (bool)data[0];
                     string sqlCmd;
-                    KCutWithClusteringDeployment.DeploySQLiteUtility utilit = new Deployment.DeploySQLiteUtility("deploy_simulation");
+                    Deployment deployment = Activator.CreateInstance(m_deploy_types.Where(t => t.Name == m_now_deployment_method).First(), new object[] { 30, 20, 10, 1, 1 }) as Deployment;// new Deployment.DeploySQLiteUtility("deploy_simulation");
 
                     if (isQuery)
                     {
                         sqlCmd = (string)data[1];
 
-                        DataView dv = utilit.GetResult(sqlCmd, null);
+                        DataView dv = deployment.sqlite_utility.GetResult(sqlCmd, null);
 
                         e.Result = new object[] { true, dv };
                     }
@@ -193,7 +210,7 @@ namespace Deployment_Simulation
                         string filePath = (string)data[1];
                         sqlCmd = "SELECT k,n,deploy_type,file_name,node_counts,level,edge_counts,diameter,job_id,deploy_name,node_id FROM (SELECT * FROM NetworkTopology AS N JOIN DeploySimulation AS D on N.n_id=D.n_id JOIN LevelRecord AS L on D.job_id=L.job_id ) AS Data";
 
-                        DataView dv = utilit.GetResult(sqlCmd, null);
+                        DataView dv = deployment.sqlite_utility.GetResult(sqlCmd, null);
 
                         if (dv != null && dv.Count > 0)
                         {
@@ -276,9 +293,11 @@ namespace Deployment_Simulation
 
             btn_run.Click += (s, e) =>
             {
+                m_now_deployment_method = cb_deployment.SelectedItem.ToString();
                 m_simulation_worker.RunWorkerAsync();
                 btn_run.Enabled = false;
                 groupBox2.Enabled = false;
+                cb_deployment.Enabled = false;
 
                 if (rdoBtn_specific.Checked)
                 {
@@ -291,6 +310,7 @@ namespace Deployment_Simulation
 
             btn_query.Click += (s, e) =>
             {
+                m_now_deployment_method = cb_deployment.SelectedItem.ToString();
                 btn_query.Enabled = false;
                 Cursor = Cursors.WaitCursor;
                 m_data_worker.RunWorkerAsync(new object[] { true, tb_sql_cmd.Text });
@@ -298,6 +318,7 @@ namespace Deployment_Simulation
 
             btn_export.Click += (s, e) =>
             {
+                m_now_deployment_method = cb_deployment.SelectedItem.ToString();
                 SaveFileDialog sfd = new SaveFileDialog();
 
                 sfd.InitialDirectory = Environment.CurrentDirectory;

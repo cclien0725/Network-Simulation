@@ -9,8 +9,8 @@ namespace Heterogenerous_Simulation
 {
     public class KCutDeployment
     {
-        private KCutWithClusteringDeployment deployment;
-        public KCutWithClusteringDeployment Deployment
+        private KCutStartWithConsider2KConsiderCoefficient deployment;
+        public KCutStartWithConsider2KConsiderCoefficient Deployment
         {
             get
             {
@@ -55,7 +55,7 @@ namespace Heterogenerous_Simulation
                     else
                         last_deploy_count = new List<int>();
 
-                    deployment = new KCutWithClusteringDeployment(percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer, K, ++N);
+                    deployment = new KCutStartWithConsider2KConsiderCoefficient(percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer, K, ++N);
                     deployment.Deploy(networkTopology);
 
                     if (deployment.DeployNodes.Count <= numberOfTTracer)

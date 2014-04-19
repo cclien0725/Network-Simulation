@@ -49,7 +49,7 @@ namespace Network_Simulation
             this.percentageOfMarkingTracer = percentageOfMarkingTracer;
             this.percentageOfFilteringTracer = percentageOfFilteringTracer;
 
-            sqlite_utility = new DeploySQLiteUtility("deploy_simulation");
+            sqlite_utility = new DeploySQLiteUtility(GetType().Name);
             sqlite_utility.CreateTable();
 
             allRoundScopeList = new List<NetworkTopology>();
@@ -105,6 +105,12 @@ namespace Network_Simulation
                 {"DeploySimulation", "job_id INTEGER PRIMARY KEY, n_id INTEGER, k INTEGER, n INTEGER, deploy_name TEXT, FOREIGN KEY(n_id) REFERENCES NetworkTopology(n_id)"},
                 {"LevelRecord", "l_id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER, level INTEGER, node_id INTEGER, deploy_type TEXT, FOREIGN KEY(job_id) REFERENCES DeploySimulation(job_id)"},
             };
+            private Dictionary<string, string> indexDic = new Dictionary<string, string>()
+            {
+                {"NetworkTopology_Index", "NetworkTopology(n_id, file_name)"},
+                {"DeoploySimulation_Index", "DeploySimulation(n_id, job_id, k, n, deploy_name)"},
+                {"LevelRecord_Index", "LevelRecord(job_id)"}
+            };
 
             private string baseDirectory = Path.Combine(Environment.CurrentDirectory, "Deploy");
             private string connectionString = @"Data Source=";
@@ -152,6 +158,12 @@ namespace Network_Simulation
                         foreach (var kvp in tableDic)
                         {
                             cmd.CommandText = string.Format("CREATE TABLE IF NOT EXISTS {0}({1})", kvp.Key, kvp.Value);
+                            cmd.ExecuteNonQuery();
+                        }
+
+                        foreach (var kvp in indexDic)
+                        {
+                            cmd.CommandText = string.Format("CREATE INDEX IF NOT EXISTS {0} on {1}", kvp.Key, kvp.Value);
                             cmd.ExecuteNonQuery();
                         }
                     }

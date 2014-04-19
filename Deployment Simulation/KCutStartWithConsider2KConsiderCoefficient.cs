@@ -8,7 +8,7 @@ using System.Data;
 
 namespace Deployment_Simulation
 {
-    public class KCutWithClusteringDeployment : Deployment
+    public class KCutStartWithConsider2KConsiderCoefficient : Deployment
     {
         private int K;
         private int N;
@@ -17,7 +17,7 @@ namespace Deployment_Simulation
         private bool isNeedRecompute;
         private List<List<int>> allLevelDeploy;
 
-        public KCutWithClusteringDeployment(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer, int KCutValue, int numberOfInsideScopeNode)
+        public KCutStartWithConsider2KConsiderCoefficient(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer, int KCutValue, int numberOfInsideScopeNode)
             : base(percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer)
         {
             K = KCutValue;
@@ -105,19 +105,22 @@ namespace Deployment_Simulation
 
                     itemCount++;
                 }
-                foreach (int id in allLevelDeploy[level])
+                if (level < allLevelDeploy.Count)
                 {
-                    if (itemCount % 499 == 0)
+                    foreach (int id in allLevelDeploy[level])
                     {
-                        sqlite_utility.RunCommnad(sb.ToString().Remove(sb.ToString().Length - 6, 6));
-                        sb.Clear();
-                        sb.Append("INSERT INTO LevelRecord(job_id, level, node_id, deploy_type)");
-                        sb.AppendFormat(" SELECT {0},{1},{2},'{3}' UNION", jobID, level + 1, id, "Deploy");
-                    }
-                    else
-                        sb.AppendFormat(" SELECT {0},{1},{2},'{3}' UNION", jobID, level + 1, id, "Deploy");
+                        if (itemCount % 499 == 0)
+                        {
+                            sqlite_utility.RunCommnad(sb.ToString().Remove(sb.ToString().Length - 6, 6));
+                            sb.Clear();
+                            sb.Append("INSERT INTO LevelRecord(job_id, level, node_id, deploy_type)");
+                            sb.AppendFormat(" SELECT {0},{1},{2},'{3}' UNION", jobID, level + 1, id, "Deploy");
+                        }
+                        else
+                            sb.AppendFormat(" SELECT {0},{1},{2},'{3}' UNION", jobID, level + 1, id, "Deploy");
 
-                    itemCount++;
+                        itemCount++;
+                    }
                 }
             }
 
@@ -306,18 +309,19 @@ namespace Deployment_Simulation
                             {
                                 if (scope != null)
                                 {
-                                    for (int e1 = 0; e1 < scope.Nodes.Count; e1++)
-                                    {
-                                        for (int e2 = 0; e2 < scope.Nodes.Count; e2++)
-                                            scope.Edges.AddRange(topo.Edges.Where(e => e.Node1 == scope.Nodes[e1].ID && e.Node2 == scope.Nodes[e2].ID ||
-                                                                                        e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
-                                    }
-                                    scope.Edges = scope.Edges.Distinct().ToList();
+                                    //for (int e1 = 0; e1 < scope.Nodes.Count; e1++)
+                                    //{
+                                    //    for (int e2 = 0; e2 < scope.Nodes.Count; e2++)
+                                    //        scope.Edges.AddRange(topo.Edges.Where(e => e.Node1 == scope.Nodes[e1].ID && e.Node2 == scope.Nodes[e2].ID ||
+                                    //                                                    e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
+                                    //}
+                                    //scope.Edges = scope.Edges.Distinct().ToList();
                                     //scope.ComputingShortestPath();
 
                                     allRoundScopeList.Add(scope);
                                 }
                                 scope = new NetworkTopology(topo.Nodes);
+                                scope.Edges = new List<NetworkTopology.Edge>(topo.Edges);
                                 scope.AdjacentMatrix = topo.AdjacentMatrix;
 
                                 scope.Nodes.Add(topo.Nodes.Where(n => n.ID == Convert.ToInt32(dv[i]["node_id"])).First());
@@ -337,13 +341,13 @@ namespace Deployment_Simulation
 
                 if (scope != null)
                 {
-                    for (int e1 = 0; e1 < scope.Nodes.Count; e1++)
-                    {
-                        for (int e2 = 0; e2 < scope.Nodes.Count; e2++)
-                            scope.Edges.AddRange(topo.Edges.Where(e => e.Node1 == scope.Nodes[e1].ID && e.Node2 == scope.Nodes[e2].ID ||
-                                                                        e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
-                    }
-                    scope.Edges = scope.Edges.Distinct().ToList();
+                    //for (int e1 = 0; e1 < scope.Nodes.Count; e1++)
+                    //{
+                    //    for (int e2 = 0; e2 < scope.Nodes.Count; e2++)
+                    //        scope.Edges.AddRange(topo.Edges.Where(e => e.Node1 == scope.Nodes[e1].ID && e.Node2 == scope.Nodes[e2].ID ||
+                    //                                                    e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
+                    //}
+                    //scope.Edges = scope.Edges.Distinct().ToList();
                     //scope.ComputingShortestPath();
 
                     allRoundScopeList.Add(scope);

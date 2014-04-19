@@ -55,6 +55,8 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tb_select_file = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.cb_deployment = new System.Windows.Forms.ComboBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -135,6 +137,8 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
+            this.groupBox1.Controls.Add(this.label4);
+            this.groupBox1.Controls.Add(this.cb_deployment);
             this.groupBox1.Controls.Add(this.lb_main_progress);
             this.groupBox1.Controls.Add(this.lb_sub_progress);
             this.groupBox1.Controls.Add(this.progress_sub);
@@ -277,7 +281,7 @@
             this.btn_run.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_run.Enabled = false;
-            this.btn_run.Location = new System.Drawing.Point(7, 128);
+            this.btn_run.Location = new System.Drawing.Point(7, 159);
             this.btn_run.Name = "btn_run";
             this.btn_run.Size = new System.Drawing.Size(317, 30);
             this.btn_run.TabIndex = 7;
@@ -297,11 +301,11 @@
             this.lv_list.FullRowSelect = true;
             this.lv_list.GridLines = true;
             this.lv_list.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.lv_list.Location = new System.Drawing.Point(7, 164);
+            this.lv_list.Location = new System.Drawing.Point(7, 195);
             this.lv_list.MultiSelect = false;
             this.lv_list.Name = "lv_list";
             this.lv_list.ShowItemToolTips = true;
-            this.lv_list.Size = new System.Drawing.Size(317, 391);
+            this.lv_list.Size = new System.Drawing.Size(317, 360);
             this.lv_list.TabIndex = 2;
             this.lv_list.UseCompatibleStateImageBehavior = false;
             this.lv_list.View = System.Windows.Forms.View.Details;
@@ -345,6 +349,27 @@
             this.label1.Size = new System.Drawing.Size(51, 17);
             this.label1.TabIndex = 0;
             this.label1.Text = "Files(s):";
+            // 
+            // cb_deployment
+            // 
+            this.cb_deployment.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cb_deployment.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cb_deployment.FormattingEnabled = true;
+            this.cb_deployment.Location = new System.Drawing.Point(101, 128);
+            this.cb_deployment.Name = "cb_deployment";
+            this.cb_deployment.Size = new System.Drawing.Size(221, 25);
+            this.cb_deployment.TabIndex = 15;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(8, 131);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(86, 17);
+            this.label4.TabIndex = 16;
+            this.label4.Text = "Deployment:";
             // 
             // MainForm
             // 
@@ -396,6 +421,8 @@
         private System.Windows.Forms.Label lb_sub_progress;
         private System.Windows.Forms.ProgressBar progress_sub;
         private System.Windows.Forms.Button btn_export;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox cb_deployment;
     }
 }
 

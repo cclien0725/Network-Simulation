@@ -37,7 +37,7 @@ namespace Deployment_Simulation
                 int K = int.Parse(tb_k.Text);
                 int N = int.Parse(tb_n.Text);
 
-                KCutWithClusteringDeployment deployment = new KCutWithClusteringDeployment(10, 10, 10, K, N);
+                KCutStartWithConsider2KConsiderCoefficient deployment = new KCutStartWithConsider2KConsiderCoefficient(10, 10, 10, K, N);
                 deployment.Deploy(m_topo);
 
                 draw_panel.Invalidate();

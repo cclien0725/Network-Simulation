@@ -8,15 +8,16 @@ using System.Data;
 
 namespace Deployment_Simulation
 {
-    public class KCutWithClusteringCompareCenterAndMinDegreeDeployment : Deployment
+    public class KCutStartWithSideNode : Deployment
     {
         private int K;
         private int N;
         private int lastDeployCount;
+        private int allLevelScopeCount;
         private bool isNeedRecompute;
         private List<List<int>> allLevelDeploy;
 
-        public KCutWithClusteringCompareCenterAndMinDegreeDeployment(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer, int KCutValue, int numberOfInsideScopeNode)
+        public KCutStartWithSideNode(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer, int KCutValue, int numberOfInsideScopeNode)
             : base(percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer)
         {
             K = KCutValue;
@@ -30,83 +31,44 @@ namespace Deployment_Simulation
             else
             {
                 NetworkTopology process_topo = networkTopology;
-                NetworkTopology center_tmp_topo = null;
-                NetworkTopology side_tmp_topo = null;
-                int centerNode;
-                int sideNode;
-                int eccentricity;
-                int minDegree;
+                int centerID;
 
                 isNeedRecompute = false;
                 lastDeployCount = 0;
+                allLevelScopeCount = 0;
 
                 allLevelDeploy = new List<List<int>>();
 
-                while (process_topo.Nodes.Count > 0)
+                // Finding the center node to run all level's process.
+                //while (tmp_src_net_topo.FindCenterNodeID(out centerID, isNeedRecompute))
+                while (selectStartNode(process_topo, out centerID, isNeedRecompute))
                 {
-                    centerNode = -1;
-                    sideNode = -1;
-                    minDegree = int.MaxValue;
+                    NetworkTopology scope_net_topo = new NetworkTopology(networkTopology.Nodes);
+                    scope_net_topo.AdjacentMatrix = networkTopology.AdjacentMatrix;
 
-                    process_topo.FindCenterNodeID(out centerNode, out eccentricity, isNeedRecompute);
+                    List<int> now_level_depoly_id = new List<int>();
 
-                    foreach (var n in process_topo.Nodes)
-                    {
-                        if (minDegree > n.Degree)
-                        {
-                            minDegree = n.Degree;
-                            sideNode = n.ID;
-                        }
-                    }
+                    // Adding the center node to scope network topology.
+                    scope_net_topo.Nodes.Add(process_topo.Nodes.Find(n => n.ID == centerID));
 
-                    NetworkTopology center_scope_net_topo = new NetworkTopology(networkTopology.Nodes);
-                    NetworkTopology side_scope_net_topo = new NetworkTopology(networkTopology.Nodes);
+                    // Starting run algorithm with this level.
+                    process_topo = startAlgorithm(process_topo, scope_net_topo, now_level_depoly_id);
 
-                    List<int> center_deploy = new List<int>();
-                    List<int> side_deploy = new List<int>();
-
-                    center_scope_net_topo.AdjacentMatrix = networkTopology.AdjacentMatrix;
-                    side_scope_net_topo.AdjacentMatrix = networkTopology.AdjacentMatrix;
-
-                    if (centerNode != -1)
-                    {
-                        center_scope_net_topo.Nodes.Add(process_topo.Nodes.Find(n => n.ID == centerNode));
-                        center_tmp_topo = startAlgorithm(process_topo, center_scope_net_topo, center_deploy);
-                    }
-
-                    if (sideNode != -1)
-                    {
-                        side_scope_net_topo.Nodes.Add(process_topo.Nodes.Find(n => n.ID == sideNode));
-                        side_tmp_topo = startAlgorithm(process_topo, side_scope_net_topo, side_deploy);
-                    }
-
-                    if (center_deploy.Count < side_deploy.Count)
-                    {
-                        process_topo = center_tmp_topo;
-                        allRoundScopeList.Add(center_scope_net_topo);
-                        deployNodes.AddRange(center_deploy);
-                        allLevelDeploy.Add(center_deploy);
-
-                        DataUtility.Log(string.Format("================= Level {0} ==================\n", allRoundScopeList.Count));
-                        DataUtility.Log(string.Format("Start From Center Node:\t{0}\n", center_scope_net_topo.Nodes[0].ID));
-                        DataUtility.Log(string.Format("Scope Node Count:\t{0}\n", center_scope_net_topo.Nodes.Count));
-                        DataUtility.Log(string.Format("Deploy Count/Node Count:\t{0}/{1} = {2:0.0000}\n", deployNodes.Count, networkTopology.Nodes.Count, (float)deployNodes.Count / (float)networkTopology.Nodes.Count));
-                    }
-                    else
-                    {
-                        process_topo = side_tmp_topo;
-                        allRoundScopeList.Add(side_scope_net_topo);
-                        deployNodes.AddRange(side_deploy);
-                        allLevelDeploy.Add(side_deploy);
-
-                        DataUtility.Log(string.Format("================= Level {0} ==================\n", allRoundScopeList.Count));
-                        DataUtility.Log(string.Format("Start From Side Node:\t{0}\n", side_scope_net_topo.Nodes[0].ID));
-                        DataUtility.Log(string.Format("Scope Node Count:\t{0}\n", side_scope_net_topo.Nodes.Count));
-                        DataUtility.Log(string.Format("Deploy Count/Node Count:\t{0}/{1} = {2:0.0000}\n", deployNodes.Count, networkTopology.Nodes.Count, (float)deployNodes.Count / (float)networkTopology.Nodes.Count));
-                    }
+                    // Adding this round generated scope network topology to list.
+                    allRoundScopeList.Add(scope_net_topo);
+                    deployNodes.AddRange(now_level_depoly_id);
+                    allLevelDeploy.Add(now_level_depoly_id);
 
                     isNeedRecompute = deployNodes.Count != lastDeployCount;
                     lastDeployCount = deployNodes.Count;
+
+                    allLevelScopeCount += scope_net_topo.Nodes.Count;
+
+                    DataUtility.Log(string.Format("================= Level {0} ==================\n", allRoundScopeList.Count));
+                    DataUtility.Log(string.Format("Center Node:\t{0}\n", centerID));
+                    DataUtility.Log(string.Format("Scope Node Count:\t{0}\n", scope_net_topo.Nodes.Count));
+                    DataUtility.Log(string.Format("All Scope Node Count/Run Level:\t{0}/{1} = {2:0.0000}\n", allLevelScopeCount, allRoundScopeList.Count, (float)allLevelScopeCount / (float)allRoundScopeList.Count));
+                    DataUtility.Log(string.Format("Deploy Count/Node Count:\t{0}/{1} = {2:0.0000}\n", deployNodes.Count, networkTopology.Nodes.Count, (float)deployNodes.Count / (float)networkTopology.Nodes.Count));
                 }
 
                 if (process_topo.Nodes.Count != 0)
@@ -143,19 +105,22 @@ namespace Deployment_Simulation
 
                     itemCount++;
                 }
-                foreach (int id in allLevelDeploy[level])
+                if (level < allLevelDeploy.Count)
                 {
-                    if (itemCount % 499 == 0)
+                    foreach (int id in allLevelDeploy[level])
                     {
-                        sqlite_utility.RunCommnad(sb.ToString().Remove(sb.ToString().Length - 6, 6));
-                        sb.Clear();
-                        sb.Append("INSERT INTO LevelRecord(job_id, level, node_id, deploy_type)");
-                        sb.AppendFormat(" SELECT {0},{1},{2},'{3}' UNION", jobID, level + 1, id, "Deploy");
-                    }
-                    else
-                        sb.AppendFormat(" SELECT {0},{1},{2},'{3}' UNION", jobID, level + 1, id, "Deploy");
+                        if (itemCount % 499 == 0)
+                        {
+                            sqlite_utility.RunCommnad(sb.ToString().Remove(sb.ToString().Length - 6, 6));
+                            sb.Clear();
+                            sb.Append("INSERT INTO LevelRecord(job_id, level, node_id, deploy_type)");
+                            sb.AppendFormat(" SELECT {0},{1},{2},'{3}' UNION", jobID, level + 1, id, "Deploy");
+                        }
+                        else
+                            sb.AppendFormat(" SELECT {0},{1},{2},'{3}' UNION", jobID, level + 1, id, "Deploy");
 
-                    itemCount++;
+                        itemCount++;
+                    }
                 }
             }
 
@@ -186,20 +151,20 @@ namespace Deployment_Simulation
                     neighbor.AddRange(src_net_topo.GetNeighborNodeIDs(scopeNode.ID).Except(scope_net_topo.Nodes.Select(x => x.ID)));
                 neighbor = neighbor.Distinct().ToList();
 
-                double maxC = double.MinValue;
+                int minD = int.MaxValue;
 
                 foreach (int id in neighbor)
                 {
-                    double tmpc = src_net_topo.ClusteringCoefficeint(id);
+                    int tmpD = src_net_topo.Nodes.Where(n => n.ID == id).Select(n => n.Degree).First();
 
-                    if (maxC < tmpc)
+                    if (minD > tmpD)
                     {
-                        maxC = tmpc;
+                        minD = tmpD;
                         selectNode = id;
                     }
                 }
 
-                if (scope_net_topo.Nodes.Count >= N - 1 && scope_net_topo.Nodes.Count <= N && maxC < 0.6)
+                if (scope_net_topo.Nodes.Count > N)
                     selectNode = -1;
 
                 // if nothing found, break the loop.
@@ -264,6 +229,25 @@ namespace Deployment_Simulation
             return remain_topo;
         }
 
+        private bool selectStartNode(NetworkTopology topo, out int selectNode, bool isNeedRecompute)
+        {
+            int minDegree = int.MaxValue;
+            bool isSelected = false;
+            selectNode = -1;
+
+            foreach (var n in topo.Nodes)
+            {
+                if (minDegree > n.Degree)
+                {
+                    minDegree = n.Degree;
+                    selectNode = n.ID;
+                    isSelected = true;
+                }
+            }
+
+            return isSelected;
+        }
+
         private bool checkHaveRunned(NetworkTopology topo)
         {
             string cmd = "SELECT node_id,level,deploy_type FROM NetworkTopology AS N JOIN DeploySimulation AS D on D.n_id=N.n_id JOIN LevelRecord AS L on D.job_id=L.job_id WHERE N.file_name LIKE @file_name AND D.k = @k AND D.n = @n AND D.deploy_name LIKE @deploy_name ORDER BY L.level,L.node_id";
@@ -294,18 +278,19 @@ namespace Deployment_Simulation
                             {
                                 if (scope != null)
                                 {
-                                    for (int e1 = 0; e1 < scope.Nodes.Count; e1++)
-                                    {
-                                        for (int e2 = 0; e2 < scope.Nodes.Count; e2++)
-                                            scope.Edges.AddRange(topo.Edges.Where(e => e.Node1 == scope.Nodes[e1].ID && e.Node2 == scope.Nodes[e2].ID ||
-                                                                                        e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
-                                    }
-                                    scope.Edges = scope.Edges.Distinct().ToList();
+                                    //for (int e1 = 0; e1 < scope.Nodes.Count; e1++)
+                                    //{
+                                    //    for (int e2 = 0; e2 < scope.Nodes.Count; e2++)
+                                    //        scope.Edges.AddRange(topo.Edges.Where(e => e.Node1 == scope.Nodes[e1].ID && e.Node2 == scope.Nodes[e2].ID ||
+                                    //                                                    e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
+                                    //}
+                                    //scope.Edges = scope.Edges.Distinct().ToList();
                                     //scope.ComputingShortestPath();
 
                                     allRoundScopeList.Add(scope);
                                 }
                                 scope = new NetworkTopology(topo.Nodes);
+                                scope.Edges = new List<NetworkTopology.Edge>(topo.Edges);
                                 scope.AdjacentMatrix = topo.AdjacentMatrix;
 
                                 scope.Nodes.Add(topo.Nodes.Where(n => n.ID == Convert.ToInt32(dv[i]["node_id"])).First());
@@ -325,13 +310,13 @@ namespace Deployment_Simulation
 
                 if (scope != null)
                 {
-                    for (int e1 = 0; e1 < scope.Nodes.Count; e1++)
-                    {
-                        for (int e2 = 0; e2 < scope.Nodes.Count; e2++)
-                            scope.Edges.AddRange(topo.Edges.Where(e => e.Node1 == scope.Nodes[e1].ID && e.Node2 == scope.Nodes[e2].ID ||
-                                                                        e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
-                    }
-                    scope.Edges = scope.Edges.Distinct().ToList();
+                    //for (int e1 = 0; e1 < scope.Nodes.Count; e1++)
+                    //{
+                    //    for (int e2 = 0; e2 < scope.Nodes.Count; e2++)
+                    //        scope.Edges.AddRange(topo.Edges.Where(e => e.Node1 == scope.Nodes[e1].ID && e.Node2 == scope.Nodes[e2].ID ||
+                    //                                                    e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
+                    //}
+                    //scope.Edges = scope.Edges.Distinct().ToList();
                     //scope.ComputingShortestPath();
 
                     allRoundScopeList.Add(scope);
@@ -342,3 +327,4 @@ namespace Deployment_Simulation
         }
     }
 }
+
