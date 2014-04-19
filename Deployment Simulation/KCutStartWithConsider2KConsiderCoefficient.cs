@@ -10,8 +10,6 @@ namespace Deployment_Simulation
 {
     public class KCutStartWithConsider2KConsiderCoefficient : Deployment
     {
-        private int K;
-        private int N;
         private int lastDeployCount;
         private int allLevelScopeCount;
         private bool isNeedRecompute;
@@ -27,7 +25,10 @@ namespace Deployment_Simulation
         protected override void doDeploy(NetworkTopology networkTopology)
         {
             if (checkHaveRunned(networkTopology))
+            {
                 isNeedWriteing2SQLite = false;
+                isNeedReset = false;
+            }
             else
             {
                 NetworkTopology process_topo = networkTopology;
@@ -77,7 +78,7 @@ namespace Deployment_Simulation
 
             // Modifying actual tracer type on network topology depend on computed deployment node.
             foreach (int id in deployNodes)
-                networkTopology.Nodes.Find(n => n.ID == id).Tracer = NetworkTopology.TracerType.Marking;
+                networkTopology.Nodes.Find(n => n.ID == id).Tracer = NetworkTopology.TracerType.Tunneling;
         }
 
         protected override void write2SQLite(NetworkTopology networkTopology)

@@ -18,6 +18,7 @@ namespace Network_Simulation
         public DeploySQLiteUtility sqlite_utility;
         protected long jobID;
         protected bool isNeedWriteing2SQLite;
+        protected bool isNeedReset;
 
         public int numberOfTTracer;
         public int numberOfMTracer;
@@ -43,6 +44,9 @@ namespace Network_Simulation
         public List<int> MarkingTracerID;
         public List<int> FilteringTracerID;
 
+        public int K;
+        public int N;
+
         public Deployment(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer)
         {
             this.percentageOfTunnelingTracer = percentageOfTunnelingTracer;
@@ -65,7 +69,8 @@ namespace Network_Simulation
             if (isNeedWriteing2SQLite)
                 write2SQLite(networkTopology);
 
-            networkTopology.Reset();
+            if (isNeedReset)
+                networkTopology.Reset();
         }
 
         private void initialize(NetworkTopology networkTopology)
@@ -83,6 +88,7 @@ namespace Network_Simulation
 
             jobID = DateTime.Now.Subtract(new DateTime(1970, 1, 1)).Ticks;
             isNeedWriteing2SQLite = true;
+            isNeedReset = true;
 
             allRoundScopeList.Clear();
             deployNodes.Clear();
@@ -92,6 +98,11 @@ namespace Network_Simulation
 
         protected abstract void doDeploy(NetworkTopology networkTopology);
         protected abstract void write2SQLite(NetworkTopology networkTopology);
+
+        public override string ToString()
+        {
+            return this.GetType().Name;
+        }
 
         public class DeploySQLiteUtility
         {

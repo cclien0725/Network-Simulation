@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using Network_Simulation;
 using System.IO;
+using Deployment_Simulation;
 
 namespace Heterogenerous_Simulation
 {
@@ -100,7 +101,7 @@ namespace Heterogenerous_Simulation
 
                     //// Doesn't use any deployment method.
                     NoneDeployment noneDeply = new NoneDeployment(0, 0, 0);
-                    sql.CreateTable(noneDeply.GetType().Name);
+                    sql.CreateTable(noneDeply.ToString());
                     noneDeply.Deploy(networkTopology);
                     Simulator noneSimulator = new Simulator(noneDeply, networkTopology, sql);
                     noneSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
@@ -113,7 +114,7 @@ namespace Heterogenerous_Simulation
 
                     //// Using randomly depolyment method.
                     RandomDeployment randomDeploy = new RandomDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text));
-                    sql.CreateTable(randomDeploy.GetType().Name);
+                    sql.CreateTable(randomDeploy.ToString());
                     randomDeploy.Deploy(networkTopology);
                     Simulator randomSimulator = new Simulator(randomDeploy, networkTopology, sql);
                     randomSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
@@ -124,9 +125,22 @@ namespace Heterogenerous_Simulation
 
                     bg.ReportProgress((filenames.IndexOf(filename) + 1) * 66 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
 
+                    // TODO: REMOVE THIS !!!
+                    //KCutDeployment kCutDeploy1 = new KCutDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text), typeof(KCutStartWithCenterNode));
+                    //sql.CreateTable(kCutDeploy1.ToString());
+                    //kCutDeploy1.Deploy(networkTopology);
+                    //Simulator randomSimulator = new Simulator(kCutDeploy1.Deployment, networkTopology, sql);
+                    //randomSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
+                    //{
+                    //    bg.ReportProgress(ra.CurrentPacket * 100 / ra.TotalPacket, new ProgressReportArg() { KEY = filename, ST = StatusType.RandomDeploymentStatus });
+                    //};
+                    //randomSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(TotalPacket.Text), Convert.ToInt32(PercentageOfAttackPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text), Convert.ToInt32(InitTimeOfAttackPacket.Text), DynamicProbability.Checked);
+
+                    //bg.ReportProgress((filenames.IndexOf(filename) + 1) * 66 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
+
                     //// Using KCut deployment method.
-                    KCutDeployment kCutDeploy = new KCutDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text));
-                    sql.CreateTable(kCutDeploy.GetType().Name);
+                    KCutDeployment kCutDeploy = new KCutDeployment(Convert.ToDouble(TunnelingTracer.Text), Convert.ToDouble(MarkingTracer.Text), Convert.ToDouble(FilteringTracer.Text), typeof(KCutStartWithConsider2KConsiderCoefficient));
+                    sql.CreateTable(kCutDeploy.ToString());
                     kCutDeploy.Deploy(networkTopology);
                     Simulator kCutSimulator = new Simulator(kCutDeploy.Deployment, networkTopology, sql);
                     kCutSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)

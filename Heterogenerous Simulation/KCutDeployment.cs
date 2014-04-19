@@ -9,14 +9,16 @@ namespace Heterogenerous_Simulation
 {
     public class KCutDeployment
     {
-        private KCutStartWithConsider2KConsiderCoefficient deployment;
-        public KCutStartWithConsider2KConsiderCoefficient Deployment
+        public Deployment Deployment
         {
             get
             {
-                return deployment;
+                return m_deployment;
             }
         }
+
+        private Deployment m_deployment;
+        private Type m_deploy_type;
 
         private double percentageOfTunnelingTracer;
         private double percentageOfMarkingTracer;
@@ -26,11 +28,12 @@ namespace Heterogenerous_Simulation
         public int numberOfMTracer;
         public int numberOfFTracer;
 
-        public KCutDeployment(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer)
+        public KCutDeployment(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer, Type deployType)
         {
             this.percentageOfFilteringTracer = percentageOfFilteringTracer;
             this.percentageOfMarkingTracer = percentageOfMarkingTracer;
             this.percentageOfTunnelingTracer = percentageOfTunnelingTracer;
+            this.m_deploy_type = deployType;
         }
 
         public void Deploy(NetworkTopology networkTopology)
@@ -42,49 +45,51 @@ namespace Heterogenerous_Simulation
             bool isSatisfied = false;
             List<int> last_deploy_count;
             int satisfy_count;
+            Deployment try_deploy = null; 
+            
 
-            for (int K = 1; K <= networkTopology.Diameter; K++)
+            for (int K = 1; K <= networkTopology.Diameter; K += 2)
             {
                 int N = 0;
                 satisfy_count = 0;
 
                 do
                 {
-                    if (deployment != null)
-                        last_deploy_count = new List<int>(deployment.DeployNodes);
+                    if (try_deploy != null)
+                        last_deploy_count = new List<int>(try_deploy.DeployNodes);
                     else
                         last_deploy_count = new List<int>();
 
-                    deployment = new KCutStartWithConsider2KConsiderCoefficient(percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer, K, ++N);
-                    deployment.Deploy(networkTopology);
+                    try_deploy = Activator.CreateInstance(m_deploy_type, new object[] { percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer, K, ++N }) as Deployment;
+                    try_deploy.Deploy(networkTopology);
 
-                    if (deployment.DeployNodes.Count <= numberOfTTracer)
+                    if (try_deploy.DeployNodes.Count <= numberOfTTracer)
                     {
+                        if (m_deployment == null)
+                            m_deployment = try_deploy;
+                        else if (m_deployment.DeployNodes.Count < try_deploy.DeployNodes.Count)
+                            m_deployment = try_deploy;
+
                         isSatisfied = true;
-                        break;
-                    } 
-                    
-                    if (deployment.DeployNodes.Except(last_deploy_count).Count() == 0 && last_deploy_count.Except(deployment.DeployNodes).Count() == 0)
-                    {
+                    }
+
+                    if (try_deploy.DeployNodes.Except(last_deploy_count).Count() == 0 && last_deploy_count.Except(try_deploy.DeployNodes).Count() == 0)
                         satisfy_count++;
-                    }
                     else
-                    {
                         satisfy_count = 0;
-                    }
                 } while (satisfy_count < 2);
 
                 if (isSatisfied)
                 {
-                    DataUtility.Log(string.Format("K={0},N={1}", K, N));
-                    break;
+                    DataUtility.Log(string.Format("K={0},N={1},|D|={2}\n", m_deployment.K, m_deployment.N, m_deployment.DeployNodes.Count));
+                    //break;
                 }
             }
 
             int c, e;
             List<int> centerNode = new List<int>();
 
-            foreach (var scope in deployment.AllRoundScopeList)
+            foreach (var scope in m_deployment.AllRoundScopeList)
             {
                 if (scope.FindCenterNodeID(out c, out e, true))
                 {
@@ -100,6 +105,10 @@ namespace Heterogenerous_Simulation
 
             networkTopology.Reset();
 
+            // Clear the deployment method.
+            foreach (NetworkTopology.Node node in networkTopology.Nodes)
+                node.Tracer = NetworkTopology.TracerType.None;
+
             centerNode.Sort((x, y) => {
                 Network_Simulation.NetworkTopology.Node n1 = networkTopology.Nodes.Find(n => n.ID == x);
                 Network_Simulation.NetworkTopology.Node n2 = networkTopology.Nodes.Find(n => n.ID == y);
@@ -108,20 +117,20 @@ namespace Heterogenerous_Simulation
             });
 
             int i = 0, j = 0;
-            deployment.FilteringTracerID = new List<int>();
-            deployment.MarkingTracerID = new List<int>();
+            m_deployment.FilteringTracerID = new List<int>();
+            m_deployment.MarkingTracerID = new List<int>();
 
             for (; i < centerNode.Count; i++)
             {
                 if (i < numberOfFTracer)
                 {
                     networkTopology.Nodes.Find(n => n.ID == centerNode[i]).Tracer = NetworkTopology.TracerType.Filtering;
-                    deployment.FilteringTracerID.Add(centerNode[i]);
+                    m_deployment.FilteringTracerID.Add(centerNode[i]);
                 }
                 else if (i < numberOfFTracer + numberOfMTracer)
                 {
                     networkTopology.Nodes.Find(n => n.ID == centerNode[i]).Tracer = NetworkTopology.TracerType.Marking;
-                    deployment.MarkingTracerID.Add(centerNode[i]);
+                    m_deployment.MarkingTracerID.Add(centerNode[i]);
                 }
                 else
                 {
@@ -131,25 +140,32 @@ namespace Heterogenerous_Simulation
 
             for (; i < numberOfFTracer; i++, j++)
             {
-                if (deployment.AllRoundScopeList[j % deployment.AllRoundScopeList.Count].Nodes.Where(n => !centerNode.Contains(n.ID) && n.Tracer == NetworkTopology.TracerType.None).Count() > 0)
+                if (m_deployment.AllRoundScopeList[j % m_deployment.AllRoundScopeList.Count].Nodes.Where(n => n.Tracer == NetworkTopology.TracerType.None).Count() > 0)
                 {
-                    deployment.AllRoundScopeList[j % deployment.AllRoundScopeList.Count].Nodes.Where(n => !centerNode.Contains(n.ID) && n.Tracer == NetworkTopology.TracerType.None).First().Tracer = NetworkTopology.TracerType.Filtering;
-                    deployment.FilteringTracerID.Add(deployment.AllRoundScopeList[j % deployment.AllRoundScopeList.Count].Nodes.Where(n => !centerNode.Contains(n.ID)).First().ID);
+                    NetworkTopology.Node node = m_deployment.AllRoundScopeList[j % m_deployment.AllRoundScopeList.Count].Nodes.Where(n => n.Tracer == NetworkTopology.TracerType.None).First();
+                    node.Tracer = NetworkTopology.TracerType.Filtering;
+                    m_deployment.FilteringTracerID.Add(node.ID);
                 }
             }
 
             for (; i < numberOfFTracer + numberOfMTracer; i++, j++)
             {
-                if (deployment.AllRoundScopeList[j % deployment.AllRoundScopeList.Count].Nodes.Where(n => !centerNode.Contains(n.ID) && n.Tracer == NetworkTopology.TracerType.None).Count() > 0)
+                if (m_deployment.AllRoundScopeList[j % m_deployment.AllRoundScopeList.Count].Nodes.Where(n => n.Tracer == NetworkTopology.TracerType.None).Count() > 0)
                 {
-                    deployment.AllRoundScopeList[j % deployment.AllRoundScopeList.Count].Nodes.Where(n => !centerNode.Contains(n.ID) && n.Tracer == NetworkTopology.TracerType.None).First().Tracer = NetworkTopology.TracerType.Marking;
-                    deployment.MarkingTracerID.Add(deployment.AllRoundScopeList[j % deployment.AllRoundScopeList.Count].Nodes.Where(n => !centerNode.Contains(n.ID)).First().ID);
+                    NetworkTopology.Node node = m_deployment.AllRoundScopeList[j % m_deployment.AllRoundScopeList.Count].Nodes.Where(n => n.Tracer == NetworkTopology.TracerType.None).First();
+                    node.Tracer = NetworkTopology.TracerType.Marking;
+                    m_deployment.MarkingTracerID.Add(node.ID);
                 }
                 else i--;
             }
 
-            foreach (int id in deployment.DeployNodes)
+            foreach (int id in m_deployment.DeployNodes)
                 networkTopology.Nodes.Find(n => n.ID == id).Tracer = NetworkTopology.TracerType.Tunneling;
+        }
+
+        public override string ToString()
+        {
+            return m_deploy_type.Name;
         }
     }
 }

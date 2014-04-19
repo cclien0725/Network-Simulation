@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using Network_Simulation;
 using System.IO;
 using System.Data.SQLite;
+using Deployment_Simulation;
 
 namespace Heterogenerous_Simulation
 {
@@ -22,6 +23,17 @@ namespace Heterogenerous_Simulation
             InitializeComponent();
 
             this.dbFileName = Path.Combine(Environment.CurrentDirectory, "Log", dbFileName); ;
+
+            comboBox1.Items.Add(typeof(NoneDeployment).Name);
+            comboBox1.Items.Add(typeof(RandomDeployment).Name);
+            comboBox1.Items.Add(typeof(KCutStartWithCenterNode).Name);
+            comboBox1.Items.Add(typeof(KCutStartWithCenterNodeConsiderCoefficient).Name);
+            comboBox1.Items.Add(typeof(KCutStartWithComparableConsiderCoefficient).Name);
+            comboBox1.Items.Add(typeof(KCutStartWithConsider2KConsiderCoefficient).Name);
+            comboBox1.Items.Add(typeof(KCutStartWithSideNode).Name);
+            comboBox1.Items.Add(typeof(KCutStartWithSideNodeConsiderCoefficient).Name);
+
+            comboBox1.SelectedValue = typeof(NoneDeployment).Name;
 
             networkTopology = new NetworkTopology(0, 0);
             networkTopology.ReadBriteFile(mapFileName);

@@ -39,28 +39,25 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(858, 568);
+            this.panel1.Size = new System.Drawing.Size(858, 615);
             this.panel1.TabIndex = 0;
             // 
             // comboBox1
             // 
+            this.comboBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "None Deployment",
-            "Random Deployment",
-            "KCut Deployment"});
-            this.comboBox1.Location = new System.Drawing.Point(695, 12);
+            this.comboBox1.Location = new System.Drawing.Point(695, 13);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(151, 20);
+            this.comboBox1.Size = new System.Drawing.Size(151, 21);
             this.comboBox1.TabIndex = 0;
             this.comboBox1.Text = "None Deployment";
             this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // NetworkViewForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(858, 568);
+            this.ClientSize = new System.Drawing.Size(858, 615);
             this.Controls.Add(this.panel1);
             this.Name = "NetworkViewForm";
             this.Text = "NetworkViewForm";
