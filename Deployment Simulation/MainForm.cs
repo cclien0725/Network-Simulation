@@ -41,6 +41,7 @@ namespace Deployment_Simulation
             m_deploy_types = new List<Type>();
             m_deploy_types.Add(typeof(KCutStartWithCenterNode));
             m_deploy_types.Add(typeof(KCutStartWithCenterNodeConsiderCoefficient));
+            m_deploy_types.Add(typeof(KCutStartWithCenterNodeConsiderCoefficientV2));
             m_deploy_types.Add(typeof(KCutStartWithComparableConsiderCoefficient));
             m_deploy_types.Add(typeof(KCutStartWithConsider2KConsiderCoefficient));
             m_deploy_types.Add(typeof(KCutStartWithSideNode));

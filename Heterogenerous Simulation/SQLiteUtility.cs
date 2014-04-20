@@ -22,7 +22,7 @@ namespace Heterogenerous_Simulation
             {"TunnelingEvents", "ID INTEGER PRIMARY KEY, PacketID INTEGER, Time REAL, TunnelingSrc INTEGER, TunnelingDst INTEGER"},
             {"MarkingEvents", "ID INTEGER PRIMARY KEY, PacketID INTEGER, Time REAL, MarkingNodeID INTEGER"},
             {"FilteringEvents", "ID INTEGER PRIMARY KEY, PacketID INTEGER, Time REAL, FilteringNodeId INTEGER"},
-            {"Deployment", "NodeID INTEGER PRIMARY KEY, TracerType INTEGER, NodeType INTEGER"}
+            {"Deployment", "NodeID INTEGER PRIMARY KEY, TracerType INTEGER, NodeType INTEGER, K INTEGER, N INTEGER"}
         };
 
         private string baseDirectory = Path.Combine(Environment.CurrentDirectory, "Log");
@@ -318,7 +318,7 @@ namespace Heterogenerous_Simulation
             catch { }
         }
 
-        public void LogDeploymentResult(NetworkTopology networkTopology)
+        public void LogDeploymentResult(NetworkTopology networkTopology, Deployment deployment)
         {
             try
             {
@@ -328,13 +328,15 @@ namespace Heterogenerous_Simulation
 
                     SQLiteTransaction trans = connection.BeginTransaction();
                     SQLiteCommand cmd = connection.CreateCommand();
-                    cmd.CommandText = string.Format("INSERT INTO {0}_Deployment(NodeID, TracerType, NodeType) VALUES(@NodeID, @TracerType, @NodeType)", prefixNameOfTable);
+                    cmd.CommandText = string.Format("INSERT INTO {0}_Deployment(NodeID, TracerType, NodeType, K, N) VALUES(@NodeID, @TracerType, @NodeType, @K, @N)", prefixNameOfTable);
 
                     foreach (Network_Simulation.NetworkTopology.Node node in networkTopology.Nodes)
                     {
                         cmd.Parameters.Add("@NodeID", DbType.Int32).Value = node.ID;
                         cmd.Parameters.Add("@TracerType", DbType.Int32).Value = node.Tracer;
                         cmd.Parameters.Add("@NodeType", DbType.Int32).Value = node.Type;
+                        cmd.Parameters.Add("@K", DbType.Int32).Value = deployment.K;
+                        cmd.Parameters.Add("@N", DbType.Int32).Value = deployment.N;
                         cmd.ExecuteNonQuery();
                     }
 

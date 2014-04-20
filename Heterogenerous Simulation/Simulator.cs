@@ -33,7 +33,7 @@ namespace Heterogenerous_Simulation
 
             attackNode = topology.Nodes.Where(node => node.Type == NetworkTopology.NodeType.Attacker).ToList();
 
-            sql.LogDeploymentResult(topology);
+            sql.LogDeploymentResult(topology, deployment);
         }
 
         public void Run(int attackPacketPerSec, int normalPacketPerSec, int totalPacket, int percentageOfAttackPacket, double probibilityOfPacketTunneling, double probibilityOfPacketMarking, double startFiltering, int initialTimeOfAttackPacket, bool dynamicProbability)
