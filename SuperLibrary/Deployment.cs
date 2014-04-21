@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using System.Data.SQLite;
 using System.Data;
+using SuperLibrary;
 
 namespace Network_Simulation
 {
@@ -104,7 +105,7 @@ namespace Network_Simulation
             return this.GetType().Name;
         }
 
-        public class DeploySQLiteUtility
+        public class DeploySQLiteUtility : SQLiteUtils
         {
             /// <summary>
             ///   Key: Table name.
@@ -118,54 +119,34 @@ namespace Network_Simulation
             };
             private Dictionary<string, string> indexDic = new Dictionary<string, string>()
             {
-                {"NetworkTopology_Index", "NetworkTopology(n_id, file_name)"},
-                {"DeoploySimulation_Index", "DeploySimulation(n_id, job_id, k, n, deploy_name)"},
-                {"LevelRecord_Index", "LevelRecord(job_id)"}
+                {"NetworkTopology_Index", "NetworkTopology(n_id, file_name, node_counts, edge_counts, diameter)"},
+                {"DeploySimulation_Index", "DeploySimulation(n_id, job_id, k, n, deploy_name)"},
+                {"LevelRecord_Index", "LevelRecord(l_id, job_id, level, node_id, deploy_type)"}
             };
-
-            private string baseDirectory = Path.Combine(Environment.CurrentDirectory, "Deploy");
-            private string connectionString = @"Data Source=";
-            private string fileName;
 
             /// <summary>
             /// SQLite constructor: create db file.
             /// </summary>
             /// <param name="dbFileName">The file name of database.</param>
-            public DeploySQLiteUtility(string dbFileName)
+            public DeploySQLiteUtility(string dbFileName) : base(Path.Combine(Environment.CurrentDirectory, "Deploy"), dbFileName, true)
             {
-                try
-                {
-                    if (!Directory.Exists(baseDirectory))
-                        Directory.CreateDirectory(baseDirectory);
-
-                    fileName = Path.Combine(baseDirectory, dbFileName + "_0");
-
-                    //for (int i = 1; File.Exists(fileName + ".db"); i++)
-                    //    fileName = Path.Combine(baseDirectory, dbFileName + "_" + i);
-
-                    fileName += ".db";
-                    
-                    if (!File.Exists(fileName))
-                        SQLiteConnection.CreateFile(fileName);
-
-                    connectionString += fileName + ";foreign keys=true;";
-                }
-                catch { }
             }
 
             /// <summary>
             /// Create the tables if not exist.
             /// </summary>
             /// <param name="prefixNameOfTable">The prefix-name of table, maybe method name.</param>
-            public void CreateTable()
+            public override void CreateTable()
             {
                 try
                 {
                     // Create tables
-                    using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                    using (SQLiteConnection connection = new SQLiteConnection(m_connection_string))
                     {
                         connection.Open();
+
                         SQLiteCommand cmd = connection.CreateCommand();
+
                         foreach (var kvp in tableDic)
                         {
                             cmd.CommandText = string.Format("CREATE TABLE IF NOT EXISTS {0}({1})", kvp.Key, kvp.Value);
@@ -180,56 +161,6 @@ namespace Network_Simulation
                     }
                 }
                 catch (SQLiteException ex)
-                {
-                    if (ex.ErrorCode != SQLiteErrorCode.Constraint)
-                        DataUtility.Log(ex.Message + "\n");
-                }
-            }
-
-            public DataView GetResult(string sqlcmd, List<SQLiteParameter> parameters)
-            {
-                try
-                {
-                    using (SQLiteConnection connection = new SQLiteConnection(connectionString))
-                    {
-                        connection.Open();
-                        DataSet ds = new DataSet();
-                        SQLiteCommand cmd = connection.CreateCommand();
-
-                        cmd.CommandText = sqlcmd;
-
-                        if (parameters != null)
-                            foreach (var item in parameters)
-                                cmd.Parameters.Add(item);
-
-                        SQLiteDataAdapter adapter = new SQLiteDataAdapter(cmd);
-                        adapter.Fill(ds);
-
-                        return ds.Tables.Count > 0 ? ds.Tables[0].DefaultView : null;
-                    }
-                }
-                catch { return null; }
-            }
-
-            public void RunCommnad(string sqlcmd, List<SQLiteParameter> parameters = null)
-            {
-                try
-                {
-                    using (SQLiteConnection connection = new SQLiteConnection(connectionString))
-                    {
-                        connection.Open();
-                        SQLiteCommand cmd = connection.CreateCommand();
-
-                        cmd.CommandText = sqlcmd;
-
-                        if (parameters != null)
-                            foreach (var item in parameters)
-                                cmd.Parameters.Add(item);
-
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-                catch(SQLiteException ex)
                 {
                     if (ex.ErrorCode != SQLiteErrorCode.Constraint)
                         DataUtility.Log(ex.Message + "\n");

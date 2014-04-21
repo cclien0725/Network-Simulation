@@ -165,6 +165,13 @@ namespace Deployment_Simulation
                             lv_list.Items[fileName].SubItems[1].Text = k.ToString();
                             lv_list.Items[fileName].SubItems[2].Text = n.ToString();
                             lv_list.Items[fileName].SubItems[3].Text = status;
+
+                            foreach (int index in lv_list.SelectedIndices)
+                                lv_list.Items[index].Selected = false;
+
+                            lv_list.Items[fileName].Selected = true;
+                            lv_list.Items[fileName].Focused = true;
+                            lv_list.TopItem = lv_list.Items[fileName];
                         }
                     }
                 }

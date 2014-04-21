@@ -250,7 +250,7 @@ namespace Deployment_Simulation
 
             DataView dv = sqlite_utility.GetResult(cmd, parms);
 
-            if (dv != null & dv.Count > 0)
+            if (dv != null && dv.Count > 0)
             {
                 int now_level;
                 int pre_level = -1;

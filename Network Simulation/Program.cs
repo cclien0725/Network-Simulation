@@ -15,7 +15,7 @@ namespace Network_Simulation
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new PrecomputingForm());
+            Application.Run(new MainForm());
         }
     }
 }

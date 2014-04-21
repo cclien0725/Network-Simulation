@@ -38,7 +38,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SQLite, Version=1.0.79.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Network Simulation\third-partDLL\SQLite\System.Data.SQLite.dll</HintPath>
+      <HintPath>..\SuperLibrary\third-partDLL\SQLite\System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xml.Linq" />
@@ -98,9 +98,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Network Simulation\Network Simulation.csproj">
-      <Project>{5E75DCBF-0796-474F-85E9-8818223CABA9}</Project>
-      <Name>Network Simulation</Name>
+    <ProjectReference Include="..\SuperLibrary\SuperLibrary.csproj">
+      <Project>{351B7458-C1CE-4E0C-8DB4-49613BA25C7A}</Project>
+      <Name>SuperLibrary</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
