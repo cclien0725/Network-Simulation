@@ -22,6 +22,7 @@ namespace Network_Simulation
             public int Degree { get; set; }
             public double ProbabilityOfTunneling { get; set; }
             public double FilteringCount { get; set; }
+            public bool IsTunnelingActive { get; set; }
 
             public Node()
             {
