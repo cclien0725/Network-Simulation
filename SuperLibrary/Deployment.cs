@@ -119,9 +119,9 @@ namespace Network_Simulation
             };
             private Dictionary<string, string> indexDic = new Dictionary<string, string>()
             {
-                {"NetworkTopology_Index", "NetworkTopology(n_id, file_name, node_counts, edge_counts, diameter)"},
+                {"NetworkTopology_Index", "NetworkTopology(n_id, file_name)"},
                 {"DeploySimulation_Index", "DeploySimulation(n_id, job_id, k, n, deploy_name)"},
-                {"LevelRecord_Index", "LevelRecord(l_id, job_id, level, node_id, deploy_type)"}
+                {"LevelRecord_Index", "LevelRecord(job_id)"}
             };
 
             /// <summary>

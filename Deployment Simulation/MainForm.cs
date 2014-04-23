@@ -99,7 +99,7 @@ namespace Deployment_Simulation
                         List<int> last_deploy_count;
                         int satisfy_count;
 
-                        for (K = 1; K <= m_topo.Diameter; K += 2)
+                        for (K = 1; K <= m_topo.Diameter; K += 1)
                         {
                             N = 0;
                             satisfy_count = 0;
