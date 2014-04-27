@@ -41,7 +41,7 @@ namespace Deployment_Simulation
             m_deploy_types = new List<Type>();
             m_deploy_types.Add(typeof(KCutStartWithCenterNode));
             m_deploy_types.Add(typeof(KCutStartWithCenterNodeConsiderCoefficient));
-            m_deploy_types.Add(typeof(KCutStartWithCenterNodeConsiderCoefficientV2));
+            m_deploy_types.Add(typeof(KCutStartWithCenterNodeNoRecomputeEccentricity));
             m_deploy_types.Add(typeof(KCutStartWithComparableConsiderCoefficient));
             m_deploy_types.Add(typeof(KCutStartWithConsider2KConsiderCoefficient));
             m_deploy_types.Add(typeof(KCutStartWithSideNode));
@@ -83,7 +83,7 @@ namespace Deployment_Simulation
                                                 new object[] { false, string.Format("Starting Deployment with K: {0}, N: {1}...", K, N), true, files[i], K, N });
 
                         // Using kcutwithclustering depolyment method.
-                        deployment = Activator.CreateInstance(m_deploy_types.Where(t => t.Name == m_now_deployment_method).First(), new object[] { 30, 20, 10, K, N }) as Deployment;// new KCutStartWithConsider2KConsiderWithCoefficient(30, 20, 10, K, N);
+                        deployment = Activator.CreateInstance(m_deploy_types.Find(t => t.Name == m_now_deployment_method), new object[] { 30, 20, 10, K, N }) as Deployment;// new KCutStartWithConsider2KConsiderWithCoefficient(30, 20, 10, K, N);
                         deployment.Deploy(m_topo);
 
                         m_simulation_worker.ReportProgress(100,
@@ -111,7 +111,7 @@ namespace Deployment_Simulation
                                 else
                                     last_deploy_count = new List<int>();
 
-                                deployment = Activator.CreateInstance(m_deploy_types.Where(t => t.Name == m_now_deployment_method).First(), new object[] { 30, 20, 10, K, ++N }) as Deployment; //new KCutStartWithConsider2KConsiderWithCoefficient(30, 20, 10, K, ++N);
+                                deployment = Activator.CreateInstance(m_deploy_types.Find(t => t.Name == m_now_deployment_method), new object[] { 30, 20, 10, K, ++N }) as Deployment; //new KCutStartWithConsider2KConsiderWithCoefficient(30, 20, 10, K, ++N);
 
                                 m_simulation_worker.ReportProgress((int)((double)K / (double)m_topo.Diameter * 100),
                                                     new object[] { false, string.Format("Starting Deployment with K: {0}, N: {1}...", K, N), true, files[i], K, N });
@@ -171,7 +171,7 @@ namespace Deployment_Simulation
 
                             lv_list.Items[fileName].Selected = true;
                             lv_list.Items[fileName].Focused = true;
-                            lv_list.TopItem = lv_list.Items[fileName];
+                            //lv_list.TopItem = lv_list.Items[fileName];
                         }
                     }
                 }
@@ -203,7 +203,7 @@ namespace Deployment_Simulation
                 {
                     bool isQuery = (bool)data[0];
                     string sqlCmd;
-                    Deployment deployment = Activator.CreateInstance(m_deploy_types.Where(t => t.Name == m_now_deployment_method).First(), new object[] { 30, 20, 10, 1, 1 }) as Deployment;// new Deployment.DeploySQLiteUtility("deploy_simulation");
+                    Deployment deployment = Activator.CreateInstance(m_deploy_types.Find(t => t.Name == m_now_deployment_method), new object[] { 30, 20, 10, 1, 1 }) as Deployment;// new Deployment.DeploySQLiteUtility("deploy_simulation");
 
                     if (isQuery)
                     {
@@ -261,7 +261,7 @@ namespace Deployment_Simulation
 
                     if (item.SubItems[3].Text.Contains("Completed"))
                     {
-                        NetworkViewForm view = new NetworkViewForm(item.Name);
+                        NetworkViewForm view = new NetworkViewForm(item.Name, m_deploy_types.Find(t => t.Name == m_now_deployment_method));
                         view.Show(this);
                     }
                 }

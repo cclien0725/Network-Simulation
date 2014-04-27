@@ -114,5 +114,32 @@ namespace SuperLibrary
                     DataUtility.Log(ex.Message + "\n");
             }
         }
+
+        public void BulkInsertCommands(List<string> cmds)
+        {
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(m_connection_string))
+                {
+                    connection.Open();
+                    SQLiteTransaction trans = connection.BeginTransaction();
+
+                    foreach (string str in cmds)
+                    {
+                        SQLiteCommand cmd = connection.CreateCommand();
+                        cmd.CommandText = str;
+
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    trans.Commit();
+                }
+            }
+            catch (SQLiteException ex)
+            {
+                if (ex.ErrorCode != SQLiteErrorCode.Constraint)
+                    DataUtility.Log(ex.Message + "\n");
+            }
+        }
     }
 }

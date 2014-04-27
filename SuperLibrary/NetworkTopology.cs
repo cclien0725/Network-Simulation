@@ -51,6 +51,7 @@ namespace Network_Simulation
         private int m_diameter;
 
         private List<Node> m_src_nodes;
+        public int[,] m_src_shortes_path_table;
 
         /// <summary>
         /// Constructor.
@@ -80,13 +81,14 @@ namespace Network_Simulation
             this.numberOfVictims = numberOfVictims;
         }
 
-        public NetworkTopology(List<Node> src_node_list)
+        public NetworkTopology(List<Node> src_node_list, ref int [,] src_shortest_path_table)
         {
             // Create instance of nodes.
             Nodes = new List<Node>();
             Edges = new List<Edge>();
 
             m_src_nodes = new List<Node>(src_node_list);
+            m_src_shortes_path_table = src_shortest_path_table;
         }
 
         /// <summary>
@@ -118,6 +120,8 @@ namespace Network_Simulation
             //// Select normal users.
             //for (; randomArrayIndex < numberOfNormalUsers + numberOfAttackers + numberOfVictims; randomArrayIndex++)
             //    Nodes[randomArray[randomArrayIndex]].Type = NodeType.Normal;
+
+            m_src_shortes_path_table = new int[Nodes.Count, Nodes.Count];
 
             // Finding diameter of the network topology.
             m_diameter = int.MinValue;

@@ -53,7 +53,7 @@
   <ItemGroup>
     <Compile Include="KCutStartWithCenterNode.cs" />
     <Compile Include="KCutStartWithCenterNodeConsiderCoefficient.cs" />
-    <Compile Include="KCutStartWithCenterNodeConsiderCoefficientV2.cs" />
+    <Compile Include="KCutStartWithCenterNodeNoRecomputeEccentricity.cs" />
     <Compile Include="KCutStartWithSideNode.cs" />
     <Compile Include="KCutStartWithSideNodeConsiderCoefficient.cs" />
     <Compile Include="KCutStartWithComparableConsiderCoefficient.cs" />
