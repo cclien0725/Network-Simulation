@@ -43,9 +43,17 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.btn_merge = new System.Windows.Forms.Button();
+            this.pb_merge = new System.Windows.Forms.ProgressBar();
+            this.tb_merge = new System.Windows.Forms.TextBox();
+            this.lv_merge = new System.Windows.Forms.ListView();
+            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // lv_hetero
@@ -110,6 +118,7 @@
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
@@ -128,7 +137,7 @@
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(527, 374);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "Deployment";
+            this.tabPage1.Text = "Deploy Statistic";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // btn_deploy_start
@@ -200,8 +209,80 @@
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage2.Size = new System.Drawing.Size(527, 374);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Heterogenerous";
+            this.tabPage2.Text = "Hetero Statistic";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.btn_merge);
+            this.tabPage3.Controls.Add(this.pb_merge);
+            this.tabPage3.Controls.Add(this.tb_merge);
+            this.tabPage3.Controls.Add(this.lv_merge);
+            this.tabPage3.Location = new System.Drawing.Point(4, 25);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(527, 374);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "Merge Deploy Database";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // btn_merge
+            // 
+            this.btn_merge.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_merge.Location = new System.Drawing.Point(412, 3);
+            this.btn_merge.Name = "btn_merge";
+            this.btn_merge.Size = new System.Drawing.Size(109, 31);
+            this.btn_merge.TabIndex = 10;
+            this.btn_merge.Text = "Start Merge";
+            this.btn_merge.UseVisualStyleBackColor = true;
+            // 
+            // pb_merge
+            // 
+            this.pb_merge.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pb_merge.Location = new System.Drawing.Point(3, 348);
+            this.pb_merge.Name = "pb_merge";
+            this.pb_merge.Size = new System.Drawing.Size(521, 23);
+            this.pb_merge.TabIndex = 11;
+            // 
+            // tb_merge
+            // 
+            this.tb_merge.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tb_merge.Location = new System.Drawing.Point(3, 7);
+            this.tb_merge.Name = "tb_merge";
+            this.tb_merge.ReadOnly = true;
+            this.tb_merge.Size = new System.Drawing.Size(403, 22);
+            this.tb_merge.TabIndex = 9;
+            this.tb_merge.Text = "Select Deploy Simulation Database to Merge...";
+            // 
+            // lv_merge
+            // 
+            this.lv_merge.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lv_merge.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader5,
+            this.columnHeader6});
+            this.lv_merge.FullRowSelect = true;
+            this.lv_merge.GridLines = true;
+            this.lv_merge.Location = new System.Drawing.Point(3, 40);
+            this.lv_merge.Name = "lv_merge";
+            this.lv_merge.ShowItemToolTips = true;
+            this.lv_merge.Size = new System.Drawing.Size(518, 302);
+            this.lv_merge.TabIndex = 8;
+            this.lv_merge.UseCompatibleStateImageBehavior = false;
+            this.lv_merge.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader5
+            // 
+            this.columnHeader5.Text = "File Name";
+            this.columnHeader5.Width = 340;
+            // 
+            // columnHeader6
+            // 
+            this.columnHeader6.Text = "Process Status";
+            this.columnHeader6.Width = 160;
             // 
             // DeployStatisticTool
             // 
@@ -218,6 +299,8 @@
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -239,5 +322,12 @@
         private System.Windows.Forms.ListView lv_deploy;
         private System.Windows.Forms.ColumnHeader columnHeader3;
         private System.Windows.Forms.ColumnHeader columnHeader4;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Button btn_merge;
+        private System.Windows.Forms.ProgressBar pb_merge;
+        private System.Windows.Forms.TextBox tb_merge;
+        private System.Windows.Forms.ListView lv_merge;
+        private System.Windows.Forms.ColumnHeader columnHeader5;
+        private System.Windows.Forms.ColumnHeader columnHeader6;
     }
 }

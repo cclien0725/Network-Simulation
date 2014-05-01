@@ -14,7 +14,7 @@ namespace Deployment_Simulation
     {
         private NetworkTopology m_topo;
 
-        public NetworkViewForm(string briteFilePath)
+        public NetworkViewForm(string briteFilePath, Type deployType)
         {
             InitializeComponent();
 
@@ -37,7 +37,7 @@ namespace Deployment_Simulation
                 int K = int.Parse(tb_k.Text);
                 int N = int.Parse(tb_n.Text);
 
-                KCutStartWithConsider2KConsiderCoefficient deployment = new KCutStartWithConsider2KConsiderCoefficient(10, 10, 10, K, N);
+                Deployment deployment = Activator.CreateInstance(deployType, new object[] { 30, 20, 10, K, N }) as Deployment; //new KCutStartWithConsider2KConsiderCoefficient(10, 10, 10, K, N);
                 deployment.Deploy(m_topo);
 
                 draw_panel.Invalidate();

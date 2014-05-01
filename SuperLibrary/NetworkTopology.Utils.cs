@@ -141,6 +141,23 @@ namespace Network_Simulation
             return path;
         }
 
+        public int GetShortestPathCount(int SourceNodeId, int DestinationNodeId)
+        {
+            int count = m_src_shortes_path_table[NodeID2Index(SourceNodeId), NodeID2Index(DestinationNodeId)];
+
+            if (SourceNodeId == DestinationNodeId)
+                return 0;
+            else if (count != 0)
+                return count;
+            else
+            {
+                count = GetShortestPath(SourceNodeId, DestinationNodeId).Count;
+                m_src_shortes_path_table[NodeID2Index(SourceNodeId), NodeID2Index(DestinationNodeId)] = count;
+                m_src_shortes_path_table[NodeID2Index(DestinationNodeId), NodeID2Index(SourceNodeId)] = count;
+                return count;
+            }
+        }
+
         public void ComputingAllEccentricity()
         {
             DataUtility.Log("Computing all eccentricity value...");
@@ -281,7 +298,7 @@ namespace Network_Simulation
         /// <returns>The complement set between the two network topologies.</returns>
         public static NetworkTopology operator -(NetworkTopology left_n, NetworkTopology right_n)
         {
-            NetworkTopology result = new NetworkTopology(left_n.m_src_nodes);
+            NetworkTopology result = new NetworkTopology(left_n.m_src_nodes, ref left_n.m_src_shortes_path_table);
 
             result.Nodes = left_n.Nodes.Except(right_n.Nodes).ToList();
             result.Edges = left_n.Edges.Except(right_n.Edges).ToList();
