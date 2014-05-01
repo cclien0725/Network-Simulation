@@ -45,10 +45,10 @@ namespace Heterogenerous_Simulation
             bool isSatisfied = false;
             List<int> last_deploy_count;
             int satisfy_count;
-            Deployment try_deploy = null; 
-            
+            Deployment try_deploy = null;
 
-            for (int K = 1; K <= networkTopology.Diameter; K += 2)
+
+            for (int K = 1; K <= networkTopology.Diameter; K++)
             {
                 int N = 0;
                 satisfy_count = 0;
@@ -87,19 +87,19 @@ namespace Heterogenerous_Simulation
             }
 
             int c, e;
-            List<int> centerNode = new List<int>();
+            List<NetworkTopology.Node> centerNode = new List<NetworkTopology.Node>();
 
             foreach (var scope in m_deployment.AllRoundScopeList)
             {
                 if (scope.FindCenterNodeID(out c, out e, true))
                 {
                     DataUtility.Log(string.Format("center ID: {0}\n", c));
-                    centerNode.Add(c);
+                    centerNode.Add(networkTopology.Nodes.Find(n => n.ID == c));
                 }
                 else
                 {
                     DataUtility.Log(string.Format("center ID: {0}\n", scope.Nodes[0].ID));
-                    centerNode.Add(scope.Nodes[0].ID);
+                    centerNode.Add(networkTopology.Nodes.Find(n => n.ID == scope.Nodes[0].ID));
                 }
             }
 
@@ -109,54 +109,56 @@ namespace Heterogenerous_Simulation
             foreach (NetworkTopology.Node node in networkTopology.Nodes)
                 node.Tracer = NetworkTopology.TracerType.None;
 
-            centerNode.Sort((x, y) => {
-                Network_Simulation.NetworkTopology.Node n1 = networkTopology.Nodes.Find(n => n.ID == x);
-                Network_Simulation.NetworkTopology.Node n2 = networkTopology.Nodes.Find(n => n.ID == y);
+            centerNode.Sort((x, y) =>
+            {
+                //Network_Simulation.NetworkTopology.Node n1 = networkTopology.Nodes.Find(n => n.ID == x);
+                //Network_Simulation.NetworkTopology.Node n2 = networkTopology.Nodes.Find(n => n.ID == y);
 
-                return n1.Eccentricity.CompareTo(n2.Eccentricity);
+                return x.Eccentricity.CompareTo(y.Eccentricity);
             });
 
-            int i = 0, j = 0;
+            //int i = 0, j = 0;
             m_deployment.FilteringTracerID = new List<int>();
             m_deployment.MarkingTracerID = new List<int>();
 
-            for (; i < centerNode.Count; i++)
+            for (int i = 0; i < numberOfFTracer; i++)
             {
-                if (i < numberOfFTracer)
-                {
-                    networkTopology.Nodes.Find(n => n.ID == centerNode[i]).Tracer = NetworkTopology.TracerType.Filtering;
-                    m_deployment.FilteringTracerID.Add(centerNode[i]);
-                }
-                else if (i < numberOfFTracer + numberOfMTracer)
-                {
-                    networkTopology.Nodes.Find(n => n.ID == centerNode[i]).Tracer = NetworkTopology.TracerType.Marking;
-                    m_deployment.MarkingTracerID.Add(centerNode[i]);
-                }
+                NetworkTopology.Node node = centerNode.Find(n => n.Tracer == NetworkTopology.TracerType.None);
+                if (node != null)
+                    node.Tracer = NetworkTopology.TracerType.Filtering;
                 else
                 {
-                    break;
-                }
-            }
-
-            for (; i < numberOfFTracer; i++, j++)
-            {
-                if (m_deployment.AllRoundScopeList[j % m_deployment.AllRoundScopeList.Count].Nodes.Where(n => n.Tracer == NetworkTopology.TracerType.None).Count() > 0)
-                {
-                    NetworkTopology.Node node = m_deployment.AllRoundScopeList[j % m_deployment.AllRoundScopeList.Count].Nodes.Where(n => n.Tracer == NetworkTopology.TracerType.None).First();
+                    int j = i;
+                    do
+                    {
+                        NetworkTopology t = m_deployment.AllRoundScopeList.Find(s => s.Nodes.Exists(n => n == centerNode[j % centerNode.Count]));
+                        node = t.Nodes.Find(n => n.Tracer == NetworkTopology.TracerType.None);
+                        j++;
+                    } while (node == null);
                     node.Tracer = NetworkTopology.TracerType.Filtering;
-                    m_deployment.FilteringTracerID.Add(node.ID);
                 }
+
+                m_deployment.FilteringTracerID.Add(node.ID);
             }
 
-            for (; i < numberOfFTracer + numberOfMTracer; i++, j++)
+            for (int i = 0; i < numberOfMTracer; i++)
             {
-                if (m_deployment.AllRoundScopeList[j % m_deployment.AllRoundScopeList.Count].Nodes.Where(n => n.Tracer == NetworkTopology.TracerType.None).Count() > 0)
-                {
-                    NetworkTopology.Node node = m_deployment.AllRoundScopeList[j % m_deployment.AllRoundScopeList.Count].Nodes.Where(n => n.Tracer == NetworkTopology.TracerType.None).First();
+                NetworkTopology.Node node = centerNode.Find(n => n.Tracer == NetworkTopology.TracerType.None);
+                if (node != null)
                     node.Tracer = NetworkTopology.TracerType.Marking;
-                    m_deployment.MarkingTracerID.Add(node.ID);
+                else
+                {
+                    int j = i;
+                    do
+                    {
+                        NetworkTopology t = m_deployment.AllRoundScopeList.Find(s => s.Nodes.Exists(n => n == centerNode[j % centerNode.Count]));
+                        node = t.Nodes.Find(n => n.Tracer == NetworkTopology.TracerType.None);
+                        j++;
+                    } while (node == null);
+                    node.Tracer = NetworkTopology.TracerType.Marking;
                 }
-                else i--;
+
+                m_deployment.MarkingTracerID.Add(node.ID);
             }
 
             foreach (int id in m_deployment.DeployNodes)
