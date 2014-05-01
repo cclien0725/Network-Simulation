@@ -166,8 +166,8 @@ namespace Deployment_Simulation
                     }
                 }
 
-                if (scope_net_topo.Nodes.Count >= N)
-                    selectNode = -1;
+                //if (scope_net_topo.Nodes.Count >= N)
+                //    selectNode = -1;
 
                 // if nothing found, break the loop.
                 if (selectNode == -1)

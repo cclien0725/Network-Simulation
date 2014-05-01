@@ -21,7 +21,7 @@ namespace Deployment_Simulation
         {
             K = KCutValue;
             N = numberOfInsideScopeNode;
-            upperBoundOfMinDegree = (int)Math.Ceiling(N * 0.9);
+            upperBoundOfMinDegree = (int)Math.Floor(N * 0.4);
         }
 
         protected override void doDeploy(NetworkTopology networkTopology)
@@ -44,7 +44,7 @@ namespace Deployment_Simulation
 
                 // Finding the center node to run all level's process.
                 //while (tmp_src_net_topo.FindCenterNodeID(out centerID, isNeedRecompute))
-                while (selectStartNode(process_topo, out centerID, isNeedRecompute))
+                while (selectStartNode(process_topo, out centerID, false))
                 {
                     NetworkTopology scope_net_topo = new NetworkTopology(networkTopology.Nodes, ref networkTopology.m_src_shortes_path_table);
                     scope_net_topo.AdjacentMatrix = networkTopology.AdjacentMatrix;

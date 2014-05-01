@@ -20,7 +20,7 @@ namespace Deployment_Simulation
         {
             K = KCutValue;
             N = numberOfInsideScopeNode;
-            upperBoundOfMinDegree = (int)Math.Ceiling(N * 0.9);
+            upperBoundOfMinDegree = (int)Math.Floor(N * 0.4);
         }
 
         protected override void doDeploy(NetworkTopology networkTopology)
@@ -51,7 +51,7 @@ namespace Deployment_Simulation
                     sideNode = -1;
                     minDegree = int.MaxValue;
 
-                    process_topo.FindCenterNodeID(out centerNode, out eccentricity, isNeedRecompute);
+                    process_topo.FindCenterNodeID(out centerNode, out eccentricity, false);
 
                     foreach (var n in process_topo.Nodes)
                     {

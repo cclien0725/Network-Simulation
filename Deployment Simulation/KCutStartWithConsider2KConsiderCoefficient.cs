@@ -21,7 +21,7 @@ namespace Deployment_Simulation
         {
             K = KCutValue;
             N = numberOfInsideScopeNode;
-            upperBoundOfMinDegree = (int)Math.Ceiling(N * 0.9);
+            upperBoundOfMinDegree = (int)Math.Floor(N * 0.4);
         }
 
         protected override void doDeploy(NetworkTopology networkTopology)
@@ -156,6 +156,14 @@ namespace Deployment_Simulation
                 neighbor.AddRange(src_net_topo.GetNeighborNodeIDs(selectNode).Except(scope_net_topo.Nodes.Select(n => n.ID)));
                 neighbor = neighbor.Distinct().ToList();
 
+                NetworkTopology concentrate_topo = new NetworkTopology(src_net_topo.Nodes, ref src_net_topo.m_src_shortes_path_table);
+                concentrate_topo.AdjacentMatrix = src_net_topo.AdjacentMatrix;
+
+                concentrate_topo.Nodes.AddRange(src_net_topo.Nodes.Except(scope_net_topo.Nodes.Where(n => n.ID != scope_net_topo.Nodes[0].ID)));
+                concentrate_topo.Edges.AddRange(src_net_topo.Edges.Where(e => !scope_net_topo.Nodes.Exists(n => n.ID == e.Node1 || n.ID == e.Node2)));
+                foreach (int id in neighbor)
+                    concentrate_topo.Edges.Add(new NetworkTopology.Edge() { Node1 = id, Node2 = scope_net_topo.Nodes[0].ID });
+
                 selectNode = -1;
 
                 if (scope_net_topo.Nodes.Count < upperBoundOfMinDegree)
@@ -179,7 +187,7 @@ namespace Deployment_Simulation
 
                     foreach (int id in neighbor)
                     {
-                        double tmpc = src_net_topo.ClusteringCoefficeint(id);
+                        double tmpc = concentrate_topo.ClusteringCoefficeint(id);
 
                         if (maxC < tmpc)
                         {

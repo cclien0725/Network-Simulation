@@ -221,14 +221,8 @@ namespace Network_Simulation
         {
             List<int> neighbor = GetNeighborNodeIDs(NodeID);
             List<Edge> neighbor_edge_connect_set = new List<Edge>();
-            
-            for (int i = 0; i < neighbor.Count; i++)
-            {
-                List<Edge> tmp = new List<Edge>(Edges.Where(e => e.Node1 == neighbor[i] || e.Node2 == neighbor[i]));
 
-                for (int j = i + 1; j < neighbor.Count; j++)
-                    neighbor_edge_connect_set.AddRange(tmp.Where(e => e.Node1 == neighbor[j] || e.Node2 == neighbor[j]));
-            }
+            neighbor_edge_connect_set.AddRange(Edges.Where(e => neighbor.Contains(e.Node1) && neighbor.Contains(e.Node2)));
 
             double max_edges = (neighbor.Count * (neighbor.Count - 1)) / 2;
             double neighbor_edge_count = neighbor_edge_connect_set.Count;

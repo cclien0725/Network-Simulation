@@ -96,37 +96,47 @@ namespace Deployment_Simulation
 
                         m_topo.ReadBriteFile(files[i]);
                         
-                        List<int> last_deploy_count;
-                        int satisfy_count;
+                        //List<int> last_deploy_count;
+                        //int satisfy_count;
 
                         for (K = 1; K <= m_topo.Diameter; K += 1)
                         {
-                            N = 0;
-                            satisfy_count = 0;
+                            //N = 0;
+                            //satisfy_count = 0;
 
-                            do
-                            {
-                                if (deployment != null)
-                                    last_deploy_count = new List<int>(deployment.DeployNodes);
-                                else
-                                    last_deploy_count = new List<int>();
+                            deployment = Activator.CreateInstance(m_deploy_types.Find(t => t.Name == m_now_deployment_method), new object[] { 30, 20, 10, K, 1 }) as Deployment; //new KCutStartWithConsider2KConsiderWithCoefficient(30, 20, 10, K, ++N);
 
-                                deployment = Activator.CreateInstance(m_deploy_types.Find(t => t.Name == m_now_deployment_method), new object[] { 30, 20, 10, K, ++N }) as Deployment; //new KCutStartWithConsider2KConsiderWithCoefficient(30, 20, 10, K, ++N);
+                            m_simulation_worker.ReportProgress((int)((double)K / (double)m_topo.Diameter * 100),
+                                                new object[] { false, string.Format("Starting Deployment with K: {0}, N: {1}...", K, 1), true, files[i], K, 1 });
 
-                                m_simulation_worker.ReportProgress((int)((double)K / (double)m_topo.Diameter * 100),
-                                                    new object[] { false, string.Format("Starting Deployment with K: {0}, N: {1}...", K, N), true, files[i], K, N });
+                            deployment.Deploy(m_topo);
 
-                                deployment.Deploy(m_topo);
+                            m_simulation_worker.ReportProgress((int)((double)K / (double)m_topo.Diameter * 100),
+                                               new object[] { false, string.Format("Completed for K: {0}, N: {1}.", K, 1), true, files[i], K, 1 });
 
-                                m_simulation_worker.ReportProgress((int)((double)K / (double)m_topo.Diameter * 100),
-                                                   new object[] { false, string.Format("Completed for K: {0}, N: {1}.", K, N), true, files[i], K, N });
+                            //do
+                            //{
+                            //    if (deployment != null)
+                            //        last_deploy_count = new List<int>(deployment.DeployNodes);
+                            //    else
+                            //        last_deploy_count = new List<int>();
 
-                                if (deployment.DeployNodes.Except(last_deploy_count).Count() == 0 && last_deploy_count.Except(deployment.DeployNodes).Count() == 0)
-                                    satisfy_count++;
-                                else
-                                    satisfy_count = 0;
+                            //    deployment = Activator.CreateInstance(m_deploy_types.Find(t => t.Name == m_now_deployment_method), new object[] { 30, 20, 10, K, ++N }) as Deployment; //new KCutStartWithConsider2KConsiderWithCoefficient(30, 20, 10, K, ++N);
 
-                            } while (satisfy_count < 2);
+                            //    m_simulation_worker.ReportProgress((int)((double)K / (double)m_topo.Diameter * 100),
+                            //                        new object[] { false, string.Format("Starting Deployment with K: {0}, N: {1}...", K, N), true, files[i], K, N });
+
+                            //    deployment.Deploy(m_topo);
+
+                            //    m_simulation_worker.ReportProgress((int)((double)K / (double)m_topo.Diameter * 100),
+                            //                       new object[] { false, string.Format("Completed for K: {0}, N: {1}.", K, N), true, files[i], K, N });
+
+                            //    if (deployment.DeployNodes.Except(last_deploy_count).Count() == 0 && last_deploy_count.Except(deployment.DeployNodes).Count() == 0)
+                            //        satisfy_count++;
+                            //    else
+                            //        satisfy_count = 0;
+
+                            //} while (satisfy_count < 2);
                         }
                     }
 
