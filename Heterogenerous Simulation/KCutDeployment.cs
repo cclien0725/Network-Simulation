@@ -45,8 +45,8 @@ namespace Heterogenerous_Simulation
             bool isSatisfied = false;
             List<int> last_deploy_count;
             int satisfy_count;
+            int deployNodesCount = int.MaxValue;
             Deployment try_deploy = null;
-
 
             for (int K = 1; K <= networkTopology.Diameter; K++)
             {
@@ -63,14 +63,23 @@ namespace Heterogenerous_Simulation
                     try_deploy = Activator.CreateInstance(m_deploy_type, new object[] { percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer, K, ++N }) as Deployment;
                     try_deploy.Deploy(networkTopology);
 
-                    if (try_deploy.DeployNodes.Count <= numberOfTTracer)
-                    {
-                        if (m_deployment == null)
-                            m_deployment = try_deploy;
-                        else if (m_deployment.DeployNodes.Count < try_deploy.DeployNodes.Count)
-                            m_deployment = try_deploy;
+                    //if (try_deploy.DeployNodes.Count <= numberOfTTracer)
+                    //{
+                    //    if (m_deployment == null)
+                    //        m_deployment = try_deploy;
+                    //    else if (m_deployment.DeployNodes.Count < try_deploy.DeployNodes.Count)
+                    //        m_deployment = try_deploy;
 
-                        isSatisfied = true;
+                    //    isSatisfied = true;
+                    //}
+
+                    if (try_deploy.DeployNodes.Count <= deployNodesCount)
+                    {
+                        m_deployment = try_deploy;
+                        deployNodesCount = try_deploy.DeployNodes.Count;
+
+                        if (try_deploy.DeployNodes.Count <= numberOfTTracer)
+                            isSatisfied = true;
                     }
 
                     if (try_deploy.DeployNodes.Except(last_deploy_count).Count() == 0 && last_deploy_count.Except(try_deploy.DeployNodes).Count() == 0)
