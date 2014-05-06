@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KCutDeploymentV2.cs" />
     <Compile Include="KCutDeployment.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

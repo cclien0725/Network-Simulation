@@ -148,6 +148,19 @@ namespace Heterogenerous_Simulation
 
                     bg.ReportProgress((filenames.IndexOf(filename) + 1) * 100 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
 
+                    ////// Using KCutV2 deployment method.
+                    //KCutDeploymentV2 kCutDeploy = new KCutDeploymentV2(Convert.ToDouble(TunnelingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(MarkingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(FilteringTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, typeof(KCutStartWithConsider2KConsiderCoefficient));
+                    //sql.CreateTable(kCutDeploy.ToString());
+                    //kCutDeploy.Deploy(networkTopology);
+                    //Simulator kCutSimulator = new Simulator(kCutDeploy.Deployment, networkTopology, sql);
+                    //kCutSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
+                    //{
+                    //    bg.ReportProgress(ra.CurrentPacket * 100 / ra.TotalPacket, new ProgressReportArg() { KEY = filename, ST = StatusType.KCutDeploymentStatus });
+                    //};
+                    //kCutSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(TotalPacket.Text), Convert.ToInt32(PercentageOfAttackPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text), Convert.ToInt32(InitTimeOfAttackPacket.Text), DynamicProbability.Checked);
+
+                    //bg.ReportProgress((filenames.IndexOf(filename) + 1) * 100 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
+
                     // TODO: REMOVE THIS !!! IT TEST ALL DEPLOYMENTS SIMULATION.
                     //foreach (var type in m_deploy_types)
                     //{
@@ -163,13 +176,6 @@ namespace Heterogenerous_Simulation
 
                     //    bg.ReportProgress((filenames.IndexOf(filename) + 1) * 100 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
                     //}
-
-                    //// Using tomato deployment method.
-                    //tomatodeployment tomatodeploy = new tomatodeployment(convert.todouble(tunnelingtracer.text), convert.todouble(markingtracer.text), convert.todouble(filteringtracer.text));
-                    //sql.createtable(tomatodeploy.gettype().name);
-                    //tomatodeploy.deploy(networktopology);
-                    //simulator tomatosimulator = new simulator(tomatodeploy, networktopology);
-                    //tomatosimulator.run(convert.toint32(attackpacketpersec.text), convert.toint32(normalpacketpersec.text), convert.toint32(numberofattackpacket.text), convert.toint32(numberofnormalpacket.text), convert.todouble(probibilityofpackettunneling.text), convert.todouble(probibilityofpacketmarking.text), convert.todouble(startfiltering.text));
                 }
 
                 File.WriteAllLines(Path.Combine(Environment.CurrentDirectory, "Log", "ARGS.txt"), new string[] { 
@@ -239,13 +245,14 @@ namespace Heterogenerous_Simulation
             if (listView1.SelectedIndices.Count > 0)
             {
                 ListViewItem item = listView1.Items[listView1.SelectedIndices[0]];
-                string dbFileName = string.Format("{0}_T{1}M{2}F{3}_A{4}V{5}_Pkt{6}_{7}.db", Path.GetFileNameWithoutExtension(item.Name),
+                string dbFileName = string.Format("{0}_T{1}M{2}F{3}_A{4}V{5}_Pkt{6}_{7}_{8}.db", Path.GetFileNameWithoutExtension(item.Name),
                                                                                    TunnelingTracer.Text,
                                                                                    MarkingTracer.Text,
                                                                                    FilteringTracer.Text,
                                                                                    AttackNodes.Text,
                                                                                    VictimNodes.Text,
                                                                                    TotalPacket.Text,
+                                                                                   PercentageOfAttackPacket.Text,
                                                                                    postfixIndex);
                 using (NetworkViewForm nvf = new NetworkViewForm(item.Name, dbFileName)) 
                 {
