@@ -33,7 +33,7 @@ namespace Heterogenerous_Simulation
 
             attackNode = topology.Nodes.Where(node => node.Type == NetworkTopology.NodeType.Attacker).ToList();
 
-            sql.LogDeploymentResult(topology, deployment);
+            //sql.LogDeploymentResult(topology, deployment);
         }
 
         public void Run(int attackPacketPerSec, int normalPacketPerSec, int totalPacket, int percentageOfAttackPacket, double probibilityOfPacketTunneling, double probibilityOfPacketMarking, double startFiltering, int initialTimeOfAttackPacket, bool dynamicProbability)
@@ -208,6 +208,8 @@ namespace Heterogenerous_Simulation
             sql.InsertTunnelingEvent(tunnelingEventList);
             sql.InsertMarkingEvent(markingEventList);
             sql.InsertFilteringEvent(filteringEventList);
+
+            sql.LogDeploymentResult(topology, deployment);
         }
 
         private List<int> ChooseTunnelingNode(List<int> path, int source, NetworkTopology.TracerType tracerType, ref TunnelingEvent tunelingEvent)
