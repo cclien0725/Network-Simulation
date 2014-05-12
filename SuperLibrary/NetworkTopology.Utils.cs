@@ -109,7 +109,38 @@ namespace Network_Simulation
                 }
             }
 
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                for (int j = 0; j < Nodes.Count; j++)
+                {
+                    if (AdjacentMatrix[i, j] != null)
+                        AdjacentMatrix[i, j].PathCount = GetShortestPath(Nodes[i].ID, Nodes[j].ID).Count;
+
+                    if (AdjacentMatrix[j, i] != null)
+                        AdjacentMatrix[j, i].PathCount = GetShortestPath(Nodes[j].ID, Nodes[i].ID).Count;
+                }
+            }
+
             DataUtility.Log("Done.\n", false);
+        }
+
+        public void ComputeNodeDistrib()
+        {
+            nodeIDPathDistrib = new Dictionary<int, int>();
+
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                for (int j = 0; j < Nodes.Count; j++)
+                {
+                    foreach (int id in GetShortestPath(Nodes[i].ID, Nodes[j].ID))
+                    {
+                        if (nodeIDPathDistrib.ContainsKey(id))
+                            nodeIDPathDistrib[id]++;
+                        else
+                            nodeIDPathDistrib.Add(id, 1);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -143,19 +174,12 @@ namespace Network_Simulation
 
         public int GetShortestPathCount(int SourceNodeId, int DestinationNodeId)
         {
-            int count = m_src_shortes_path_table[NodeID2Index(SourceNodeId), NodeID2Index(DestinationNodeId)];
+            Adjacency adjacency = AdjacentMatrix[NodeID2Index(SourceNodeId), NodeID2Index(DestinationNodeId)];
 
-            if (SourceNodeId == DestinationNodeId)
+            if (adjacency == null)
                 return 0;
-            else if (count != 0)
-                return count;
-            else
-            {
-                count = GetShortestPath(SourceNodeId, DestinationNodeId).Count;
-                m_src_shortes_path_table[NodeID2Index(SourceNodeId), NodeID2Index(DestinationNodeId)] = count;
-                m_src_shortes_path_table[NodeID2Index(DestinationNodeId), NodeID2Index(SourceNodeId)] = count;
-                return count;
-            }
+            else 
+                return adjacency.PathCount;
         }
 
         public void ComputingAllEccentricity()
@@ -217,12 +241,31 @@ namespace Network_Simulation
         /// </summary>
         /// <param name="NodeID">The node id on the network topology.</param>
         /// <returns>The clustering coefficeint value.</returns>
-        public double ClusteringCoefficeint(int NodeID)
+        public double ClusteringCoefficient(int NodeID)
         {
             List<int> neighbor = GetNeighborNodeIDs(NodeID);
             List<Edge> neighbor_edge_connect_set = new List<Edge>();
 
             neighbor_edge_connect_set.AddRange(Edges.Where(e => neighbor.Contains(e.Node1) && neighbor.Contains(e.Node2)));
+
+            double max_edges = (neighbor.Count * (neighbor.Count - 1)) / 2;
+            double neighbor_edge_count = neighbor_edge_connect_set.Count;
+
+            if (max_edges > 0)
+                return neighbor_edge_count / max_edges;
+            else
+                return 0;
+        }
+
+        public double ClusteringCoefficient(NetworkTopology Scope, int NodeID)
+        {
+            List<int> neighbor = GetNeighborNodeIDs(NodeID);
+            List<Edge> neighbor_edge_connect_set = new List<Edge>();
+
+            neighbor_edge_connect_set.AddRange(Edges.Where(e =>
+                                                    Scope.Nodes[0].ID == e.Node1 && neighbor.Contains(e.Node2) ||
+                                                    Scope.Nodes[0].ID == e.Node2 && neighbor.Contains(e.Node1)
+                                               ));
 
             double max_edges = (neighbor.Count * (neighbor.Count - 1)) / 2;
             double neighbor_edge_count = neighbor_edge_connect_set.Count;
@@ -292,7 +335,7 @@ namespace Network_Simulation
         /// <returns>The complement set between the two network topologies.</returns>
         public static NetworkTopology operator -(NetworkTopology left_n, NetworkTopology right_n)
         {
-            NetworkTopology result = new NetworkTopology(left_n.m_src_nodes, ref left_n.m_src_shortes_path_table);
+            NetworkTopology result = new NetworkTopology(left_n.m_src_nodes);
 
             result.Nodes = left_n.Nodes.Except(right_n.Nodes).ToList();
             result.Edges = left_n.Edges.Except(right_n.Edges).ToList();

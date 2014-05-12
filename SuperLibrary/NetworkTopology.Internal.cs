@@ -53,10 +53,12 @@ namespace Network_Simulation
             public double Length { get; set; }
             public double Delay { get; set; }
             public int Predecessor { get; set; }
+            public int PathCount { get; set; }
 
             public Adjacency()
             {
                 Predecessor = -1;
+                PathCount = 0;
             }
 
             public Adjacency(string String)
@@ -65,11 +67,12 @@ namespace Network_Simulation
                 Predecessor = Convert.ToInt32(data[0]);
                 Length = Convert.ToDouble(data[1]);
                 Delay = Convert.ToDouble(data[2]);
+                PathCount = Convert.ToInt32(data[3]);
             }
 
             public string GetString()
             {
-                return string.Format("{0},{1},{2}", Predecessor, Length, Delay);
+                return string.Format("{0},{1},{2},{3}", Predecessor, Length, Delay, PathCount);
             }
         }
     }

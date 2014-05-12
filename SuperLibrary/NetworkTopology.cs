@@ -49,9 +49,12 @@ namespace Network_Simulation
         private bool m_is_mouse_down;
 
         private int m_diameter;
+        private int[] m_hop_count_distrib;
+        public double[] m_prob_hop;
 
         private List<Node> m_src_nodes;
-        public int[,] m_src_shortes_path_table;
+
+        private Dictionary<int, int> nodeIDPathDistrib;
 
         /// <summary>
         /// Constructor.
@@ -81,14 +84,13 @@ namespace Network_Simulation
             this.numberOfVictims = numberOfVictims;
         }
 
-        public NetworkTopology(List<Node> src_node_list, ref int [,] src_shortest_path_table)
+        public NetworkTopology(List<Node> src_node_list)
         {
             // Create instance of nodes.
             Nodes = new List<Node>();
             Edges = new List<Edge>();
 
             m_src_nodes = new List<Node>(src_node_list);
-            m_src_shortes_path_table = src_shortest_path_table;
         }
 
         /// <summary>
@@ -121,13 +123,31 @@ namespace Network_Simulation
             //for (; randomArrayIndex < numberOfNormalUsers + numberOfAttackers + numberOfVictims; randomArrayIndex++)
             //    Nodes[randomArray[randomArrayIndex]].Type = NodeType.Normal;
 
-            m_src_shortes_path_table = new int[Nodes.Count, Nodes.Count];
-
             // Finding diameter of the network topology.
             m_diameter = int.MinValue;
             foreach (var node in Nodes)
                 if (m_diameter < node.Eccentricity)
                     m_diameter = node.Eccentricity;
+
+            m_hop_count_distrib = new int[m_diameter];
+            m_prob_hop = new double[m_diameter];
+            int sum_hop_cout = 0;
+
+            for (int i = 0; i < Nodes.Count; i++)
+                for (int j = 0; j < Nodes.Count; j++)
+                    if (AdjacentMatrix[i, j] != null)
+                        m_hop_count_distrib[AdjacentMatrix[i, j].PathCount - 1]++;
+                    else
+                        m_hop_count_distrib[0]++;
+
+            for (int i = 1; i < m_hop_count_distrib.Length; i++)
+            {
+                m_hop_count_distrib[i] /= 2;
+                sum_hop_cout += m_hop_count_distrib[i];
+            }
+
+            for (int i = 1; i < m_prob_hop.Length; i++)
+                m_prob_hop[i] = (double)m_hop_count_distrib[i] / (double)sum_hop_cout;
         }
 
         /// <summary>
@@ -149,6 +169,7 @@ namespace Network_Simulation
                 string[] lines = File.ReadAllLines(fileName);
                 string shortestPathFileName = string.Format(@"{0}.ShortestPath", fileName);
                 string eccDegPathFileName = string.Format(@"{0}.EccDeg", fileName);
+                string nodeDistribFileName = string.Format(@"{0}.NodeDistrib", fileName);
 
                 for (int i = 0; i < lines.Length; i++)
                 {
@@ -189,10 +210,19 @@ namespace Network_Simulation
                 // Computing shortest path
                 else
                 {
-                    ComputingShortestPath();
+                    ComputingShortestPath();                    
 
                     // Output the result to the file. (XXX.ShortestPath)
                     WriteShortestPathFile(shortestPathFileName);
+                }
+
+                if (File.Exists(nodeDistribFileName))
+                    ReadNodeIDDistribFile(nodeDistribFileName);
+                else
+                {
+                    ComputeNodeDistrib();
+
+                    WriteNodeIDDistribFile(nodeDistribFileName);
                 }
 
                 if (File.Exists(eccDegPathFileName))
@@ -204,7 +234,7 @@ namespace Network_Simulation
 
                     WriteEccentricityDegreeFile(eccDegPathFileName);
                 }
-                
+
                 Initialize();
             //}
             //catch(Exception exception)
@@ -337,6 +367,58 @@ namespace Network_Simulation
 
                         if (i != Nodes.Count - 1)
                             writer.Write("\n");
+                    }
+                }
+            }
+
+            DataUtility.Log("Done.\n", false);
+        }
+
+        private void ReadNodeIDDistribFile(string fileName)
+        {
+            DataUtility.Log("Reading nodeid distrib file...");
+
+            nodeIDPathDistrib = new Dictionary<int,int>();
+
+            using (BufferedStream bs = new BufferedStream(File.OpenRead(fileName)))
+            {
+                using (StreamReader reader = new StreamReader(bs))
+                {
+                    int i = 0;
+
+                    while (!reader.EndOfStream)
+                    {
+                        string data = reader.ReadLine();
+
+                        string[] str = data.Split(',');
+
+                        if (str.Length == 2)
+                        {
+                            int id = Convert.ToInt32(str[0]);
+                            int value = Convert.ToInt32(str[1]);
+
+                            nodeIDPathDistrib.Add(id, value);
+                        }
+
+                        i++;
+                    }
+                }
+            }
+
+            DataUtility.Log("Done.\n", false);
+        }
+
+        private void WriteNodeIDDistribFile(string fileName)
+        {
+            DataUtility.Log("Writing nodeid distrib file...");
+
+            using (BufferedStream bs = new BufferedStream(File.OpenWrite(fileName)))
+            {
+                using (StreamWriter writer = new StreamWriter(bs))
+                {
+                    foreach (var item in nodeIDPathDistrib)
+                    {
+                        writer.WriteLine(string.Format("{0},{1}", item.Key, item.Value));
                     }
                 }
             }

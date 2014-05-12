@@ -116,6 +116,7 @@ namespace Network_Simulation
                 {"NetworkTopology", "n_id INTEGER PRIMARY KEY AUTOINCREMENT, file_name TEXT UNIQUE, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER"},
                 {"DeploySimulation", "job_id INTEGER PRIMARY KEY, n_id INTEGER, k INTEGER, n INTEGER, deploy_name TEXT, FOREIGN KEY(n_id) REFERENCES NetworkTopology(n_id)"},
                 {"LevelRecord", "l_id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER, level INTEGER, node_id INTEGER, deploy_type TEXT, FOREIGN KEY(job_id) REFERENCES DeploySimulation(job_id)"},
+                {"UndetectedRatio", "u_id INTEGER PRIMARY KEY AUTOINCREMENT, file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, metric_name TEXT, ratio REAL"}
             };
             private Dictionary<string, string> indexDic = new Dictionary<string, string>()
             {

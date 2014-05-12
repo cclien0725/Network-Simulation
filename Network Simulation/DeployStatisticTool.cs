@@ -45,7 +45,10 @@ namespace Network_Simulation
             m_deploy_names.Add(typeof(KCutStartWithComparableConsiderCoefficient).Name);
             m_deploy_names.Add(typeof(KCutStartWithConsider2KConsiderCoefficient).Name);
             m_deploy_names.Add(typeof(KCutStartWithSideNode).Name);
+            m_deploy_names.Add(typeof(KCutStartWithSideNodeConcentrateDegree).Name);
             m_deploy_names.Add(typeof(KCutStartWithSideNodeConsiderCoefficient).Name);
+            m_deploy_names.Add(typeof(KCutStartWithSideNodeConsiderScopeCoefficient).Name);
+            m_deploy_names.Add(typeof(KCutStartWithSideNodeConsiderScopeCoefficientMinDegree).Name);
 
             m_deploy_worker = new BackgroundWorker();
             m_deploy_worker.WorkerSupportsCancellation = true;

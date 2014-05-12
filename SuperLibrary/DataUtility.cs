@@ -42,6 +42,20 @@ namespace Network_Simulation
                 Console.Write("{0}", msg);
         }
 
+        public static long Combination(long a, long b)
+        {
+            long upper = 1;
+            long lower = 1;
+
+            for (int i = 0; i < b; i++)
+            {
+                upper *= (a - i);
+                lower *= i + 1;
+            }
+
+            return upper / lower;
+        }
+
         public static void ExcelExport(DataTable data, String fileName, bool openAfter)
         {
             //export a DataTable to Excel

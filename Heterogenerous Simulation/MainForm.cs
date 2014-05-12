@@ -37,12 +37,15 @@ namespace Heterogenerous_Simulation
             InitializeComponent();
 
             m_deploy_types = new List<Type>();
-            m_deploy_types.Add(typeof(KCutStartWithCenterNode));
-            m_deploy_types.Add(typeof(KCutStartWithCenterNodeConsiderCoefficient));
-            m_deploy_types.Add(typeof(KCutStartWithComparableConsiderCoefficient));
-            m_deploy_types.Add(typeof(KCutStartWithConsider2KConsiderCoefficient));
+            //m_deploy_types.Add(typeof(KCutStartWithCenterNode));
+            //m_deploy_types.Add(typeof(KCutStartWithCenterNodeConsiderCoefficient));
+            //m_deploy_types.Add(typeof(KCutStartWithComparableConsiderCoefficient));
+            //m_deploy_types.Add(typeof(KCutStartWithConsider2KConsiderCoefficient));
             m_deploy_types.Add(typeof(KCutStartWithSideNode));
+            m_deploy_types.Add(typeof(KCutStartWithSideNodeConcentrateDegree));
             m_deploy_types.Add(typeof(KCutStartWithSideNodeConsiderCoefficient));
+            m_deploy_types.Add(typeof(KCutStartWithSideNodeConsiderScopeCoefficient));
+            m_deploy_types.Add(typeof(KCutStartWithSideNodeConsiderScopeCoefficientMinDegree));
         }
 
         private void Form1_Load(object sender, EventArgs e)

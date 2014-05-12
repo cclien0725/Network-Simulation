@@ -53,10 +53,14 @@
   <ItemGroup>
     <Compile Include="KCutStartWithCenterNode.cs" />
     <Compile Include="KCutStartWithCenterNodeConsiderCoefficient.cs" />
+    <Compile Include="KCutStartWithCenterNodeConsiderScopeCoefficientMinDegree.cs" />
     <Compile Include="KCutStartWithCenterNodeNoRecomputeEccentricity.cs" />
+    <Compile Include="KCutStartWithSideConcentrateDegree.cs" />
     <Compile Include="KCutStartWithSideNode.cs" />
     <Compile Include="KCutStartWithSideNodeConsiderCoefficient.cs" />
     <Compile Include="KCutStartWithComparableConsiderCoefficient.cs" />
+    <Compile Include="KCutStartWithSideNodeConsiderScopeCoefficient.cs" />
+    <Compile Include="KCutStartWithSideNodeConsiderScopeCoefficientMinDegree.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -14,6 +14,7 @@ namespace Deployment_Simulation
         private bool isNeedRecompute;
         private List<List<int>> allLevelDeploy;
         private int upperBoundOfMinDegree;
+        private long m_undetected_count;
 
         public KCutStartWithComparableConsiderCoefficient(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer, int KCutValue, int numberOfInsideScopeNode)
             : base(percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer)
@@ -62,8 +63,8 @@ namespace Deployment_Simulation
                         }
                     }
 
-                    NetworkTopology center_scope_net_topo = new NetworkTopology(networkTopology.Nodes, ref networkTopology.m_src_shortes_path_table);
-                    NetworkTopology side_scope_net_topo = new NetworkTopology(networkTopology.Nodes, ref networkTopology.m_src_shortes_path_table);
+                    NetworkTopology center_scope_net_topo = new NetworkTopology(networkTopology.Nodes);
+                    NetworkTopology side_scope_net_topo = new NetworkTopology(networkTopology.Nodes);
 
                     List<int> center_deploy = new List<int>();
                     List<int> side_deploy = new List<int>();
@@ -90,6 +91,9 @@ namespace Deployment_Simulation
                         deployNodes.AddRange(center_deploy);
                         allLevelDeploy.Add(center_deploy);
 
+                        if (center_scope_net_topo.Nodes.Count > 1)
+                            m_undetected_count += DataUtility.Combination(center_scope_net_topo.Nodes.Count, 2);
+
                         DataUtility.Log(string.Format("================= Level {0} ==================\n", allRoundScopeList.Count));
                         DataUtility.Log(string.Format("Start From Center Node:\t{0}\n", center_scope_net_topo.Nodes[0].ID));
                         DataUtility.Log(string.Format("Scope Node Count:\t{0}\n", center_scope_net_topo.Nodes.Count));
@@ -101,6 +105,9 @@ namespace Deployment_Simulation
                         allRoundScopeList.Add(side_scope_net_topo);
                         deployNodes.AddRange(side_deploy);
                         allLevelDeploy.Add(side_deploy);
+
+                        if (side_scope_net_topo.Nodes.Count > 1)
+                            m_undetected_count += DataUtility.Combination(side_scope_net_topo.Nodes.Count, 2);
 
                         DataUtility.Log(string.Format("================= Level {0} ==================\n", allRoundScopeList.Count));
                         DataUtility.Log(string.Format("Start From Side Node:\t{0}\n", side_scope_net_topo.Nodes[0].ID));
@@ -167,6 +174,38 @@ namespace Deployment_Simulation
 
             if (itemCount % 499 != 0)
                 sqlite_utility.RunCommnad(sb.ToString().Remove(sb.ToString().Length - 6, 6));
+
+            double ratio = (double)m_undetected_count / (double)DataUtility.Combination(networkTopology.Nodes.Count, 2);
+
+            cmd = "INSERT INTO UndetectedRatio(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
+            sqlite_utility.RunCommnad(cmd, new List<SQLiteParameter>()
+            {
+                new SQLiteParameter("@file_name", networkTopology.FileName),
+                new SQLiteParameter("@node_counts", networkTopology.Nodes.Count),
+                new SQLiteParameter("@edge_counts", networkTopology.Edges.Count),
+                new SQLiteParameter("@diameter", networkTopology.Diameter),
+                new SQLiteParameter("@k", K),
+                new SQLiteParameter("@n", N),
+                new SQLiteParameter("@metric_name", "Theoretical Undetected Ratio"),
+                new SQLiteParameter("@ratio", ratio)
+            });
+
+            double ratio_ub = 0;
+            for (int i = 1; i <= K - 1; i++)
+                ratio_ub += networkTopology.m_prob_hop[i];
+
+            cmd = "INSERT INTO UndetectedRatio(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
+            sqlite_utility.RunCommnad(cmd, new List<SQLiteParameter>()
+            {
+                new SQLiteParameter("@file_name", networkTopology.FileName),
+                new SQLiteParameter("@node_counts", networkTopology.Nodes.Count),
+                new SQLiteParameter("@edge_counts", networkTopology.Edges.Count),
+                new SQLiteParameter("@diameter", networkTopology.Diameter),
+                new SQLiteParameter("@k", K),
+                new SQLiteParameter("@n", N),
+                new SQLiteParameter("@metric_name", "Theoretical Undetected Ratio Upper Bound"),
+                new SQLiteParameter("@ratio", ratio_ub)
+            });
         }
 
         /// <summary>
@@ -217,7 +256,7 @@ namespace Deployment_Simulation
 
                     foreach (int id in neighbor)
                     {
-                        double tmpc = src_net_topo.ClusteringCoefficeint(id);
+                        double tmpc = src_net_topo.ClusteringCoefficient(id);
 
                         if (maxC < tmpc)
                         {
@@ -332,7 +371,7 @@ namespace Deployment_Simulation
 
                                     allRoundScopeList.Add(scope);
                                 }
-                                scope = new NetworkTopology(topo.Nodes, ref topo.m_src_shortes_path_table);
+                                scope = new NetworkTopology(topo.Nodes);
                                 scope.Edges = new List<NetworkTopology.Edge>(topo.Edges);
                                 scope.AdjacentMatrix = topo.AdjacentMatrix;
 

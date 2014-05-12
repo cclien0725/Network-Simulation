@@ -14,6 +14,7 @@ namespace Deployment_Simulation
         private int allLevelScopeCount;
         private bool isNeedRecompute;
         private List<List<int>> allLevelDeploy;
+        private long m_undetected_count;
 
         public KCutStartWithCenterNodeNoRecomputeEccentricity(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer, int KCutValue, int numberOfInsideScopeNode)
             : base(percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer)
@@ -44,7 +45,7 @@ namespace Deployment_Simulation
                 //while (tmp_src_net_topo.FindCenterNodeID(out centerID, isNeedRecompute))
                 while (selectStartNode(process_topo, out centerID, false))
                 {
-                    NetworkTopology scope_net_topo = new NetworkTopology(networkTopology.Nodes, ref networkTopology.m_src_shortes_path_table);
+                    NetworkTopology scope_net_topo = new NetworkTopology(networkTopology.Nodes);
                     scope_net_topo.AdjacentMatrix = networkTopology.AdjacentMatrix;
 
                     List<int> now_level_depoly_id = new List<int>();
@@ -64,6 +65,9 @@ namespace Deployment_Simulation
                     lastDeployCount = deployNodes.Count;
 
                     allLevelScopeCount += scope_net_topo.Nodes.Count;
+
+                    if (scope_net_topo.Nodes.Count > 1)
+                        m_undetected_count += DataUtility.Combination(scope_net_topo.Nodes.Count, 2);
 
                     DataUtility.Log(string.Format("================= Level {0} ==================\n", allRoundScopeList.Count));
                     DataUtility.Log(string.Format("Center Node:\t{0}\n", centerID));
@@ -127,6 +131,38 @@ namespace Deployment_Simulation
 
             if (itemCount % 499 != 0)
                 sqlite_utility.RunCommnad(sb.ToString().Remove(sb.ToString().Length - 6, 6));
+
+            double ratio = (double)m_undetected_count / (double)DataUtility.Combination(networkTopology.Nodes.Count, 2);
+
+            cmd = "INSERT INTO UndetectedRatio(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
+            sqlite_utility.RunCommnad(cmd, new List<SQLiteParameter>()
+            {
+                new SQLiteParameter("@file_name", networkTopology.FileName),
+                new SQLiteParameter("@node_counts", networkTopology.Nodes.Count),
+                new SQLiteParameter("@edge_counts", networkTopology.Edges.Count),
+                new SQLiteParameter("@diameter", networkTopology.Diameter),
+                new SQLiteParameter("@k", K),
+                new SQLiteParameter("@n", N),
+                new SQLiteParameter("@metric_name", "Theoretical Undetected Ratio"),
+                new SQLiteParameter("@ratio", ratio)
+            });
+
+            double ratio_ub = 0;
+            for (int i = 1; i <= K - 1; i++)
+                ratio_ub += networkTopology.m_prob_hop[i];
+
+            cmd = "INSERT INTO UndetectedRatio(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
+            sqlite_utility.RunCommnad(cmd, new List<SQLiteParameter>()
+            {
+                new SQLiteParameter("@file_name", networkTopology.FileName),
+                new SQLiteParameter("@node_counts", networkTopology.Nodes.Count),
+                new SQLiteParameter("@edge_counts", networkTopology.Edges.Count),
+                new SQLiteParameter("@diameter", networkTopology.Diameter),
+                new SQLiteParameter("@k", K),
+                new SQLiteParameter("@n", N),
+                new SQLiteParameter("@metric_name", "Theoretical Undetected Ratio Upper Bound"),
+                new SQLiteParameter("@ratio", ratio_ub)
+            });
         }
 
         /// <summary>
@@ -278,7 +314,7 @@ namespace Deployment_Simulation
 
                                     allRoundScopeList.Add(scope);
                                 }
-                                scope = new NetworkTopology(topo.Nodes, ref topo.m_src_shortes_path_table);
+                                scope = new NetworkTopology(topo.Nodes);
                                 scope.Edges = new List<NetworkTopology.Edge>(topo.Edges);
                                 scope.AdjacentMatrix = topo.AdjacentMatrix;
 
