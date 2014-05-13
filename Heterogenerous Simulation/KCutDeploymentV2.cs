@@ -101,48 +101,70 @@ namespace Heterogenerous_Simulation
             foreach (NetworkTopology.Node node in networkTopology.Nodes)
                 node.Tracer = NetworkTopology.TracerType.None;
 
-            dNode.Sort((x, y) => x.Eccentricity.CompareTo(y.Eccentricity));
+            dNode.Sort((x, y) => networkTopology.NodeIDPathDistrib[y.ID].CompareTo(networkTopology.NodeIDPathDistrib[x.ID]));
 
             m_deployment.FilteringTracerID = new List<int>();
             m_deployment.MarkingTracerID = new List<int>();
 
-            int left = 0, right = dNode.Count - 1;
-
-            for (int i = 0; i < numberOfFTracer; i++, left += 2, right -= 2)
+            for (int i = 0; i < numberOfFTracer; i++)
             {
-                while (dNode[(left + left / dNode.Count) % dNode.Count].Tracer != NetworkTopology.TracerType.None)
-                    left += 2;
-                NetworkTopology.Node leftNode = dNode[(left + left / dNode.Count) % dNode.Count];
-                leftNode.Tracer = NetworkTopology.TracerType.Filtering;
-                m_deployment.FilteringTracerID.Add(leftNode.ID);
-
-                if (++i >= numberOfFTracer)
+                NetworkTopology.Node node = dNode.First(n => n.Tracer == NetworkTopology.TracerType.None);
+                
+                if (node == null)
                     break;
 
-                while (dNode[(Math.Abs(right) + Math.Abs(right) / dNode.Count) % dNode.Count].Tracer != NetworkTopology.TracerType.None)
-                    right -= 2;
-                NetworkTopology.Node rightNode = dNode[(Math.Abs(right) + Math.Abs(right) / dNode.Count) % dNode.Count];
-                rightNode.Tracer = NetworkTopology.TracerType.Filtering;
-                m_deployment.FilteringTracerID.Add(rightNode.ID);
+                node.Tracer = NetworkTopology.TracerType.Filtering;
+                m_deployment.FilteringTracerID.Add(node.ID);
             }
 
-            for (int i = 0; i < numberOfMTracer; i++, left += 2, right -= 2)
+            for (int i = 0; i < numberOfMTracer; i++)
             {
-                while (dNode[(left + left / dNode.Count) % dNode.Count].Tracer != NetworkTopology.TracerType.None)
-                    left += 2;
-                NetworkTopology.Node leftNode = dNode[(left + left / dNode.Count) % dNode.Count];
-                leftNode.Tracer = NetworkTopology.TracerType.Marking;
-                m_deployment.MarkingTracerID.Add(leftNode.ID);
+                NetworkTopology.Node node = dNode.First(n => n.Tracer == NetworkTopology.TracerType.None);
 
-                if (++i >= numberOfMTracer)
+                if (node == null)
                     break;
 
-                while (dNode[(Math.Abs(right) + Math.Abs(right) / dNode.Count) % dNode.Count].Tracer != NetworkTopology.TracerType.None)
-                    right -= 2;
-                NetworkTopology.Node rightNode = dNode[(Math.Abs(right) + Math.Abs(right) / dNode.Count) % dNode.Count];
-                rightNode.Tracer = NetworkTopology.TracerType.Marking;
-                m_deployment.MarkingTracerID.Add(rightNode.ID);
+                node.Tracer = NetworkTopology.TracerType.Marking;
+                m_deployment.MarkingTracerID.Add(node.ID);
             }
+
+            //int left = 0, right = dNode.Count - 1;
+
+            //for (int i = 0; i < numberOfFTracer; i++, left += 2, right -= 2)
+            //{
+            //    while (dNode[(left + left / dNode.Count) % dNode.Count].Tracer != NetworkTopology.TracerType.None)
+            //        left += 2;
+            //    NetworkTopology.Node leftNode = dNode[(left + left / dNode.Count) % dNode.Count];
+            //    leftNode.Tracer = NetworkTopology.TracerType.Filtering;
+            //    m_deployment.FilteringTracerID.Add(leftNode.ID);
+
+            //    if (++i >= numberOfFTracer)
+            //        break;
+
+            //    while (dNode[(Math.Abs(right) + Math.Abs(right) / dNode.Count) % dNode.Count].Tracer != NetworkTopology.TracerType.None)
+            //        right -= 2;
+            //    NetworkTopology.Node rightNode = dNode[(Math.Abs(right) + Math.Abs(right) / dNode.Count) % dNode.Count];
+            //    rightNode.Tracer = NetworkTopology.TracerType.Filtering;
+            //    m_deployment.FilteringTracerID.Add(rightNode.ID);
+            //}
+
+            //for (int i = 0; i < numberOfMTracer; i++, left += 2, right -= 2)
+            //{
+            //    while (dNode[(left + left / dNode.Count) % dNode.Count].Tracer != NetworkTopology.TracerType.None)
+            //        left += 2;
+            //    NetworkTopology.Node leftNode = dNode[(left + left / dNode.Count) % dNode.Count];
+            //    leftNode.Tracer = NetworkTopology.TracerType.Marking;
+            //    m_deployment.MarkingTracerID.Add(leftNode.ID);
+
+            //    if (++i >= numberOfMTracer)
+            //        break;
+
+            //    while (dNode[(Math.Abs(right) + Math.Abs(right) / dNode.Count) % dNode.Count].Tracer != NetworkTopology.TracerType.None)
+            //        right -= 2;
+            //    NetworkTopology.Node rightNode = dNode[(Math.Abs(right) + Math.Abs(right) / dNode.Count) % dNode.Count];
+            //    rightNode.Tracer = NetworkTopology.TracerType.Marking;
+            //    m_deployment.MarkingTracerID.Add(rightNode.ID);
+            //}
 
             foreach (NetworkTopology.Node node in dNode)
             {

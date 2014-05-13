@@ -55,6 +55,13 @@ namespace Network_Simulation
         private List<Node> m_src_nodes;
 
         private Dictionary<int, int> nodeIDPathDistrib;
+        public Dictionary<int, int> NodeIDPathDistrib 
+        { 
+            get
+            {
+                return nodeIDPathDistrib; 
+            } 
+        }
 
         /// <summary>
         /// Constructor.
