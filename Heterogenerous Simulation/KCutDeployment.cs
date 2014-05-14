@@ -109,9 +109,7 @@ namespace Heterogenerous_Simulation
             for (int i = 0; i < numberOfFTracer; i++)
             {
                 NetworkTopology.Node node = centerNode.Find(n => n.Tracer == NetworkTopology.TracerType.None);
-                if (node != null)
-                    node.Tracer = NetworkTopology.TracerType.Filtering;
-                else
+                if (node == null)
                 {
                     int j = i;
                     do
@@ -120,18 +118,16 @@ namespace Heterogenerous_Simulation
                         node = t.Nodes.Find(n => n.Tracer == NetworkTopology.TracerType.None);
                         j++;
                     } while (node == null);
-                    node.Tracer = NetworkTopology.TracerType.Filtering;
                 }
 
+                node.Tracer = NetworkTopology.TracerType.Filtering;
                 m_deployment.FilteringTracerID.Add(node.ID);
             }
 
             for (int i = 0; i < numberOfMTracer; i++)
             {
                 NetworkTopology.Node node = centerNode.Find(n => n.Tracer == NetworkTopology.TracerType.None);
-                if (node != null)
-                    node.Tracer = NetworkTopology.TracerType.Marking;
-                else
+                if (node == null)
                 {
                     int j = i;
                     do
@@ -140,14 +136,30 @@ namespace Heterogenerous_Simulation
                         node = t.Nodes.Find(n => n.Tracer == NetworkTopology.TracerType.None);
                         j++;
                     } while (node == null);
-                    node.Tracer = NetworkTopology.TracerType.Marking;
                 }
 
+                node.Tracer = NetworkTopology.TracerType.Marking;
                 m_deployment.MarkingTracerID.Add(node.ID);
             }
 
             foreach (int id in m_deployment.DeployNodes)
                 networkTopology.Nodes.Find(n => n.ID == id).Tracer = NetworkTopology.TracerType.Tunneling;
+
+            if (m_deployment.DeployNodes.Count < numberOfTTracer)
+            {
+                for (int i = 0; i < numberOfTTracer - m_deployment.DeployNodes.Count; i++)
+                {
+                    NetworkTopology.Node node;
+                    do
+                    {
+                        int j = i;
+                        NetworkTopology t = m_deployment.AllRoundScopeList.Find(s => s.Nodes.Exists(n => n == centerNode[j % centerNode.Count]));
+                        node = t.Nodes.Find(n => n.Tracer == NetworkTopology.TracerType.None);
+                        j++;
+                    } while (centerNode == null);
+                    node.Tracer = NetworkTopology.TracerType.Tunneling;
+                }
+            }
         }
 
         public override string ToString()

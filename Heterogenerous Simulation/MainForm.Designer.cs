@@ -45,6 +45,8 @@
             this.StartFiltering = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.PercentageOfTracer = new System.Windows.Forms.TextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.DynamicProbability = new System.Windows.Forms.CheckBox();
             this.label16 = new System.Windows.Forms.Label();
@@ -68,8 +70,7 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.label15 = new System.Windows.Forms.Label();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.label2 = new System.Windows.Forms.Label();
-            this.PercentageOfTracer = new System.Windows.Forms.TextBox();
+            this.ConsiderDistance = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -251,8 +252,27 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Map information";
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(56, 116);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(128, 16);
+            this.label2.TabIndex = 16;
+            this.label2.Text = "Percentage of Tracer:";
+            // 
+            // PercentageOfTracer
+            // 
+            this.PercentageOfTracer.Location = new System.Drawing.Point(190, 113);
+            this.PercentageOfTracer.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.PercentageOfTracer.Name = "PercentageOfTracer";
+            this.PercentageOfTracer.Size = new System.Drawing.Size(213, 23);
+            this.PercentageOfTracer.TabIndex = 15;
+            this.PercentageOfTracer.Text = "50";
+            // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.ConsiderDistance);
             this.groupBox3.Controls.Add(this.DynamicProbability);
             this.groupBox3.Controls.Add(this.label16);
             this.groupBox3.Controls.Add(this.InitTimeOfAttackPacket);
@@ -280,7 +300,7 @@
             // DynamicProbability
             // 
             this.DynamicProbability.AutoSize = true;
-            this.DynamicProbability.Location = new System.Drawing.Point(214, 236);
+            this.DynamicProbability.Location = new System.Drawing.Point(11, 240);
             this.DynamicProbability.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.DynamicProbability.Name = "DynamicProbability";
             this.DynamicProbability.Size = new System.Drawing.Size(140, 20);
@@ -467,23 +487,16 @@
             this.progressBar1.Size = new System.Drawing.Size(932, 31);
             this.progressBar1.TabIndex = 22;
             // 
-            // label2
+            // ConsiderDistance
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(56, 116);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(128, 16);
-            this.label2.TabIndex = 16;
-            this.label2.Text = "Percentage of Tracer:";
-            // 
-            // PercentageOfTracer
-            // 
-            this.PercentageOfTracer.Location = new System.Drawing.Point(190, 113);
-            this.PercentageOfTracer.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.PercentageOfTracer.Name = "PercentageOfTracer";
-            this.PercentageOfTracer.Size = new System.Drawing.Size(213, 23);
-            this.PercentageOfTracer.TabIndex = 15;
-            this.PercentageOfTracer.Text = "50";
+            this.ConsiderDistance.AutoSize = true;
+            this.ConsiderDistance.Location = new System.Drawing.Point(151, 240);
+            this.ConsiderDistance.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.ConsiderDistance.Name = "ConsiderDistance";
+            this.ConsiderDistance.Size = new System.Drawing.Size(128, 20);
+            this.ConsiderDistance.TabIndex = 25;
+            this.ConsiderDistance.Text = "Consider Distance";
+            this.ConsiderDistance.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -559,6 +572,7 @@
         private System.Windows.Forms.CheckBox DynamicProbability;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox PercentageOfTracer;
+        private System.Windows.Forms.CheckBox ConsiderDistance;
     }
 }
 

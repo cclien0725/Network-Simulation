@@ -36,7 +36,7 @@ namespace Heterogenerous_Simulation
             //sql.LogDeploymentResult(topology, deployment);
         }
 
-        public void Run(int attackPacketPerSec, int normalPacketPerSec, int totalPacket, int percentageOfAttackPacket, double probibilityOfPacketTunneling, double probibilityOfPacketMarking, double startFiltering, int initialTimeOfAttackPacket, bool dynamicProbability)
+        public void Run(int attackPacketPerSec, int normalPacketPerSec, int totalPacket, int percentageOfAttackPacket, double probibilityOfPacketTunneling, double probibilityOfPacketMarking, double startFiltering, int initialTimeOfAttackPacket, bool dynamicProbability, bool considerDistance)
         {
             Random rd = new Random();
             int victimID;
@@ -116,12 +116,12 @@ namespace Heterogenerous_Simulation
                                 //if (i < startFiltering * totalPacket / 100)
                                 if (markingEventList.Count * 100 / totalPacket < startFiltering)
                                 {
-                                    path = ChooseTunnelingNode(path, j, NetworkTopology.TracerType.Marking, ref tunnelingEvent);
+                                    path = ChooseTunnelingNode(path, j, NetworkTopology.TracerType.Marking, ref tunnelingEvent, considerDistance);
                                     shouldMarking = true;
                                 }
                                 else
                                 {
-                                    path = ChooseTunnelingNode(path, j, NetworkTopology.TracerType.Filtering, ref tunnelingEvent);
+                                    path = ChooseTunnelingNode(path, j, NetworkTopology.TracerType.Filtering, ref tunnelingEvent, considerDistance);
                                     shouldFiltering = true;
                                 }
 
@@ -212,7 +212,7 @@ namespace Heterogenerous_Simulation
             sql.LogDeploymentResult(topology, deployment);
         }
 
-        private List<int> ChooseTunnelingNode(List<int> path, int source, NetworkTopology.TracerType tracerType, ref TunnelingEvent tunelingEvent)
+        private List<int> ChooseTunnelingNode(List<int> path, int source, NetworkTopology.TracerType tracerType, ref TunnelingEvent tunelingEvent, bool considerDistance)
         {
             double totalDelay = double.MaxValue;
             List<int> newPath = new List<int>();
@@ -259,6 +259,26 @@ namespace Heterogenerous_Simulation
                     newPath = tmpPath;
                     totalDelay = tmpTotalDelay;
                     tunelingEvent.TunnelingDst = tunnelingNodeID;
+                }
+            }
+
+            if (considerDistance)
+            {
+                if (tunnelingTargets.Exists(nodeID => newPath.Contains(nodeID)))
+                {
+                    double ori_dist = 0;
+                    double new_dist = 0;
+                    int tunnelingNodeID = tunnelingTargets.Find(nodeID => newPath.Contains(nodeID));
+                    int tunnelingTargetIndex = newPath.IndexOf(tunnelingNodeID);
+
+                    for (int i = source; i < tunnelingTargetIndex; i++)
+                        new_dist += topology.AdjacentMatrix[topology.NodeID2Index(newPath[i]), topology.NodeID2Index(newPath[i + 1])].Length;
+
+                    for (int i = source; i < path.Count - 1; i++)
+                        ori_dist += topology.AdjacentMatrix[topology.NodeID2Index(path[i]), topology.NodeID2Index(path[i + 1])].Length;
+
+                    if (new_dist > ori_dist)
+                        return path;
                 }
             }
 
