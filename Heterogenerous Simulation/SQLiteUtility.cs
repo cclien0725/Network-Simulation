@@ -22,7 +22,8 @@ namespace Heterogenerous_Simulation
             {"TunnelingEvents", "ID INTEGER PRIMARY KEY, PacketID INTEGER, Time REAL, TunnelingSrc INTEGER, TunnelingDst INTEGER"},
             {"MarkingEvents", "ID INTEGER PRIMARY KEY, PacketID INTEGER, Time REAL, MarkingNodeID INTEGER"},
             {"FilteringEvents", "ID INTEGER PRIMARY KEY, PacketID INTEGER, Time REAL, FilteringNodeId INTEGER"},
-            {"Deployment", "NodeID INTEGER PRIMARY KEY, TracerType INTEGER, NodeType INTEGER, K INTEGER, N INTEGER, Status BOOLEAN"}
+            {"Deployment", "NodeID INTEGER PRIMARY KEY, TracerType INTEGER, NodeType INTEGER, K INTEGER, N INTEGER, Status BOOLEAN"},
+            {"TracingCost", "ID INTEGER PRIMARY KEY, PacketID INTEGER, CurrentNodeID INTEGER, NextHopID INTEGER, Length REAL"}
         };
 
         private string baseDirectory = Path.Combine(Environment.CurrentDirectory, "Log");
@@ -338,6 +339,33 @@ namespace Heterogenerous_Simulation
                         cmd.Parameters.Add("@K", DbType.Int32).Value = deployment.K;
                         cmd.Parameters.Add("@N", DbType.Int32).Value = deployment.N;
                         cmd.Parameters.Add("@Status", DbType.Boolean).Value = node.IsTunnelingActive;
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    trans.Commit();
+                }
+            }
+            catch { }
+        }
+
+        public void InsertTracingCost(List<PacketSentEvent> tracingList)
+        {
+            try 
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    SQLiteTransaction trans = connection.BeginTransaction();
+                    SQLiteCommand cmd = connection.CreateCommand();
+                    cmd.CommandText = string.Format("INSERT INTO {0}_TracingCost(PacketID, CurrentNodeID, NextHopID, Length) VALUES(@PacketID, @CurrentNodeID, @NextHopID, @Length)", prefixNameOfTable);
+
+                    foreach (PacketSentEvent e in tracingList)
+                    {
+                        cmd.Parameters.Add("@PacketID", System.Data.DbType.Int32).Value = e.PacketID;
+                        cmd.Parameters.Add("@CurrentNodeID", System.Data.DbType.Int32).Value = e.CurrentNodeID;
+                        cmd.Parameters.Add("@NextHopID", System.Data.DbType.Int32).Value = e.NextHopID;
+                        cmd.Parameters.Add("@Length", System.Data.DbType.Double).Value = e.Length;
                         cmd.ExecuteNonQuery();
                     }
 

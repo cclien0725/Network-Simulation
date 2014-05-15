@@ -203,6 +203,38 @@ namespace Heterogenerous_Simulation
                 //    DataUtility.Log(string.Format("Node%{0} FC:{1} Tp:{2}\n", node.ID, node.FilteringCount, node.ProbabilityOfTunneling));
             }
 
+            List<PacketSentEvent> tracingList = new List<PacketSentEvent>();
+            int packetID = 0;
+            List<int> FilteringAndMarkingTracerID = new List<int>();
+            if (deployment.FilteringTracerID != null)
+                FilteringAndMarkingTracerID.AddRange(deployment.FilteringTracerID);
+
+            if (deployment.MarkingTracerID != null)
+                FilteringAndMarkingTracerID.AddRange(deployment.MarkingTracerID);
+
+            foreach (int victim in topology.idOfVictims)
+            {
+                foreach (int nodeID in FilteringAndMarkingTracerID) 
+                {
+                    if (victim == nodeID)
+                        continue;
+
+                    path = topology.GetShortestPath(victim, nodeID);
+                    for (int i = 0; i < path.Count - 1; i++)
+                    {
+                        tracingList.Add(new PacketSentEvent(packetID)
+                        {
+                            CurrentNodeID = path[i],
+                            NextHopID = path[i + 1],
+                            Length = topology.AdjacentMatrix[topology.NodeID2Index(path[i]), topology.NodeID2Index(path[i + 1])].Length
+                        });
+                    }
+                    packetID++;
+                }
+            }
+
+            sql.InsertTracingCost(tracingList);
+
             sql.InsertPacketEvent(packetEventList);
             sql.InsertPacketSentEvent(packetSentEventList);
             sql.InsertTunnelingEvent(tunnelingEventList);

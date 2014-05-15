@@ -21,6 +21,11 @@ namespace Heterogenerous_Simulation
         public int NextHopID { get; set; }
         public double Length { get; set; }
 
+        public PacketSentEvent(int packetID)
+        {
+            this.PacketID = packetID;
+        }
+
         public PacketSentEvent(PacketEvent packetEvent)
         {
             this.PacketID = packetEvent.PacketID;

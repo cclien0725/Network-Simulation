@@ -150,13 +150,13 @@ namespace Heterogenerous_Simulation
                 for (int i = 0; i < numberOfTTracer - m_deployment.DeployNodes.Count; i++)
                 {
                     NetworkTopology.Node node;
+                    int j = i;
                     do
                     {
-                        int j = i;
                         NetworkTopology t = m_deployment.AllRoundScopeList.Find(s => s.Nodes.Exists(n => n == centerNode[j % centerNode.Count]));
                         node = t.Nodes.Find(n => n.Tracer == NetworkTopology.TracerType.None);
                         j++;
-                    } while (centerNode == null);
+                    } while (node == null);
                     node.Tracer = NetworkTopology.TracerType.Tunneling;
                 }
             }

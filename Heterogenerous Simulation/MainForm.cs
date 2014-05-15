@@ -138,21 +138,8 @@ namespace Heterogenerous_Simulation
 
                     bg.ReportProgress((filenames.IndexOf(filename) + 1) * 66 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
 
-                    //// Using KCut deployment method.
-                    //KCutDeployment kCutDeploy = new KCutDeployment(Convert.ToDouble(TunnelingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(MarkingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(FilteringTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, typeof(KCutStartWithConsider2KConsiderCoefficient));
-                    //sql.CreateTable(kCutDeploy.ToString());
-                    //kCutDeploy.Deploy(networkTopology);
-                    //Simulator kCutSimulator = new Simulator(kCutDeploy.Deployment, networkTopology, sql);
-                    //kCutSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
-                    //{
-                    //    bg.ReportProgress(ra.CurrentPacket * 100 / ra.TotalPacket, new ProgressReportArg() { KEY = filename, ST = StatusType.KCutDeploymentStatus });
-                    //};
-                    //kCutSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(TotalPacket.Text), Convert.ToInt32(PercentageOfAttackPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text), Convert.ToInt32(InitTimeOfAttackPacket.Text), DynamicProbability.Checked);
-
-                    //bg.ReportProgress((filenames.IndexOf(filename) + 1) * 100 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
-
-                    ////// Using KCutV2 deployment method.
-                    KCutDeploymentV2 kCutDeploy = new KCutDeploymentV2(Convert.ToDouble(TunnelingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(MarkingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(FilteringTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, typeof(KCutStartWithConsider2KConsiderCoefficient));
+                    // Using KCut deployment method.
+                    KCutDeployment kCutDeploy = new KCutDeployment(Convert.ToDouble(TunnelingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(MarkingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(FilteringTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, typeof(KCutStartWithConsider2KConsiderCoefficient));
                     sql.CreateTable(kCutDeploy.ToString());
                     kCutDeploy.Deploy(networkTopology);
                     Simulator kCutSimulator = new Simulator(kCutDeploy.Deployment, networkTopology, sql);
@@ -163,6 +150,19 @@ namespace Heterogenerous_Simulation
                     kCutSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(TotalPacket.Text), Convert.ToInt32(PercentageOfAttackPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text), Convert.ToInt32(InitTimeOfAttackPacket.Text), DynamicProbability.Checked, ConsiderDistance.Checked);
 
                     bg.ReportProgress((filenames.IndexOf(filename) + 1) * 100 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
+
+                    //// Using KCutV2 deployment method.
+                    //KCutDeploymentV2 kCutDeploy = new KCutDeploymentV2(Convert.ToDouble(TunnelingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(MarkingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(FilteringTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, typeof(KCutStartWithConsider2KConsiderCoefficient));
+                    //sql.CreateTable(kCutDeploy.ToString());
+                    //kCutDeploy.Deploy(networkTopology);
+                    //Simulator kCutSimulator = new Simulator(kCutDeploy.Deployment, networkTopology, sql);
+                    //kCutSimulator.onReportOccur += delegate(object obj, Simulator.ReportArgument ra)
+                    //{
+                    //    bg.ReportProgress(ra.CurrentPacket * 100 / ra.TotalPacket, new ProgressReportArg() { KEY = filename, ST = StatusType.KCutDeploymentStatus });
+                    //};
+                    //kCutSimulator.Run(Convert.ToInt32(AttackPacketPerSec.Text), Convert.ToInt32(NormalPacketPerSec.Text), Convert.ToInt32(TotalPacket.Text), Convert.ToInt32(PercentageOfAttackPacket.Text), Convert.ToDouble(ProbibilityOfPacketTunneling.Text), Convert.ToDouble(ProbibilityOfPacketMarking.Text), Convert.ToDouble(StartFiltering.Text), Convert.ToInt32(InitTimeOfAttackPacket.Text), DynamicProbability.Checked, ConsiderDistance.Checked);
+
+                    //bg.ReportProgress((filenames.IndexOf(filename) + 1) * 100 / filenames.Count, new ProgressReportArg() { ST = StatusType.TotalProgress });
 
                     // TODO: REMOVE THIS !!! IT TEST ALL DEPLOYMENTS SIMULATION.
                     //foreach (var type in m_deploy_types)

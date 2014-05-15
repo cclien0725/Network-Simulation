@@ -90,7 +90,7 @@ namespace Heterogenerous_Simulation
 
             for (int i = 0; i < numberOfFTracer; i++)
             {
-                NetworkTopology.Node node = dNode.First(n => n.Tracer == NetworkTopology.TracerType.None);
+                NetworkTopology.Node node = dNode.Find(n => n.Tracer == NetworkTopology.TracerType.None);
                 if (node == null)
                 {
                     int j = i;
@@ -108,7 +108,7 @@ namespace Heterogenerous_Simulation
 
             for (int i = 0; i < numberOfMTracer; i++)
             {
-                NetworkTopology.Node node = dNode.First(n => n.Tracer == NetworkTopology.TracerType.None);
+                NetworkTopology.Node node = dNode.Find(n => n.Tracer == NetworkTopology.TracerType.None);
                 if (node == null)
                 {
                     int j = i;
@@ -132,7 +132,7 @@ namespace Heterogenerous_Simulation
 
             for (int i = 0; i < numberOfTTracer; i++)
             {
-                NetworkTopology.Node node = dNode.First(n => n.Tracer == NetworkTopology.TracerType.None);
+                NetworkTopology.Node node = dNode.Find(n => n.Tracer == NetworkTopology.TracerType.None);
                 if (node == null)
                 {
                     int j = i;
