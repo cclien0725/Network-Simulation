@@ -8,7 +8,7 @@ namespace Deployment_Simulation
 {
     public class Simulator
     {
-        public class PacketEvent
+        private class PacketEvent
         {
             public int PacketID { get; set; }
             public double Time { get; set; }
@@ -17,7 +17,7 @@ namespace Deployment_Simulation
             public NetworkTopology.NodeType Type { get; set; }
         }
 
-        public class MarkingEvent : PacketEvent
+        private class MarkingEvent : PacketEvent
         {
             public int MarkingNodeID { get; set; }
             public int HopCount { get; set; }
@@ -32,7 +32,7 @@ namespace Deployment_Simulation
             }
         }
 
-        public class PacketSentEvent : PacketEvent
+        private class PacketSentEvent : PacketEvent
         {
             public int CurrentNodeID { get; set; }
             public int NextHopID { get; set; }
@@ -51,6 +51,11 @@ namespace Deployment_Simulation
                 this.Destination = packetEvent.Destination;
                 this.Type = packetEvent.Type;
             }
+        }
+
+        private class SQLiteSimulator
+        {
+ 
         }
 
         private Deployment m_deployment;
@@ -120,8 +125,17 @@ namespace Deployment_Simulation
                         default:
                             break;
                     }
+
+                    PacketSentEvent packetSentEvent = new PacketSentEvent(packetEvent);
+                    packetSentEvent.CurrentNodeID = path[j];
+                    packetSentEvent.NextHopID = j == path.Count - 1 ? -1 : path[j + 1];
+                    packetSentEvent.Length = j == path.Count - 1 ? 0 : m_networkTopology.AdjacentMatrix[m_networkTopology.NodeID2Index(path[j]), m_networkTopology.NodeID2Index(path[j + 1])].Length;
+
+                    packetSentEventList.Add(packetSentEvent);
                 }
             }
+
+            //TODO: Log into db
         }
     }
 }
