@@ -15,7 +15,6 @@ namespace Deployment_Simulation
         private bool isNeedRecompute;
         private List<List<int>> allLevelDeploy;
         private int upperBoundOfMinDegree;
-        private long m_undetected_count;
 
         public KCutStartWithCenterNodeConsiderScopeCoefficientMinDegree(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer, int KCutValue, int numberOfInsideScopeNode)
             : base(percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer)
@@ -67,9 +66,6 @@ namespace Deployment_Simulation
                     lastDeployCount = deployNodes.Count;
 
                     allLevelScopeCount += scope_net_topo.Nodes.Count;
-
-                    if (scope_net_topo.Nodes.Count > 1)
-                        m_undetected_count += DataUtility.Combination(scope_net_topo.Nodes.Count, 2);
 
                     DataUtility.Log(string.Format("================= Level {0} ==================\n", allRoundScopeList.Count));
                     DataUtility.Log(string.Format("Center Node:\t{0}\n", centerID));
@@ -133,38 +129,6 @@ namespace Deployment_Simulation
 
             if (itemCount % 499 != 0)
                 sqlite_utility.RunCommnad(sb.ToString().Remove(sb.ToString().Length - 6, 6));
-
-            double ratio = (double)m_undetected_count / (double)DataUtility.Combination(networkTopology.Nodes.Count, 2);
-
-            cmd = "INSERT INTO UndetectedRatio(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
-            sqlite_utility.RunCommnad(cmd, new List<SQLiteParameter>()
-            {
-                new SQLiteParameter("@file_name", networkTopology.FileName),
-                new SQLiteParameter("@node_counts", networkTopology.Nodes.Count),
-                new SQLiteParameter("@edge_counts", networkTopology.Edges.Count),
-                new SQLiteParameter("@diameter", networkTopology.Diameter),
-                new SQLiteParameter("@k", K),
-                new SQLiteParameter("@n", N),
-                new SQLiteParameter("@metric_name", "Theoretical Undetected Ratio"),
-                new SQLiteParameter("@ratio", ratio)
-            });
-
-            double ratio_ub = 0;
-            for (int i = 1; i <= K - 1; i++)
-                ratio_ub += networkTopology.m_prob_hop[i];
-
-            cmd = "INSERT INTO UndetectedRatio(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
-            sqlite_utility.RunCommnad(cmd, new List<SQLiteParameter>()
-            {
-                new SQLiteParameter("@file_name", networkTopology.FileName),
-                new SQLiteParameter("@node_counts", networkTopology.Nodes.Count),
-                new SQLiteParameter("@edge_counts", networkTopology.Edges.Count),
-                new SQLiteParameter("@diameter", networkTopology.Diameter),
-                new SQLiteParameter("@k", K),
-                new SQLiteParameter("@n", N),
-                new SQLiteParameter("@metric_name", "Theoretical Undetected Ratio Upper Bound"),
-                new SQLiteParameter("@ratio", ratio_ub)
-            });
         }
 
         /// <summary>

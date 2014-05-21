@@ -15,7 +15,6 @@ namespace Deployment_Simulation
         private bool isNeedRecompute;
         private List<List<int>> allLevelDeploy;
         private int upperBoundOfMinDegree;
-        private long m_undetected_count;
 
         public KCutStartWithConsider2KConsiderCoefficient(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer, int KCutValue, int numberOfInsideScopeNode)
             : base(percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer)
@@ -45,7 +44,7 @@ namespace Deployment_Simulation
 
                 // Finding the center node to run all level's process.
                 //while (tmp_src_net_topo.FindCenterNodeID(out centerID, isNeedRecompute))
-                while (selectStartNode(process_topo, out centerID, false))
+                while (selectStartNode(process_topo, out centerID, isNeedRecompute))
                 {
                     NetworkTopology scope_net_topo = new NetworkTopology(networkTopology.Nodes);
                     scope_net_topo.AdjacentMatrix = networkTopology.AdjacentMatrix;
@@ -67,9 +66,6 @@ namespace Deployment_Simulation
                     lastDeployCount = deployNodes.Count;
 
                     allLevelScopeCount += scope_net_topo.Nodes.Count;
-
-                    if (scope_net_topo.Nodes.Count > 1)
-                        m_undetected_count += DataUtility.Combination(scope_net_topo.Nodes.Count, 2);
 
                     DataUtility.Log(string.Format("================= Level {0} ==================\n", allRoundScopeList.Count));
                     DataUtility.Log(string.Format("Center Node:\t{0}\n", centerID));
@@ -133,38 +129,6 @@ namespace Deployment_Simulation
 
             if (itemCount % 499 != 0)
                 sqlite_utility.RunCommnad(sb.ToString().Remove(sb.ToString().Length - 6, 6));
-
-            double ratio = (double)m_undetected_count / (double)DataUtility.Combination(networkTopology.Nodes.Count, 2);
-
-            cmd = "INSERT INTO UndetectedRatio(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
-            sqlite_utility.RunCommnad(cmd, new List<SQLiteParameter>()
-            {
-                new SQLiteParameter("@file_name", networkTopology.FileName),
-                new SQLiteParameter("@node_counts", networkTopology.Nodes.Count),
-                new SQLiteParameter("@edge_counts", networkTopology.Edges.Count),
-                new SQLiteParameter("@diameter", networkTopology.Diameter),
-                new SQLiteParameter("@k", K),
-                new SQLiteParameter("@n", N),
-                new SQLiteParameter("@metric_name", "Theoretical Undetected Ratio"),
-                new SQLiteParameter("@ratio", ratio)
-            });
-
-            double ratio_ub = 0;
-            for (int i = 1; i <= K - 1; i++)
-                ratio_ub += networkTopology.m_prob_hop[i];
-
-            cmd = "INSERT INTO UndetectedRatio(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
-            sqlite_utility.RunCommnad(cmd, new List<SQLiteParameter>()
-            {
-                new SQLiteParameter("@file_name", networkTopology.FileName),
-                new SQLiteParameter("@node_counts", networkTopology.Nodes.Count),
-                new SQLiteParameter("@edge_counts", networkTopology.Edges.Count),
-                new SQLiteParameter("@diameter", networkTopology.Diameter),
-                new SQLiteParameter("@k", K),
-                new SQLiteParameter("@n", N),
-                new SQLiteParameter("@metric_name", "Theoretical Undetected Ratio Upper Bound"),
-                new SQLiteParameter("@ratio", ratio_ub)
-            });
         }
 
         /// <summary>
@@ -180,13 +144,12 @@ namespace Deployment_Simulation
         private NetworkTopology startAlgorithm(NetworkTopology src_net_topo, NetworkTopology scope_net_topo, List<int> nowDeployNodes)
         {
             List<int> neighbor = new List<int>();
-            int max_hop_count = int.MinValue;
             int selectNode = scope_net_topo.Nodes[0].ID;
 
-            while (max_hop_count < K)
+            while (true)
             {
-                if (scope_net_topo.Nodes.Count >= 2 * N - upperBoundOfMinDegree)
-                    break;
+                //if (scope_net_topo.Nodes.Count >= 2 * N - upperBoundOfMinDegree)
+                //    break;
 
                 neighbor.Remove(selectNode);
                 neighbor.AddRange(src_net_topo.GetNeighborNodeIDs(selectNode).Except(scope_net_topo.Nodes.Select(n => n.ID)));
@@ -202,39 +165,74 @@ namespace Deployment_Simulation
 
                 selectNode = -1;
 
-                if (scope_net_topo.Nodes.Count < upperBoundOfMinDegree)
-                {
-                    int minD = int.MaxValue;
+                List<int> tmp = new List<int>(neighbor);
 
-                    foreach (int id in neighbor)
-                    {
-                        int tmpD = src_net_topo.Nodes.Find(n => n.ID == id).Degree;
+                //neighbor.Sort((x, y) => concentrate_topo.ClusteringCoefficient(scope_net_topo, x).CompareTo(concentrate_topo.ClusteringCoefficient(scope_net_topo, y)));
 
-                        if (minD > tmpD)
-                        {
-                            minD = tmpD;
-                            selectNode = id;
-                        }
-                    }
-                }
-                else
+                for (int i = neighbor.Count - 1; i >= 0; i--)
                 {
+                    int max_hop_count = int.MinValue;
                     double maxC = double.MinValue;
 
-                    foreach (int id in neighbor)
+                    foreach (int id in tmp)
                     {
-                        double tmpc = concentrate_topo.ClusteringCoefficient(id);
+                        double tmpC = concentrate_topo.ClusteringCoefficient(scope_net_topo, id);
 
-                        if (maxC < tmpc)
+                        if (tmpC > maxC)
                         {
-                            maxC = tmpc;
+                            maxC = tmpC;
                             selectNode = id;
                         }
                     }
+                    tmp.Remove(selectNode);
 
-                    if (scope_net_topo.Nodes.Count >= N && maxC < 0.6)
+                    foreach (var scopeNode in scope_net_topo.Nodes)
+                    {
+                        int hop_count = scope_net_topo.GetShortestPathCount(scopeNode.ID, selectNode) - 1;
+
+                        if (max_hop_count < hop_count)
+                            max_hop_count = hop_count;
+                    }
+
+                    if (max_hop_count <= K - 1)
+                        break;
+                    else
                         selectNode = -1;
                 }
+
+                //if (scope_net_topo.Nodes.Count < upperBoundOfMinDegree)
+                //{
+                //    int minD = int.MaxValue;
+
+                //    foreach (int id in neighbor)
+                //    {
+                //        int tmpD = src_net_topo.Nodes.Find(n => n.ID == id).Degree;
+
+                //        if (minD > tmpD)
+                //        {
+                //            minD = tmpD;
+                //            selectNode = id;
+                //        }
+                //    }
+                //}
+                //else
+                //{
+                //double maxC = double.MinValue;
+
+                //foreach (int id in neighbor)
+                //{
+                //    double tmpc = concentrate_topo.ClusteringCoefficeint(id);
+
+                //    if (maxC < tmpc)
+                //    {
+                //        maxC = tmpc;
+                //        selectNode = id;
+                //    }
+                //}
+
+                //if (scope_net_topo.Nodes.Count >= N && maxC < 0.6)
+                //    selectNode = -1;
+                //}
 
                 // if nothing found, break the loop.
                 if (selectNode == -1)
@@ -249,14 +247,13 @@ namespace Deployment_Simulation
 
                     scope_net_topo.Nodes.Add(src_net_topo.Nodes.Find(n => n.ID == selectNode));
 
+                    //foreach (var scopeNode in scope_net_topo.Nodes)
+                    //{
+                    //    int hop_count = scope_net_topo.GetShortestPathCount(scopeNode.ID, selectNode);
 
-                    foreach (var scopeNode in scope_net_topo.Nodes)
-                    {
-                        int hop_count = scope_net_topo.GetShortestPathCount(scopeNode.ID, selectNode);
-
-                        if (max_hop_count < hop_count)
-                            max_hop_count = hop_count;
-                    }
+                    //    if (max_hop_count < hop_count)
+                    //        max_hop_count = hop_count;
+                    //}
                 }
             }
 
@@ -319,9 +316,9 @@ namespace Deployment_Simulation
                 {
                     foreach (var n in topo.Nodes)
                     {
-                        if (minDegree > n.Degree)
+                        if (minDegree > topo.Degree(n.ID))
                         {
-                            minDegree = n.Degree;
+                            minDegree = topo.Degree(n.ID);
                             selectNode = n.ID;
                             isSelected = true;
                         }
@@ -333,9 +330,9 @@ namespace Deployment_Simulation
             {
                 foreach (var n in topo.Nodes)
                 {
-                    if (minDegree > n.Degree)
+                    if (minDegree > topo.Degree(n.ID))
                     {
-                        minDegree = n.Degree;
+                        minDegree = topo.Degree(n.ID);
                         selectNode = n.ID;
                         isSelected = true;
                     }

@@ -614,5 +614,46 @@ namespace Network_Simulation
                 }
             }
         }
+
+        private class SimLogSQLiteUtils : SQLiteUtils
+        {
+            private Dictionary<string, string> m_tables = new Dictionary<string, string>()
+            {
+                {"UndetectedRatio", "u_id INTEGER PRIMARY KEY AUTOINCREMENT, file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, deploy_name TEXT, metric_name TEXT, ratio REAL"},
+                {"SearchingCost", "s_id INTEGER PRIMARY KEY AUTOINCREMENT, file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, deploy_name TEXT, metric_name TEXT, ratio REAL"},
+                {"SavingCost", "s_id INTEGER PRIMARY KEY AUTOINCREMENT, file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, deploy_name TEXT, ratio REAL"},
+                {"SurvivalMaliciousTrafficRatio", "s_id INTEGER PRIMARY KEY AUTOINCREMENT, file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, deploy_name TEXT, ratio REAL"}
+            };
+
+            public SimLogSQLiteUtils()
+                : base(Path.Combine(Environment.CurrentDirectory, "Deploy", "SimLog"), "SimLogStatistic", false)
+            {
+            }
+
+            public override void CreateTable()
+            {
+                try
+                {
+                    // Create tables
+                    using (SQLiteConnection connection = new SQLiteConnection(m_connection_string))
+                    {
+                        connection.Open();
+
+                        SQLiteCommand cmd = connection.CreateCommand();
+
+                        foreach (var kvp in m_tables)
+                        {
+                            cmd.CommandText = string.Format("CREATE TABLE IF NOT EXISTS {0}({1})", kvp.Key, kvp.Value);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+                catch (SQLiteException ex)
+                {
+                    if (ex.ErrorCode != SQLiteErrorCode.Constraint)
+                        DataUtility.Log(ex.Message + "\n");
+                }
+            }
+        }
     }
 }

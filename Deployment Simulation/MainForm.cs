@@ -48,6 +48,8 @@ namespace Deployment_Simulation
             m_deploy_types.Add(typeof(KCutStartWithSideNode));
             m_deploy_types.Add(typeof(KCutStartWithSideNodeConcentrateDegree));
             m_deploy_types.Add(typeof(KCutStartWithSideNodeConsiderCoefficient));
+            m_deploy_types.Add(typeof(KCutStartWithSideNodeConsiderCoefficientWithN));
+            m_deploy_types.Add(typeof(KCutStartWithSideNodeConsiderCoefficientWithNRatio));
             m_deploy_types.Add(typeof(KCutStartWithSideNodeConsiderScopeCoefficient));
             m_deploy_types.Add(typeof(KCutStartWithSideNodeConsiderScopeCoefficientMinDegree));
 
@@ -65,6 +67,7 @@ namespace Deployment_Simulation
             m_simulation_worker.DoWork += (s, e) =>
             {
                 Deployment deployment = null;
+                Simulator sim = new Simulator(m_topo, m_now_deployment_method);
                 string[] files = tb_select_file.Text.Split(';');
                 int K, N;
 
@@ -131,6 +134,9 @@ namespace Deployment_Simulation
                                                     new object[] { false, string.Format("Starting Deployment with K: {0}, N: {1}...", K, N), true, files[i], K, N });
 
                                 deployment.Deploy(m_topo);
+
+                                sim.Deployment = deployment;
+                                sim.Run();
 
                                 m_simulation_worker.ReportProgress((int)((double)K / (double)m_topo.Diameter * 100),
                                                    new object[] { false, string.Format("Completed for K: {0}, N: {1}.", K, N), true, files[i], K, N });

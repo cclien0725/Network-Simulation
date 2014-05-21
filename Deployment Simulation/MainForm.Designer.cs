@@ -36,6 +36,8 @@
             this.tb_sql_cmd = new System.Windows.Forms.TextBox();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.cb_deployment = new System.Windows.Forms.ComboBox();
             this.lb_main_progress = new System.Windows.Forms.Label();
             this.lb_sub_progress = new System.Windows.Forms.Label();
             this.progress_sub = new System.Windows.Forms.ProgressBar();
@@ -55,8 +57,6 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tb_select_file = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.cb_deployment = new System.Windows.Forms.ComboBox();
-            this.label4 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -160,6 +160,26 @@
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Setting";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(8, 131);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(60, 17);
+            this.label4.TabIndex = 16;
+            this.label4.Text = "Method:";
+            // 
+            // cb_deployment
+            // 
+            this.cb_deployment.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cb_deployment.FormattingEnabled = true;
+            this.cb_deployment.Location = new System.Drawing.Point(71, 128);
+            this.cb_deployment.Name = "cb_deployment";
+            this.cb_deployment.Size = new System.Drawing.Size(251, 25);
+            this.cb_deployment.TabIndex = 15;
             // 
             // lb_main_progress
             // 
@@ -349,27 +369,6 @@
             this.label1.Size = new System.Drawing.Size(51, 17);
             this.label1.TabIndex = 0;
             this.label1.Text = "Files(s):";
-            // 
-            // cb_deployment
-            // 
-            this.cb_deployment.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cb_deployment.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cb_deployment.FormattingEnabled = true;
-            this.cb_deployment.Location = new System.Drawing.Point(101, 128);
-            this.cb_deployment.Name = "cb_deployment";
-            this.cb_deployment.Size = new System.Drawing.Size(221, 25);
-            this.cb_deployment.TabIndex = 15;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(8, 131);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(86, 17);
-            this.label4.TabIndex = 16;
-            this.label4.Text = "Deployment:";
             // 
             // MainForm
             // 

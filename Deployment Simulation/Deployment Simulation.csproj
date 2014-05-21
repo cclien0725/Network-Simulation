@@ -59,6 +59,8 @@
     <Compile Include="KCutStartWithSideNode.cs" />
     <Compile Include="KCutStartWithSideNodeConsiderCoefficient.cs" />
     <Compile Include="KCutStartWithComparableConsiderCoefficient.cs" />
+    <Compile Include="KCutStartWithSideNodeConsiderCoefficientWithN.cs" />
+    <Compile Include="KCutStartWithSideNodeConsiderCoefficientWithNRatio.cs" />
     <Compile Include="KCutStartWithSideNodeConsiderScopeCoefficient.cs" />
     <Compile Include="KCutStartWithSideNodeConsiderScopeCoefficientMinDegree.cs" />
     <Compile Include="MainForm.cs">
