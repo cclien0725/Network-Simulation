@@ -17,12 +17,13 @@ namespace Heterogenerous_Simulation
         private SQLiteUtility sql;
         private NetworkTopology topology;
         private Deployment deployment;
+        private string version;
 
         private List<NetworkTopology.Node> attackNode;
 
         public event EventHandler<ReportArgument> onReportOccur;
 
-        public Simulator(Deployment deployment, NetworkTopology topology, SQLiteUtility sql)
+        public Simulator(Deployment deployment, NetworkTopology topology, SQLiteUtility sql, string version)
         {
             if (topology.Nodes.Count == 0)
                 throw new Exception("Run() Fail: There are 0 nodes in the network.");
@@ -30,6 +31,7 @@ namespace Heterogenerous_Simulation
             this.sql = sql;
             this.topology = topology;
             this.deployment = deployment;
+            this.version = version;
 
             attackNode = topology.Nodes.Where(node => node.Type == NetworkTopology.NodeType.Attacker).ToList();
 
@@ -216,10 +218,48 @@ namespace Heterogenerous_Simulation
             {
                 foreach (int nodeID in FilteringAndMarkingTracerID) 
                 {
-                    if (victim == nodeID)
-                        continue;
+                    if (victim == nodeID) continue;
 
                     path = topology.GetShortestPath(victim, nodeID);
+                    for (int i = 0; i < path.Count - 1; i++)
+                    {
+                        tracingList.Add(new PacketSentEvent(packetID)
+                        {
+                            CurrentNodeID = path[i],
+                            NextHopID = path[i + 1],
+                            Length = topology.AdjacentMatrix[topology.NodeID2Index(path[i]), topology.NodeID2Index(path[i + 1])].Length
+                        });
+                    }
+                    packetID++;
+                }
+
+                if (version == "Random" || version == "V2")
+                {
+                    foreach (int nodeID in deployment.TunnelingTracerID)
+                    {
+                        if (victim == nodeID) continue;
+
+                        path = topology.GetShortestPath(victim, nodeID);
+                        for (int i = 0; i < path.Count - 1; i++)
+                        {
+                            tracingList.Add(new PacketSentEvent(packetID)
+                            {
+                                CurrentNodeID = path[i],
+                                NextHopID = path[i + 1],
+                                Length = topology.AdjacentMatrix[topology.NodeID2Index(path[i]), topology.NodeID2Index(path[i + 1])].Length
+                            });
+                        }
+                        packetID++;
+                    }
+                }
+            }
+
+            if (version == "V1")
+            {
+                foreach (int nodeID in deployment.TunnelingTracerID)
+                {
+                    deployment.FilteringTracerID.Sort((x, y) => { return topology.GetShortestPathCount(x, nodeID).CompareTo(topology.GetShortestPathCount(y, nodeID)); });
+                    path = topology.GetShortestPath(deployment.FilteringTracerID.First(), nodeID);
                     for (int i = 0; i < path.Count - 1; i++)
                     {
                         tracingList.Add(new PacketSentEvent(packetID)

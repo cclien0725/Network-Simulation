@@ -105,6 +105,7 @@ namespace Heterogenerous_Simulation
 
             m_deployment.FilteringTracerID = new List<int>();
             m_deployment.MarkingTracerID = new List<int>();
+            m_deployment.TunnelingTracerID = new List<int>();
 
             for (int i = 0; i < numberOfFTracer; i++)
             {
@@ -143,7 +144,10 @@ namespace Heterogenerous_Simulation
             }
 
             foreach (int id in m_deployment.DeployNodes)
+            {
                 networkTopology.Nodes.Find(n => n.ID == id).Tracer = NetworkTopology.TracerType.Tunneling;
+                m_deployment.TunnelingTracerID.Add(id);
+            }
 
             if (m_deployment.DeployNodes.Count < numberOfTTracer)
             {
@@ -158,6 +162,7 @@ namespace Heterogenerous_Simulation
                         j++;
                     } while (node == null);
                     node.Tracer = NetworkTopology.TracerType.Tunneling;
+                    m_deployment.TunnelingTracerID.Add(node.ID);
                 }
             }
         }

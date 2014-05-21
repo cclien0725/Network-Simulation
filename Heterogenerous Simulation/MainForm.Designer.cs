@@ -48,6 +48,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.PercentageOfTracer = new System.Windows.Forms.TextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.ConsiderDistance = new System.Windows.Forms.CheckBox();
             this.DynamicProbability = new System.Windows.Forms.CheckBox();
             this.label16 = new System.Windows.Forms.Label();
             this.InitTimeOfAttackPacket = new System.Windows.Forms.TextBox();
@@ -70,7 +71,7 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.label15 = new System.Windows.Forms.Label();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.ConsiderDistance = new System.Windows.Forms.CheckBox();
+            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -297,13 +298,24 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Packet Setting";
             // 
+            // ConsiderDistance
+            // 
+            this.ConsiderDistance.AutoSize = true;
+            this.ConsiderDistance.Location = new System.Drawing.Point(151, 240);
+            this.ConsiderDistance.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.ConsiderDistance.Name = "ConsiderDistance";
+            this.ConsiderDistance.Size = new System.Drawing.Size(108, 16);
+            this.ConsiderDistance.TabIndex = 25;
+            this.ConsiderDistance.Text = "Consider Distance";
+            this.ConsiderDistance.UseVisualStyleBackColor = true;
+            // 
             // DynamicProbability
             // 
             this.DynamicProbability.AutoSize = true;
             this.DynamicProbability.Location = new System.Drawing.Point(11, 240);
             this.DynamicProbability.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.DynamicProbability.Name = "DynamicProbability";
-            this.DynamicProbability.Size = new System.Drawing.Size(140, 20);
+            this.DynamicProbability.Size = new System.Drawing.Size(120, 16);
             this.DynamicProbability.TabIndex = 24;
             this.DynamicProbability.Text = "Dynamic Probability";
             this.DynamicProbability.UseVisualStyleBackColor = true;
@@ -440,7 +452,8 @@
             this.columnHeader1,
             this.columnHeader2,
             this.columnHeader3,
-            this.columnHeader4});
+            this.columnHeader4,
+            this.columnHeader5});
             this.listView1.Location = new System.Drawing.Point(430, 16);
             this.listView1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.listView1.Name = "listView1";
@@ -453,7 +466,7 @@
             // columnHeader1
             // 
             this.columnHeader1.Text = "Map File";
-            this.columnHeader1.Width = 230;
+            this.columnHeader1.Width = 208;
             // 
             // columnHeader2
             // 
@@ -487,16 +500,10 @@
             this.progressBar1.Size = new System.Drawing.Size(932, 31);
             this.progressBar1.TabIndex = 22;
             // 
-            // ConsiderDistance
+            // columnHeader5
             // 
-            this.ConsiderDistance.AutoSize = true;
-            this.ConsiderDistance.Location = new System.Drawing.Point(151, 240);
-            this.ConsiderDistance.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.ConsiderDistance.Name = "ConsiderDistance";
-            this.ConsiderDistance.Size = new System.Drawing.Size(128, 20);
-            this.ConsiderDistance.TabIndex = 25;
-            this.ConsiderDistance.Text = "Consider Distance";
-            this.ConsiderDistance.UseVisualStyleBackColor = true;
+            this.columnHeader5.Text = "KCut2 Deployment";
+            this.columnHeader5.Width = 120;
             // 
             // MainForm
             // 
@@ -573,6 +580,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox PercentageOfTracer;
         private System.Windows.Forms.CheckBox ConsiderDistance;
+        private System.Windows.Forms.ColumnHeader columnHeader5;
     }
 }
 

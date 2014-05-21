@@ -44,6 +44,7 @@ namespace Network_Simulation
 
         public List<int> MarkingTracerID;
         public List<int> FilteringTracerID;
+        public List<int> TunnelingTracerID;
 
         public int K;
         public int N;

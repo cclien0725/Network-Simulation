@@ -16,6 +16,7 @@ namespace Heterogenerous_Simulation
         {
             MarkingTracerID = new List<int>();
             FilteringTracerID = new List<int>();
+            TunnelingTracerID = new List<int>();
 
             // Create random array.
             int[] randomArray = DataUtility.RandomArray(networkTopology.Nodes.Count);
@@ -25,6 +26,7 @@ namespace Heterogenerous_Simulation
             for (; randomArrayIndex < numberOfTTracer; randomArrayIndex++)
             {
                 networkTopology.Nodes[randomArray[randomArrayIndex]].Tracer = NetworkTopology.TracerType.Tunneling;
+                TunnelingTracerID.Add(networkTopology.Nodes[randomArray[randomArrayIndex]].ID);
             }
 
             // Randomly select marking tracer.
