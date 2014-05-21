@@ -57,6 +57,7 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tb_select_file = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.cb_run_sim = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -164,7 +165,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(8, 131);
+            this.label4.Location = new System.Drawing.Point(8, 158);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(60, 17);
@@ -176,7 +177,7 @@
             this.cb_deployment.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cb_deployment.FormattingEnabled = true;
-            this.cb_deployment.Location = new System.Drawing.Point(71, 128);
+            this.cb_deployment.Location = new System.Drawing.Point(71, 155);
             this.cb_deployment.Name = "cb_deployment";
             this.cb_deployment.Size = new System.Drawing.Size(251, 25);
             this.cb_deployment.TabIndex = 15;
@@ -214,11 +215,12 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.cb_run_sim);
             this.groupBox2.Controls.Add(this.rdoBtn_all);
             this.groupBox2.Controls.Add(this.rdoBtn_specific);
             this.groupBox2.Location = new System.Drawing.Point(7, 50);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(125, 72);
+            this.groupBox2.Size = new System.Drawing.Size(125, 99);
             this.groupBox2.TabIndex = 13;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Simulation Mode";
@@ -258,7 +260,7 @@
             // 
             this.tb_n.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tb_n.Location = new System.Drawing.Point(172, 94);
+            this.tb_n.Location = new System.Drawing.Point(172, 104);
             this.tb_n.Name = "tb_n";
             this.tb_n.Size = new System.Drawing.Size(150, 25);
             this.tb_n.TabIndex = 12;
@@ -269,7 +271,7 @@
             this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(147, 97);
+            this.label6.Location = new System.Drawing.Point(147, 107);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(21, 17);
             this.label6.TabIndex = 11;
@@ -279,7 +281,7 @@
             // 
             this.tb_k.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tb_k.Location = new System.Drawing.Point(172, 66);
+            this.tb_k.Location = new System.Drawing.Point(172, 76);
             this.tb_k.Name = "tb_k";
             this.tb_k.Size = new System.Drawing.Size(150, 25);
             this.tb_k.TabIndex = 8;
@@ -290,7 +292,7 @@
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(147, 69);
+            this.label2.Location = new System.Drawing.Point(147, 79);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(19, 17);
             this.label2.TabIndex = 3;
@@ -301,7 +303,7 @@
             this.btn_run.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_run.Enabled = false;
-            this.btn_run.Location = new System.Drawing.Point(7, 159);
+            this.btn_run.Location = new System.Drawing.Point(7, 186);
             this.btn_run.Name = "btn_run";
             this.btn_run.Size = new System.Drawing.Size(317, 30);
             this.btn_run.TabIndex = 7;
@@ -321,11 +323,11 @@
             this.lv_list.FullRowSelect = true;
             this.lv_list.GridLines = true;
             this.lv_list.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.lv_list.Location = new System.Drawing.Point(7, 195);
+            this.lv_list.Location = new System.Drawing.Point(7, 222);
             this.lv_list.MultiSelect = false;
             this.lv_list.Name = "lv_list";
             this.lv_list.ShowItemToolTips = true;
-            this.lv_list.Size = new System.Drawing.Size(317, 360);
+            this.lv_list.Size = new System.Drawing.Size(317, 333);
             this.lv_list.TabIndex = 2;
             this.lv_list.UseCompatibleStateImageBehavior = false;
             this.lv_list.View = System.Windows.Forms.View.Details;
@@ -369,6 +371,16 @@
             this.label1.Size = new System.Drawing.Size(51, 17);
             this.label1.TabIndex = 0;
             this.label1.Text = "Files(s):";
+            // 
+            // cb_run_sim
+            // 
+            this.cb_run_sim.AutoSize = true;
+            this.cb_run_sim.Location = new System.Drawing.Point(6, 72);
+            this.cb_run_sim.Name = "cb_run_sim";
+            this.cb_run_sim.Size = new System.Drawing.Size(117, 21);
+            this.cb_run_sim.TabIndex = 17;
+            this.cb_run_sim.Text = "Run Actual Sim";
+            this.cb_run_sim.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -422,6 +434,7 @@
         private System.Windows.Forms.Button btn_export;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox cb_deployment;
+        private System.Windows.Forms.CheckBox cb_run_sim;
     }
 }
 

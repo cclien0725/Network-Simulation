@@ -135,8 +135,11 @@ namespace Deployment_Simulation
 
                                 deployment.Deploy(m_topo);
 
-                                sim.Deployment = deployment;
-                                sim.Run();
+                                if (cb_run_sim.Checked)
+                                {
+                                    sim.Deployment = deployment;
+                                    sim.Run();
+                                }
 
                                 m_simulation_worker.ReportProgress((int)((double)K / (double)m_topo.Diameter * 100),
                                                    new object[] { false, string.Format("Completed for K: {0}, N: {1}.", K, N), true, files[i], K, N });
