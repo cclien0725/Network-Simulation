@@ -141,7 +141,7 @@ namespace Deployment_Simulation
         /// <returns>The remain network topology after process the algorithm.</returns>
         private NetworkTopology startAlgorithm(NetworkTopology src_net_topo, NetworkTopology scope_net_topo, List<int> nowDeployNodes)
         {
-            List<int> neighbor = new List<int>();
+            List<NeighborIDWithMaxHopCount> neighbor = new List<NeighborIDWithMaxHopCount>();
             int selectNode = scope_net_topo.Nodes[0].ID;
 
             while (true)
@@ -149,48 +149,52 @@ namespace Deployment_Simulation
                 //if (scope_net_topo.Nodes.Count >= 2 * N - upperBoundOfMinDegree)
                 //    break;
 
-                neighbor.Remove(selectNode);
-                neighbor.AddRange(src_net_topo.GetNeighborNodeIDs(selectNode).Except(scope_net_topo.Nodes.Select(n => n.ID)));
-                neighbor = neighbor.Distinct().ToList();
+                neighbor.RemoveAll(n => n.NodeID == selectNode);
+                foreach (int id in src_net_topo.GetNeighborNodeIDs(selectNode).Except(scope_net_topo.Nodes.Select(n => n.ID)))
+                    neighbor.Add(new NeighborIDWithMaxHopCount() { NodeID = id, HopCount = int.MinValue });
+                //neighbor.AddRange(src_net_topo.GetNeighborNodeIDs(selectNode).Except(scope_net_topo.Nodes.Select(n => n.ID)));
+                neighbor = neighbor.GroupBy(n => n.NodeID).Select(n => n.First()).ToList();
 
                 NetworkTopology concentrate_topo = new NetworkTopology(src_net_topo.Nodes);
                 concentrate_topo.AdjacentMatrix = src_net_topo.AdjacentMatrix;
 
                 concentrate_topo.Nodes.AddRange(src_net_topo.Nodes.Except(scope_net_topo.Nodes.Where(n => n.ID != scope_net_topo.Nodes[0].ID)));
                 concentrate_topo.Edges.AddRange(src_net_topo.Edges.Where(e => !scope_net_topo.Nodes.Exists(n => n.ID == e.Node1 || n.ID == e.Node2)));
-                foreach (int id in neighbor)
+                foreach (int id in neighbor.Select(n => n.NodeID))
                     concentrate_topo.Edges.Add(new NetworkTopology.Edge() { Node1 = id, Node2 = scope_net_topo.Nodes[0].ID });
 
                 selectNode = -1;
 
-                List<int> tmp = new List<int>(neighbor);
+                Dictionary<int, double> tmp = new Dictionary<int, double>();
+
+                foreach (int id in neighbor.Where(n => n.HopCount == int.MinValue).Select(n => n.NodeID))
+                    tmp.Add(id, concentrate_topo.ClusteringCoefficient(id));
 
                 //neighbor.Sort((x, y) => concentrate_topo.ClusteringCoefficient(x).CompareTo(concentrate_topo.ClusteringCoefficient(y)));
 
-                for (int i = neighbor.Count - 1; i >= 0; i--)
+                for (int i = 0; i < tmp.Count; i++)
                 {
                     int max_hop_count = int.MinValue;
-                    double maxC = double.MinValue;
 
-                    foreach (int id in tmp)
-                    {
-                        double tmpC = concentrate_topo.ClusteringCoefficient(id);
-
-                        if (tmpC > maxC)
-                        {
-                            maxC = tmpC;
-                            selectNode = id;
-                        }
-                    }
+                    selectNode = tmp.Aggregate((kvp1, kvp2) => kvp1.Value >= kvp2.Value ? kvp1 : kvp2).Key;
                     tmp.Remove(selectNode);
 
-                    foreach (var scopeNode in scope_net_topo.Nodes)
-                    {
-                        int hop_count = scope_net_topo.GetShortestPathCount(scopeNode.ID, selectNode) - 1;
+                    NeighborIDWithMaxHopCount nowNode = neighbor.Find(n => n.NodeID == selectNode);
 
-                        if (max_hop_count < hop_count)
-                            max_hop_count = hop_count;
+                    if (nowNode.HopCount == int.MinValue)
+                    {
+                        foreach (var scopeNode in scope_net_topo.Nodes)
+                        {
+                            int hop_count = scope_net_topo.GetShortestPathCount(scopeNode.ID, selectNode) - 1;
+
+                            if (max_hop_count < hop_count)
+                                max_hop_count = hop_count;
+                        }
+
+                        nowNode.HopCount = max_hop_count;
                     }
+                    else
+                        max_hop_count = nowNode.HopCount;
 
                     if (max_hop_count <= K - 1)
                         break;
@@ -260,16 +264,18 @@ namespace Deployment_Simulation
             // Handling the neighbor nodes of each node in the scope network topology.
             if (selectNode != -1)
             {
-                neighbor.Remove(selectNode);
-                neighbor.AddRange(src_net_topo.GetNeighborNodeIDs(selectNode).Except(scope_net_topo.Nodes.Select(n => n.ID)));
-                neighbor = neighbor.Distinct().ToList();
+                neighbor.RemoveAll(n => n.NodeID == selectNode);
+                foreach (int id in src_net_topo.GetNeighborNodeIDs(selectNode).Except(scope_net_topo.Nodes.Select(n => n.ID)))
+                    neighbor.Add(new NeighborIDWithMaxHopCount() { NodeID = id, HopCount = int.MinValue });
+                //neighbor.AddRange(src_net_topo.GetNeighborNodeIDs(selectNode).Except(scope_net_topo.Nodes.Select(n => n.ID)));
+                neighbor = neighbor.GroupBy(n => n.NodeID).Select(n => n.First()).ToList();
             }
 
             // During above process the tmp list will be deployment nodes, and add to deployNodes list.
-            nowDeployNodes.AddRange(neighbor);
+            nowDeployNodes.AddRange(neighbor.Select(n => n.NodeID));
 
             // Adding deploy nodes to the scope network topology.
-            foreach (int id in neighbor)
+            foreach (int id in neighbor.Select(n => n.NodeID))
             {
                 scope_net_topo.Edges.AddRange(src_net_topo.Edges.Where(e =>
                                                     e.Node1 == id && scope_net_topo.Nodes.Exists(n => n.ID == e.Node2) ||
@@ -283,7 +289,7 @@ namespace Deployment_Simulation
             remain_topo = src_net_topo - scope_net_topo;
 
             // Removing deployment nodes and edges from scope network topology.
-            foreach (int id in neighbor)
+            foreach (int id in neighbor.Select(n => n.NodeID))
             {
                 scope_net_topo.Nodes.RemoveAll(x => x.ID == id);
                 scope_net_topo.Edges.RemoveAll(x => x.Node1 == id || x.Node2 == id);

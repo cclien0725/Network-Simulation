@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataStructure.cs" />
     <Compile Include="KCutStartWithCenterNode.cs" />
     <Compile Include="KCutStartWithCenterNodeConsiderCoefficient.cs" />
     <Compile Include="KCutStartWithCenterNodeConsiderScopeCoefficientMinDegree.cs" />

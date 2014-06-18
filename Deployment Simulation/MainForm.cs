@@ -123,6 +123,9 @@ namespace Deployment_Simulation
 
                             do
                             {
+                                if (N >= 50)
+                                    break;
+
                                 if (deployment != null)
                                     last_deploy_count = new List<int>(deployment.DeployNodes);
                                 else

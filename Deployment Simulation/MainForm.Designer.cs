@@ -42,6 +42,7 @@
             this.lb_sub_progress = new System.Windows.Forms.Label();
             this.progress_sub = new System.Windows.Forms.ProgressBar();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.cb_run_sim = new System.Windows.Forms.CheckBox();
             this.rdoBtn_all = new System.Windows.Forms.RadioButton();
             this.rdoBtn_specific = new System.Windows.Forms.RadioButton();
             this.progress_main = new System.Windows.Forms.ProgressBar();
@@ -57,7 +58,6 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tb_select_file = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.cb_run_sim = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -225,6 +225,16 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Simulation Mode";
             // 
+            // cb_run_sim
+            // 
+            this.cb_run_sim.AutoSize = true;
+            this.cb_run_sim.Location = new System.Drawing.Point(6, 72);
+            this.cb_run_sim.Name = "cb_run_sim";
+            this.cb_run_sim.Size = new System.Drawing.Size(117, 21);
+            this.cb_run_sim.TabIndex = 17;
+            this.cb_run_sim.Text = "Run Actual Sim";
+            this.cb_run_sim.UseVisualStyleBackColor = true;
+            // 
             // rdoBtn_all
             // 
             this.rdoBtn_all.AutoSize = true;
@@ -372,16 +382,6 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Files(s):";
             // 
-            // cb_run_sim
-            // 
-            this.cb_run_sim.AutoSize = true;
-            this.cb_run_sim.Location = new System.Drawing.Point(6, 72);
-            this.cb_run_sim.Name = "cb_run_sim";
-            this.cb_run_sim.Size = new System.Drawing.Size(117, 21);
-            this.cb_run_sim.TabIndex = 17;
-            this.cb_run_sim.Text = "Run Actual Sim";
-            this.cb_run_sim.UseVisualStyleBackColor = true;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
@@ -392,7 +392,7 @@
             this.Font = new System.Drawing.Font("Microsoft JhengHei", 9.267326F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
-            this.Text = "Simulation of Deployment";
+            this.Text = "Deploy Simulator";
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();

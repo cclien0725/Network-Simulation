@@ -87,6 +87,36 @@ namespace SuperLibrary
             catch { return null; }
         }
 
+        public bool GetResult(string sqlcmd, ref DataSet result, List<SQLiteParameter> parameters = null)
+        {
+            try
+            {
+                if (result == null)
+                    result = new DataSet();
+                else
+                    result.Clear();
+
+                using (SQLiteConnection connection = new SQLiteConnection(m_connection_string))
+                {
+                    connection.Open();
+
+                    SQLiteCommand cmd = connection.CreateCommand();
+
+                    cmd.CommandText = sqlcmd;
+
+                    if (parameters != null)
+                        foreach (var item in parameters)
+                            cmd.Parameters.Add(item);
+
+                    SQLiteDataAdapter adapter = new SQLiteDataAdapter(cmd);
+                    adapter.Fill(result);
+                }
+
+                return result.Tables.Count > 0;
+            }
+            catch { return false; }
+        }
+
         public void RunCommnad(string sqlcmd, List<SQLiteParameter> parameters = null)
         {
             try

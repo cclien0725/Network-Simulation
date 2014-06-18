@@ -257,7 +257,7 @@ namespace Network_Simulation
 
             // If the file of shortest path is exist, then load into memory
             if (File.Exists(shortestPathFileName))
-                ReadShortestPathFile(shortestPathFileName);
+                ResetShortestPathFile(shortestPathFileName);
 
             if (File.Exists(eccDegPathFileName))
                 ReadEccentricityDegreeFile(eccDegPathFileName);
@@ -271,6 +271,8 @@ namespace Network_Simulation
         {
             DataUtility.Log("Reading shortest path file...");
 
+            AdjacentMatrix = null;
+            GC.Collect();
             // Create the space of adjacent matrix
             AdjacentMatrix = new Adjacency[Nodes.Count, Nodes.Count];
 
@@ -287,6 +289,38 @@ namespace Network_Simulation
                         for (int j = 0; j < data.Length; j++)
                             if (!data[j].Equals("null"))
                                 AdjacentMatrix[i, j] = new Adjacency(data[j]);
+
+                        i++;
+                    }
+                }
+            }
+
+            DataUtility.Log("Done.\n", false);
+        }
+
+        private void ResetShortestPathFile(string fileName)
+        {
+            DataUtility.Log("Reading shortest path file...");
+
+            using (BufferedStream bs = new BufferedStream(File.OpenRead(fileName)))
+            {
+                using (StreamReader reader = new StreamReader(bs))
+                {
+                    int i = 0;
+
+                    while (!reader.EndOfStream)
+                    {
+                        string[] data = reader.ReadLine().Split(' ');
+
+                        for (int j = 0; j < data.Length; j++)
+                            if (!data[j].Equals("null"))
+                            {
+                                string[] str = data[j].Split(',');
+                                AdjacentMatrix[i, j].Predecessor = Convert.ToInt32(str[0]);
+                                AdjacentMatrix[i, j].Length = Convert.ToDouble(str[1]);
+                                AdjacentMatrix[i, j].Delay = Convert.ToDouble(str[2]);
+                                AdjacentMatrix[i, j].PathCount = Convert.ToInt32(str[3]);
+                            }
 
                         i++;
                     }

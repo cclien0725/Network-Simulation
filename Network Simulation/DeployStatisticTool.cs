@@ -86,6 +86,7 @@ namespace Network_Simulation
                 double count_of_total_runs = m_deploy_file_names.Count * 2 + 2;
                 double now_runs = 0;
                 string cmd;
+                DataSet ds = new DataSet();
                 DataView dv;
                 m_deploy_sql = new DeployStatisticSQLiteUtils();
                 int itemCount;
@@ -98,7 +99,8 @@ namespace Network_Simulation
                     // Count of All Level.
                     m_deploy_worker.ReportProgress((int)(now_runs / count_of_total_runs * 100.0), new object[] { filePath, "Processing (1/2)..." });
                     cmd = "SELECT file_name, node_counts, edge_counts, diameter, k, n, deploy_name, level, deploy_type, COUNT(*) AS count_of_nodes FROM (NetworkTopology INNER JOIN DeploySimulation ON NetworkTopology.n_id = DeploySimulation.n_id) INNER JOIN LevelRecord ON DeploySimulation.job_id = LevelRecord.job_id GROUP BY file_name, node_counts, diameter, k, n, deploy_name, level, deploy_type;";
-                    dv = m_query_sql.GetResult(cmd);
+                    m_query_sql.GetResult(cmd, ref ds);
+                    dv = ds.Tables[0].DefaultView;
 
                     itemCount = 0;
                     sb.Clear();
@@ -124,7 +126,8 @@ namespace Network_Simulation
                     // Count of Non-Level.
                     m_deploy_worker.ReportProgress((int)(++now_runs / count_of_total_runs * 100.0), new object[] { filePath, "Processing (2/2)..." });
                     cmd = "SELECT file_name, node_counts, edge_counts, diameter, k, n, deploy_name, deploy_type, COUNT(*) AS count_of_nodes FROM (NetworkTopology INNER JOIN DeploySimulation ON NetworkTopology.n_id = DeploySimulation.n_id) INNER JOIN LevelRecord ON DeploySimulation.job_id = LevelRecord.job_id GROUP BY file_name, node_counts, diameter, k, n, deploy_name, deploy_type;";
-                    dv = m_query_sql.GetResult(cmd);
+                    m_query_sql.GetResult(cmd, ref ds);
+                    dv = ds.Tables[0].DefaultView;
 
                     itemCount = 0;
                     sb.Clear();
