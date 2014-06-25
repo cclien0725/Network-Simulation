@@ -48,17 +48,17 @@ namespace Heterogenerous_Simulation_Console_Version
 
             for (int K = 1; K <= networkTopology.Diameter; K++)
             {
-                int N = 0;
+                //int N = 0;
                 satisfy_count = 0;
 
-                do
-                {
+                //do
+                //{
                     if (try_deploy != null)
                         last_deploy_count = new List<int>(try_deploy.DeployNodes);
                     else
                         last_deploy_count = new List<int>();
 
-                    try_deploy = Activator.CreateInstance(m_deploy_type, new object[] { percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer, K, ++N }) as Deployment;
+                    try_deploy = Activator.CreateInstance(m_deploy_type, new object[] { percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer, K, 1}) as Deployment;
                     try_deploy.Deploy(networkTopology);
 
                     if (try_deploy.DeployNodes.Count <= numberOfTTracer + numberOfMTracer + numberOfFTracer)
@@ -67,11 +67,11 @@ namespace Heterogenerous_Simulation_Console_Version
                         dList.Add(try_deploy);
                     }
 
-                    if (try_deploy.DeployNodes.Except(last_deploy_count).Count() == 0 && last_deploy_count.Except(try_deploy.DeployNodes).Count() == 0)
-                        satisfy_count++;
-                    else
-                        satisfy_count = 0;
-                } while (satisfy_count < 2);
+                    //if (try_deploy.DeployNodes.Except(last_deploy_count).Count() == 0 && last_deploy_count.Except(try_deploy.DeployNodes).Count() == 0)
+                //        satisfy_count++;
+                //    else
+                //        satisfy_count = 0;
+                //} while (satisfy_count < 2);
             }
 
             dList.Sort((x, y) => x.DeployNodes.Count.CompareTo(y.DeployNodes.Count));

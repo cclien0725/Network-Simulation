@@ -60,10 +60,14 @@ namespace Heterogenerous_Simulation_Console_Version
                 sql.LoadAttackersAndVictim(ref networkTopology);
             }
 
+            RandomDeployment randomDeploy;
+            KCutDeployment kcutDeploy;
+            KCutDeploymentV2 kcut2Deploy;
+
             switch (methodName) 
             {
                 case "RandomDeployment":
-                    RandomDeployment randomDeploy = new RandomDeployment(TunnelingTracer * PercentageOfTracer / 100, MarkingTracer * PercentageOfTracer / 100, FilteringTracer * PercentageOfTracer / 100);
+                    randomDeploy = new RandomDeployment(TunnelingTracer * PercentageOfTracer / 100, MarkingTracer * PercentageOfTracer / 100, FilteringTracer * PercentageOfTracer / 100);
                     if (sql.CreateTable(randomDeploy.ToString()))
                     {
                         randomDeploy.Deploy(networkTopology);
@@ -73,7 +77,7 @@ namespace Heterogenerous_Simulation_Console_Version
                     break;
 
                 case "KCutDeployment":
-                    KCutDeployment kcutDeploy = new KCutDeployment(TunnelingTracer * PercentageOfTracer / 100, MarkingTracer * PercentageOfTracer / 100, FilteringTracer * PercentageOfTracer / 100, typeof(KCutStartWithSideNodeConsiderCoefficient));
+                    kcutDeploy = new KCutDeployment(TunnelingTracer * PercentageOfTracer / 100, MarkingTracer * PercentageOfTracer / 100, FilteringTracer * PercentageOfTracer / 100, typeof(KCutStartWithSideNodeConsiderCoefficient));
                     if (sql.CreateTable("KCutDeployV1")) 
                     {
                         kcutDeploy.Deploy(networkTopology);
@@ -83,7 +87,7 @@ namespace Heterogenerous_Simulation_Console_Version
                     break;
 
                 case "KCutDeployment2":
-                    KCutDeploymentV2 kcut2Deploy = new KCutDeploymentV2(TunnelingTracer * PercentageOfTracer / 100, MarkingTracer * PercentageOfTracer / 100, FilteringTracer * PercentageOfTracer / 100, typeof(KCutStartWithSideNodeConsiderCoefficient));
+                    kcut2Deploy = new KCutDeploymentV2(TunnelingTracer * PercentageOfTracer / 100, MarkingTracer * PercentageOfTracer / 100, FilteringTracer * PercentageOfTracer / 100, typeof(KCutStartWithSideNodeConsiderCoefficient));
                     if (sql.CreateTable("KCutDeployV2"))
                     {
                         kcut2Deploy.Deploy(networkTopology);
@@ -93,13 +97,34 @@ namespace Heterogenerous_Simulation_Console_Version
                     break;
 
                 case "OPTRandomDeployment":
-                    // TODO: Optimal Random
+                    // Optimal Random
+                    randomDeploy = new RandomDeployment(TunnelingTracer * PercentageOfTracer / 100, MarkingTracer * PercentageOfTracer / 100, FilteringTracer * PercentageOfTracer / 100);
+                    if (sql.CreateTable("OPTRandomDeployment"))
+                    {
+                        randomDeploy.Deploy(networkTopology);
+                        OptSimulator optRandomSimulator = new OptSimulator(randomDeploy, networkTopology, sql, "Random");
+                        optRandomSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                    }
                     break;
                 case "OPTKCutDeployment":
-                    // TODO: Optimal KCutV1
+                    // Optimal KCutV1
+                    kcutDeploy = new KCutDeployment(TunnelingTracer * PercentageOfTracer / 100, MarkingTracer * PercentageOfTracer / 100, FilteringTracer * PercentageOfTracer / 100, typeof(KCutStartWithSideNodeConsiderCoefficient));
+                    if (sql.CreateTable("OPTKCutDeployV1"))
+                    {
+                        kcutDeploy.Deploy(networkTopology);
+                        OptSimulator optKCutSimulator = new OptSimulator(kcutDeploy.Deployment, networkTopology, sql, "V1");
+                        optKCutSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                    }
                     break;
                 case "OPTKCutDeploymentV2":
-                    // TODO: Optimal KCutV2
+                    // Optimal KCutV2
+                    kcut2Deploy = new KCutDeploymentV2(TunnelingTracer * PercentageOfTracer / 100, MarkingTracer * PercentageOfTracer / 100, FilteringTracer * PercentageOfTracer / 100, typeof(KCutStartWithSideNodeConsiderCoefficient));
+                    if (sql.CreateTable("OPTKCutDeployV2"))
+                    {
+                        kcut2Deploy.Deploy(networkTopology);
+                        OptSimulator kcut2Simulator = new OptSimulator(kcut2Deploy.Deployment, networkTopology, sql, "V2");
+                        kcut2Simulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                    }
                     break;
             }
         }

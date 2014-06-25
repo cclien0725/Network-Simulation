@@ -6,7 +6,7 @@ using Network_Simulation;
 
 namespace Heterogenerous_Simulation_Console_Version
 {
-    public class Simulator
+    public class OptSimulator
     {
         public class ReportArgument : EventArgs
         {
@@ -23,7 +23,7 @@ namespace Heterogenerous_Simulation_Console_Version
 
         public event EventHandler<ReportArgument> onReportOccur;
 
-        public Simulator(Deployment deployment, NetworkTopology topology, SQLiteUtility sql, string version)
+        public OptSimulator(Deployment deployment, NetworkTopology topology, SQLiteUtility sql, string version)
         {
             if (topology.Nodes.Count == 0)
                 throw new Exception("Run() Fail: There are 0 nodes in the network.");
@@ -109,7 +109,7 @@ namespace Heterogenerous_Simulation_Console_Version
                     switch (topology.Nodes[topology.NodeID2Index(path[j])].Tracer)
                     {
                         case NetworkTopology.TracerType.Tunneling:
-                            if (!isTunneling && !isMarking && rd.NextDouble() <= topology.Nodes.Find(node => node.ID == path[j]).ProbabilityOfTunneling && topology.Nodes.Find(node => node.ID == path[j]).IsTunnelingActive)
+                            if (!isTunneling && !isMarking && /*rd.NextDouble() <= topology.Nodes.Find(node => node.ID == path[j]).ProbabilityOfTunneling*/ packetEvent.Type == NetworkTopology.NodeType.Attacker && topology.Nodes.Find(node => node.ID == path[j]).IsTunnelingActive)
                             {
                                 TunnelingEvent tunnelingEvent = new TunnelingEvent(packetEvent);
                                 tunnelingEvent.TunnelingSrc = path[j];
@@ -134,7 +134,7 @@ namespace Heterogenerous_Simulation_Console_Version
                             }
                             break;
                         case NetworkTopology.TracerType.Marking:
-                            if ((!isMarking && rd.NextDouble() <= probibilityOfPacketMarking && markingEventList.Count * 100 / totalPacket < startFiltering && !shouldFiltering) || shouldMarking)
+                            if ((!isMarking && /*rd.NextDouble() <= probibilityOfPacketMarking*/ packetEvent.Type == NetworkTopology.NodeType.Attacker && markingEventList.Count * 100 / totalPacket < startFiltering && !shouldFiltering) || shouldMarking)
                             {
                                 MarkingEvent markingEvent = new MarkingEvent(packetEvent);
 
@@ -260,7 +260,7 @@ namespace Heterogenerous_Simulation_Console_Version
                 {
                     //deployment.FilteringTracerID.Sort((x, y) => { return topology.GetShortestPathCount(x, nodeID).CompareTo(topology.GetShortestPathCount(y, nodeID)); });
                     int min = deployment.FilteringTracerID.Aggregate((x, y) => topology.GetShortestPathCount(x, nodeID) <= topology.GetShortestPathCount(y, nodeID) ? x : y);
-                    
+
                     path = topology.GetShortestPath(min, nodeID);
                     for (int i = 0; i < path.Count - 1; i++)
                     {

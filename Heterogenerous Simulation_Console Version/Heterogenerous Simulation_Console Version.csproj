@@ -49,6 +49,7 @@
     <Compile Include="KCutDeployment.cs" />
     <Compile Include="KCutDeploymentV2.cs" />
     <Compile Include="NoneDeployment.cs" />
+    <Compile Include="OptSimulator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandomDeployment.cs" />

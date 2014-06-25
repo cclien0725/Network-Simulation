@@ -1,6 +1,6 @@
 @echo off
 
-set files=n100d3_01.brite;n100d3_02.brite
+set files=n4kd4_1.brite;n4kd4_2.brite;n4kd4_3.brite;n4kd4_4.brite;n4kd4_5.brite;n4kd4_6.brite;n4kd4_7.brite;n4kd4_8.brite;n4kd4_9.brite;n4kd4_10.brite;n4kd4_11.brite;n4kd4_12.brite;n4kd4_13.brite;n4kd4_14.brite;n4kd4_15.brite;n5kd4_1.brite;n5kd4_2.brite;n5kd4_3.brite;n5kd4_4.brite;n5kd4_5.brite;n5kd4_6.brite;n5kd4_7.brite;n5kd4_8.brite;n5kd4_9.brite;n5kd4_10.brite;n5kd4_11.brite;n5kd4_12.brite;n5kd4_13.brite;n5kd4_14.brite;n5kd4_15.brite
 set methods=RandomDeployment;KCutDeployment;KCutDeployment2
 
 copy "Heterogenerous Simulation_Console Version.exe" "S.exe"
