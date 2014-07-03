@@ -71,8 +71,16 @@ namespace Heterogenerous_Simulation_Console_Version
                     if (sql.CreateTable(randomDeploy.ToString()))
                     {
                         randomDeploy.Deploy(networkTopology);
-                        Simulator randomSimulator = new Simulator(randomDeploy, networkTopology, sql, "Random");
-                        randomSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        if (MarkingTracer > 0)
+                        {
+                            MarkingAssistanceSimulator markSimulator = new MarkingAssistanceSimulator(randomDeploy, networkTopology, sql, "Random");
+                            markSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        }
+                        else
+                        {
+                            Simulator randomSimulator = new Simulator(randomDeploy, networkTopology, sql, "Random");
+                            randomSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        }
                     }
                     break;
 
@@ -81,8 +89,16 @@ namespace Heterogenerous_Simulation_Console_Version
                     if (sql.CreateTable("KCutDeployV1")) 
                     {
                         kcutDeploy.Deploy(networkTopology);
-                        Simulator kcutSimulator = new Simulator(kcutDeploy.Deployment, networkTopology, sql, "V1");
-                        kcutSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        if (MarkingTracer > 0)
+                        {
+                            MarkingAssistanceSimulator markSimulator = new MarkingAssistanceSimulator(kcutDeploy.Deployment, networkTopology, sql, "Random");
+                            markSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        }
+                        else
+                        {
+                            Simulator kcutSimulator = new Simulator(kcutDeploy.Deployment, networkTopology, sql, "V1");
+                            kcutSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        }
                     }
                     break;
 
@@ -91,8 +107,16 @@ namespace Heterogenerous_Simulation_Console_Version
                     if (sql.CreateTable("KCutDeployV2"))
                     {
                         kcut2Deploy.Deploy(networkTopology);
-                        Simulator kcut2Simulator = new Simulator(kcut2Deploy.Deployment, networkTopology, sql, "V2");
-                        kcut2Simulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        if (MarkingTracer > 0)
+                        {
+                            MarkingAssistanceSimulator markSimulator = new MarkingAssistanceSimulator(kcut2Deploy.Deployment, networkTopology, sql, "Random");
+                            markSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        }
+                        else
+                        {
+                            Simulator kcut2Simulator = new Simulator(kcut2Deploy.Deployment, networkTopology, sql, "V2");
+                            kcut2Simulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        }
                     }
                     break;
 
@@ -102,8 +126,16 @@ namespace Heterogenerous_Simulation_Console_Version
                     if (sql.CreateTable("OPTRandomDeployment"))
                     {
                         randomDeploy.Deploy(networkTopology);
-                        OptSimulator optRandomSimulator = new OptSimulator(randomDeploy, networkTopology, sql, "Random");
-                        optRandomSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        if (MarkingTracer > 0)
+                        {
+                            OptMarkingAssistanceSimulator markSimulator = new OptMarkingAssistanceSimulator(randomDeploy, networkTopology, sql, "Random");
+                            markSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        }
+                        else
+                        {
+                            OptSimulator optRandomSimulator = new OptSimulator(randomDeploy, networkTopology, sql, "Random");
+                            optRandomSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        }
                     }
                     break;
                 case "OPTKCutDeployment":
@@ -112,8 +144,16 @@ namespace Heterogenerous_Simulation_Console_Version
                     if (sql.CreateTable("OPTKCutDeployV1"))
                     {
                         kcutDeploy.Deploy(networkTopology);
-                        OptSimulator optKCutSimulator = new OptSimulator(kcutDeploy.Deployment, networkTopology, sql, "V1");
-                        optKCutSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        if (MarkingTracer > 0)
+                        {
+                            OptMarkingAssistanceSimulator markSimulator = new OptMarkingAssistanceSimulator(kcutDeploy.Deployment, networkTopology, sql, "Random");
+                            markSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        }
+                        else
+                        {
+                            OptSimulator optKCutSimulator = new OptSimulator(kcutDeploy.Deployment, networkTopology, sql, "V1");
+                            optKCutSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        }
                     }
                     break;
                 case "OPTKCutDeploymentV2":
@@ -122,8 +162,16 @@ namespace Heterogenerous_Simulation_Console_Version
                     if (sql.CreateTable("OPTKCutDeployV2"))
                     {
                         kcut2Deploy.Deploy(networkTopology);
-                        OptSimulator kcut2Simulator = new OptSimulator(kcut2Deploy.Deployment, networkTopology, sql, "V2");
-                        kcut2Simulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        if (MarkingTracer > 0)
+                        {
+                            OptMarkingAssistanceSimulator markSimulator = new OptMarkingAssistanceSimulator(kcut2Deploy.Deployment, networkTopology, sql, "Random");
+                            markSimulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        }
+                        else
+                        {
+                            OptSimulator kcut2Simulator = new OptSimulator(kcut2Deploy.Deployment, networkTopology, sql, "V2");
+                            kcut2Simulator.Run(AttackPacketPerSecond, NormalPacketPerSecond, TotalPacket, PercentageOfAttackPacket, ProbabilityOfPacketTunneling, ProbabilityOfPackeMarking, StartFiltering, InitTimeOfAttackPacket, DynamicProbability, ConsiderDistance);
+                        }
                     }
                     break;
             }
