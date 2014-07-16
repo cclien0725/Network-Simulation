@@ -36,7 +36,6 @@ namespace Heterogenerous_Simulation
             //comboBox1.Items.Add(typeof(KCutStartWithSideNodeConsiderCoefficient).Name);
 
             comboBox1.SelectedValue = typeof(NoneDeployment).Name;
-
             networkTopology = new NetworkTopology(0, 0);
             networkTopology.ReadBriteFile(mapFileName);
 

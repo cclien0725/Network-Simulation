@@ -46,7 +46,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MarkingSimulator.cs" />
     <Compile Include="KCutDeployment.cs" />
     <Compile Include="KCutDeploymentV2.cs" />
     <Compile Include="MarkingAssistanceSimulator.cs" />
