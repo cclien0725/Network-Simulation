@@ -221,13 +221,16 @@ namespace Heterogenerous_Simulation_Console_Version
                     if (victim == nodeID) continue;
 
                     path = topology.GetShortestPath(victim, nodeID);
+                    double time = 0;
                     for (int i = 0; i < path.Count - 1; i++)
                     {
+                        time += topology.AdjacentMatrix[topology.NodeID2Index(path[i]), topology.NodeID2Index(path[i + 1])].Delay;
                         tracingList.Add(new PacketSentEvent(packetID)
                         {
                             CurrentNodeID = path[i],
                             NextHopID = path[i + 1],
-                            Length = topology.AdjacentMatrix[topology.NodeID2Index(path[i]), topology.NodeID2Index(path[i + 1])].Length
+                            Length = topology.AdjacentMatrix[topology.NodeID2Index(path[i]), topology.NodeID2Index(path[i + 1])].Length,
+                            Time = time
                         });
                     }
                     packetID++;
@@ -240,13 +243,16 @@ namespace Heterogenerous_Simulation_Console_Version
                         if (victim == nodeID) continue;
 
                         path = topology.GetShortestPath(victim, nodeID);
+                        double time = 0;
                         for (int i = 0; i < path.Count - 1; i++)
                         {
+                            time += topology.AdjacentMatrix[topology.NodeID2Index(path[i]), topology.NodeID2Index(path[i + 1])].Delay;
                             tracingList.Add(new PacketSentEvent(packetID)
                             {
                                 CurrentNodeID = path[i],
                                 NextHopID = path[i + 1],
-                                Length = topology.AdjacentMatrix[topology.NodeID2Index(path[i]), topology.NodeID2Index(path[i + 1])].Length
+                                Length = topology.AdjacentMatrix[topology.NodeID2Index(path[i]), topology.NodeID2Index(path[i + 1])].Length,
+                                Time = time
                             });
                         }
                         packetID++;
@@ -262,13 +268,16 @@ namespace Heterogenerous_Simulation_Console_Version
                     int min = deployment.FilteringTracerID.Aggregate((x, y) => topology.GetShortestPathCount(x, nodeID) <= topology.GetShortestPathCount(y, nodeID) ? x : y);
 
                     path = topology.GetShortestPath(min, nodeID);
+                    double time = 0;
                     for (int i = 0; i < path.Count - 1; i++)
                     {
+                        time += topology.AdjacentMatrix[topology.NodeID2Index(path[i]), topology.NodeID2Index(path[i + 1])].Delay;
                         tracingList.Add(new PacketSentEvent(packetID)
                         {
                             CurrentNodeID = path[i],
                             NextHopID = path[i + 1],
-                            Length = topology.AdjacentMatrix[topology.NodeID2Index(path[i]), topology.NodeID2Index(path[i + 1])].Length
+                            Length = topology.AdjacentMatrix[topology.NodeID2Index(path[i]), topology.NodeID2Index(path[i + 1])].Length,
+                            Time = time
                         });
                     }
                     packetID++;

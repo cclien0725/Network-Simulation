@@ -96,7 +96,7 @@ namespace Heterogenerous_Simulation_Console_Version
             {"MarkingEvents", "ID INTEGER PRIMARY KEY, PacketID INTEGER, Time REAL, MarkingNodeID INTEGER"},
             {"FilteringEvents", "ID INTEGER PRIMARY KEY, PacketID INTEGER, Time REAL, FilteringNodeId INTEGER"},
             {"Deployment", "NodeID INTEGER PRIMARY KEY, TracerType INTEGER, NodeType INTEGER, K INTEGER, N INTEGER, Status BOOLEAN"},
-            {"TracingCost", "ID INTEGER PRIMARY KEY, PacketID INTEGER, CurrentNodeID INTEGER, NextHopID INTEGER, Length REAL"}
+            {"TracingCost", "ID INTEGER PRIMARY KEY, PacketID INTEGER, CurrentNodeID INTEGER, NextHopID INTEGER, Length REAL, Time REAL"}
         };
 
         private string baseDirectory = Path.Combine(Environment.CurrentDirectory, "Log");
@@ -440,7 +440,7 @@ namespace Heterogenerous_Simulation_Console_Version
 
                     SQLiteTransaction trans = connection.BeginTransaction();
                     SQLiteCommand cmd = connection.CreateCommand();
-                    cmd.CommandText = string.Format("INSERT INTO {0}_TracingCost(PacketID, CurrentNodeID, NextHopID, Length) VALUES(@PacketID, @CurrentNodeID, @NextHopID, @Length)", prefixNameOfTable);
+                    cmd.CommandText = string.Format("INSERT INTO {0}_TracingCost(PacketID, CurrentNodeID, NextHopID, Length, Time) VALUES(@PacketID, @CurrentNodeID, @NextHopID, @Length, @Time)", prefixNameOfTable);
 
                     foreach (PacketSentEvent e in tracingList)
                     {
@@ -448,6 +448,7 @@ namespace Heterogenerous_Simulation_Console_Version
                         cmd.Parameters.Add("@CurrentNodeID", System.Data.DbType.Int32).Value = e.CurrentNodeID;
                         cmd.Parameters.Add("@NextHopID", System.Data.DbType.Int32).Value = e.NextHopID;
                         cmd.Parameters.Add("@Length", System.Data.DbType.Double).Value = e.Length;
+                        cmd.Parameters.Add("@Time", System.Data.DbType.Double).Value = e.Time;
                         cmd.ExecuteNonQuery();
                     }
 
