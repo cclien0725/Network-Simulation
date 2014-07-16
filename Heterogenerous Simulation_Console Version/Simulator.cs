@@ -158,16 +158,6 @@ namespace Heterogenerous_Simulation_Console_Version
                                         }
                                     }
                                 }
-
-                                // Tunneling
-                                TunnelingEvent tunnelingEvent = new TunnelingEvent(packetEvent);
-                                tunnelingEvent.TunnelingSrc = path[j];
-                                path = ChooseTunnelingNode(path, j, NetworkTopology.TracerType.Filtering, ref tunnelingEvent, considerDistance);
-                                shouldFiltering = true;
-                                tunnelingNodeID = tunnelingEvent.TunnelingSrc;
-
-                                tunnelingEventList.Add(tunnelingEvent);
-                                isTunneling = true;
                             }
                             break;
                         case NetworkTopology.TracerType.Filtering:
