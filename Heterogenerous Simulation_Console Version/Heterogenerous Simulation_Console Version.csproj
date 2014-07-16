@@ -49,7 +49,9 @@
     <Compile Include="MarkingSimulator.cs" />
     <Compile Include="KCutDeployment.cs" />
     <Compile Include="KCutDeploymentV2.cs" />
+    <Compile Include="MarkingAssistanceSimulator.cs" />
     <Compile Include="NoneDeployment.cs" />
+    <Compile Include="OptMarkingAssistanceSimulator.cs" />
     <Compile Include="OptSimulator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
