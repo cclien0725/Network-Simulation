@@ -143,7 +143,7 @@ namespace Heterogenerous_Simulation
                     bg.ReportProgress((filenames.IndexOf(filename) * 4 + 2) * 100 / (filenames.Count * 4), new ProgressReportArg() { ST = StatusType.TotalProgress });
 
                     // Using KCut deployment method.
-                    KCutDeployment kCutDeploy = new KCutDeployment(Convert.ToDouble(TunnelingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(MarkingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(FilteringTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, typeof(KCutStartWithConsider2KConsiderCoefficient));
+                    KCutDeployment kCutDeploy = new KCutDeployment(Convert.ToDouble(TunnelingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(MarkingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(FilteringTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, typeof(KCutStartWithSideNodeConsiderCoefficient));
                     sql.CreateTable("KCutDeployV1");
                     kCutDeploy.Deploy(networkTopology);
                     Simulator kCutSimulator = new Simulator(kCutDeploy.Deployment, networkTopology, sql, "V1");
@@ -156,7 +156,7 @@ namespace Heterogenerous_Simulation
                     bg.ReportProgress((filenames.IndexOf(filename) * 4 + 3) * 100 / (filenames.Count * 4), new ProgressReportArg() { ST = StatusType.TotalProgress });
 
                     // Using KCutV2 deployment method.
-                    KCutDeploymentV2 kCut2Deploy = new KCutDeploymentV2(Convert.ToDouble(TunnelingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(MarkingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(FilteringTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, typeof(KCutStartWithConsider2KConsiderCoefficient));
+                    KCutDeploymentV2 kCut2Deploy = new KCutDeploymentV2(Convert.ToDouble(TunnelingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(MarkingTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, Convert.ToDouble(FilteringTracer.Text) * Convert.ToDouble(PercentageOfTracer.Text) / 100, typeof(KCutStartWithSideNodeConsiderCoefficient));
                     sql.CreateTable("KCutDeployV2");
                     kCut2Deploy.Deploy(networkTopology);
                     Simulator kCut2Simulator = new Simulator(kCut2Deploy.Deployment, networkTopology, sql, "V2");

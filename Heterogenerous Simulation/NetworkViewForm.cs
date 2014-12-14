@@ -26,15 +26,16 @@ namespace Heterogenerous_Simulation
 
             comboBox1.Items.Add(typeof(NoneDeployment).Name);
             comboBox1.Items.Add(typeof(RandomDeployment).Name);
-            comboBox1.Items.Add(typeof(KCutStartWithCenterNode).Name);
-            comboBox1.Items.Add(typeof(KCutStartWithCenterNodeConsiderCoefficient).Name);
-            comboBox1.Items.Add(typeof(KCutStartWithComparableConsiderCoefficient).Name);
-            comboBox1.Items.Add(typeof(KCutStartWithConsider2KConsiderCoefficient).Name);
-            comboBox1.Items.Add(typeof(KCutStartWithSideNode).Name);
-            comboBox1.Items.Add(typeof(KCutStartWithSideNodeConsiderCoefficient).Name);
+            comboBox1.Items.Add("KCutDeployV1");
+            comboBox1.Items.Add("KCutDeployV2");
+            //comboBox1.Items.Add(typeof(KCutStartWithCenterNode).Name);
+            //comboBox1.Items.Add(typeof(KCutStartWithCenterNodeConsiderCoefficient).Name);
+            //comboBox1.Items.Add(typeof(KCutStartWithComparableConsiderCoefficient).Name);
+            //comboBox1.Items.Add(typeof(KCutStartWithConsider2KConsiderCoefficient).Name);
+            //comboBox1.Items.Add(typeof(KCutStartWithSideNode).Name);
+            //comboBox1.Items.Add(typeof(KCutStartWithSideNodeConsiderCoefficient).Name);
 
             comboBox1.SelectedValue = typeof(NoneDeployment).Name;
-
             networkTopology = new NetworkTopology(0, 0);
             networkTopology.ReadBriteFile(mapFileName);
 
