@@ -44,8 +44,8 @@ namespace Heterogenerous_Simulation
             m_deploy_types.Add(typeof(KCutStartWithSideNode));
             m_deploy_types.Add(typeof(KCutStartWithSideNodeConcentrateDegree));
             m_deploy_types.Add(typeof(KCutStartWithSideNodeConsiderCoefficient));
-            m_deploy_types.Add(typeof(KCutStartWithSideNodeConsiderScopeCoefficient));
-            m_deploy_types.Add(typeof(KCutStartWithSideNodeConsiderScopeCoefficientMinDegree));
+            m_deploy_types.Add(typeof(KCutStartWithSideNodeCoefficientAndMinDegree));
+            m_deploy_types.Add(typeof(KCutStartWithSideMinDegreeAndCoefficient));
         }
 
         private void Form1_Load(object sender, EventArgs e)

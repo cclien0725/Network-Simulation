@@ -8,20 +8,18 @@ using System.Data;
 
 namespace Deployment_Simulation
 {
-    public class KCutStartWithSideNodeConsiderScopeCoefficientMinDegree : Deployment
+    public class KCutStartWithSideNodeConsiderCoefficientStrictDegreeWithN : Deployment
     {
         private int lastDeployCount;
         private int allLevelScopeCount;
         private bool isNeedRecompute;
         private List<List<int>> allLevelDeploy;
-        private int upperBoundOfMinDegree;
 
-        public KCutStartWithSideNodeConsiderScopeCoefficientMinDegree(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer, int KCutValue, int numberOfInsideScopeNode)
+        public KCutStartWithSideNodeConsiderCoefficientStrictDegreeWithN(double percentageOfTunnelingTracer, double percentageOfMarkingTracer, double percentageOfFilteringTracer, int KCutValue, int numberOfInsideScopeNode)
             : base(percentageOfTunnelingTracer, percentageOfMarkingTracer, percentageOfFilteringTracer)
         {
             K = KCutValue;
             N = numberOfInsideScopeNode;
-            upperBoundOfMinDegree = (int)Math.Floor(N * 0.4);
         }
 
         protected override void doDeploy(NetworkTopology networkTopology)
@@ -143,145 +141,94 @@ namespace Deployment_Simulation
         /// <returns>The remain network topology after process the algorithm.</returns>
         private NetworkTopology startAlgorithm(NetworkTopology src_net_topo, NetworkTopology scope_net_topo, List<int> nowDeployNodes)
         {
-            List<int> neighbor = new List<int>();
+            List<NeighborIDWithMaxHopCount> neighbor = new List<NeighborIDWithMaxHopCount>();
             int selectNode = scope_net_topo.Nodes[0].ID;
-            int last_max_hop_count = int.MinValue;
 
             while (true)
             {
-                //if (scope_net_topo.Nodes.Count >= 2 * N - upperBoundOfMinDegree)
-                //    break;
+                if (scope_net_topo.Nodes.Count >= N)
+                    break;
 
-                neighbor.Remove(selectNode);
-                neighbor.AddRange(src_net_topo.GetNeighborNodeIDs(selectNode).Except(scope_net_topo.Nodes.Select(n => n.ID)));
-                neighbor = neighbor.Distinct().ToList();
+                neighbor.RemoveAll(n => n.NodeID == selectNode);
+                foreach (int id in src_net_topo.GetNeighborNodeIDs(selectNode).Except(scope_net_topo.Nodes.Select(n => n.ID)))
+                    neighbor.Add(new NeighborIDWithMaxHopCount() { NodeID = id, HopCount = int.MinValue });
+                //neighbor.AddRange(src_net_topo.GetNeighborNodeIDs(selectNode).Except(scope_net_topo.Nodes.Select(n => n.ID)));
+                neighbor = neighbor.GroupBy(n => n.NodeID).Select(n => n.First()).ToList();
 
                 NetworkTopology concentrate_topo = new NetworkTopology(src_net_topo.Nodes);
                 concentrate_topo.AdjacentMatrix = src_net_topo.AdjacentMatrix;
 
                 concentrate_topo.Nodes.AddRange(src_net_topo.Nodes.Except(scope_net_topo.Nodes.Where(n => n.ID != scope_net_topo.Nodes[0].ID)));
                 concentrate_topo.Edges.AddRange(src_net_topo.Edges.Where(e => !scope_net_topo.Nodes.Exists(n => n.ID == e.Node1 || n.ID == e.Node2)));
-                foreach (int id in neighbor)
+                foreach (int id in neighbor.Select(n => n.NodeID))
                     concentrate_topo.Edges.Add(new NetworkTopology.Edge() { Node1 = id, Node2 = scope_net_topo.Nodes[0].ID });
 
                 selectNode = -1;
 
-                List<int> tmp = new List<int>(neighbor);
+                Dictionary<int, double> tmp = new Dictionary<int, double>();
 
-                //if (last_max_hop_count < K / 2)
-                //    neighbor.Sort((x, y) => concentrate_topo.ClusteringCoefficient(scope_net_topo, x).CompareTo(concentrate_topo.ClusteringCoefficient(scope_net_topo, y)));
-                //else
-                //    neighbor.Sort((x, y) => concentrate_topo.Degree(x).CompareTo(concentrate_topo.Degree(y)));
+                foreach (int id in neighbor.Where(n => n.HopCount == int.MinValue).Select(n => n.NodeID))
+                    tmp.Add(id, concentrate_topo.ClusteringCoefficient(id));
 
-                for (int i = neighbor.Count - 1; i >= 0; i--)
+                //neighbor.Sort((x, y) => concentrate_topo.ClusteringCoefficient(x).CompareTo(concentrate_topo.ClusteringCoefficient(y)));
+
+                for (int i = 0; i < tmp.Count;)
                 {
                     int max_hop_count = int.MinValue;
 
-                    if (last_max_hop_count < K / 2)
+                    selectNode = tmp.Aggregate((kvp1, kvp2) => kvp1.Value >= kvp2.Value ? kvp1 : kvp2).Key;
+                    tmp.Remove(selectNode);
+
+                    NeighborIDWithMaxHopCount nowNode = neighbor.Find(n => n.NodeID == selectNode);
+
+                    if (nowNode.HopCount == int.MinValue)
                     {
-                        double maxC = double.MinValue;
-
-                        foreach (int id in tmp)
+                        foreach (var scopeNode in scope_net_topo.Nodes)
                         {
-                            double tmpC = concentrate_topo.ClusteringCoefficient(scope_net_topo, id);
+                            int hop_count = scope_net_topo.GetShortestPathCount(scopeNode.ID, selectNode) - 1;
 
-                            if (tmpC > maxC)
-                            {
-                                maxC = tmpC;
-                                selectNode = id;
-                            }
+                            if (max_hop_count < hop_count)
+                                max_hop_count = hop_count;
                         }
-                        tmp.Remove(selectNode);   
+
+                        nowNode.HopCount = max_hop_count;
                     }
                     else
-                    {
-                        int minD = int.MaxValue;
-
-                        foreach (int id in tmp)
-                        {
-                            int tmpD = src_net_topo.Degree(id);
-
-                            if (minD > tmpD)
-                            {
-                                minD = tmpD;
-                                selectNode = id;
-                            }
-                        }
-                        tmp.Remove(selectNode);
-                    }
-
-                    foreach (var scopeNode in scope_net_topo.Nodes)
-                    {
-                        int hop_count = scope_net_topo.GetShortestPathCount(scopeNode.ID, selectNode) - 1;
-
-                        if (max_hop_count < hop_count)
-                            max_hop_count = hop_count;
-                    }
+                        max_hop_count = nowNode.HopCount;
 
                     if (max_hop_count <= K - 1)
-                    {
-                        last_max_hop_count = max_hop_count;
                         break;
-                    }
                     else
                         selectNode = -1;
                 }
 
-                //if (scope_net_topo.Nodes.Count < upperBoundOfMinDegree)
-                //{
-                //    int minD = int.MaxValue;
-
-                //    foreach (int id in neighbor)
-                //    {
-                //        int tmpD = src_net_topo.Nodes.Find(n => n.ID == id).Degree;
-
-                //        if (minD > tmpD)
-                //        {
-                //            minD = tmpD;
-                //            selectNode = id;
-                //        }
-                //    }
-                //}
-                //else
-                //{
-                //double maxC = double.MinValue;
-
-                //foreach (int id in neighbor)
-                //{
-                //    double tmpc = concentrate_topo.ClusteringCoefficeint(id);
-
-                //    if (maxC < tmpc)
-                //    {
-                //        maxC = tmpc;
-                //        selectNode = id;
-                //    }
-                //}
-
-                //if (scope_net_topo.Nodes.Count >= N && maxC < 0.6)
-                //    selectNode = -1;
-                //}
-
                 // if nothing found, break the loop.
                 if (selectNode == -1)
                     break;
-                // adding the node to the scope set, and computing the max hop count.
-                else
+                // if K <= Diameter/2, checking the degree of selected node wether or not greater than threshold.
+                else if (K <= Math.Ceiling(src_net_topo.Diameter / 2.0))
                 {
-                    scope_net_topo.Edges.AddRange(src_net_topo.Edges.Where(e =>
-                                                    e.Node1 == selectNode && scope_net_topo.Nodes.Exists(n => n.ID == e.Node2) ||
-                                                    e.Node2 == selectNode && scope_net_topo.Nodes.Exists(n => n.ID == e.Node1)
-                                                    ));
+                    List<NetworkTopology.Node> remain_nodes = src_net_topo.Nodes.Except(scope_net_topo.Nodes).ToList();
+                    double avg = remain_nodes.Average(n => src_net_topo.Degree(n.ID));
+                    double std = Math.Sqrt(remain_nodes.Sum(n => Math.Pow(src_net_topo.Degree(n.ID) - avg, 2)) / (double)remain_nodes.Count);
+                    double ratio_k = (double)K / (double)src_net_topo.Diameter;
+                    int threshold = Convert.ToInt32(Math.Round(avg + std * ratio_k, MidpointRounding.AwayFromZero));
 
-                    scope_net_topo.Nodes.Add(src_net_topo.Nodes.Find(n => n.ID == selectNode));
-
-                    //foreach (var scopeNode in scope_net_topo.Nodes)
-                    //{
-                    //    int hop_count = scope_net_topo.GetShortestPathCount(scopeNode.ID, selectNode);
-
-                    //    if (max_hop_count < hop_count)
-                    //        max_hop_count = hop_count;
-                    //}
+                    //if (src_net_topo.Degree(selectNode) >= src_net_topo.Nodes.Except(scope_net_topo.Nodes).Average(n => src_net_topo.Degree(n.ID)) + K / 2)
+                    if (src_net_topo.Degree(selectNode) > threshold)
+                    {
+                        selectNode = -1;
+                        break;
+                    }
                 }
+
+                // adding the node to the scope set, and computing the max hop count.
+                scope_net_topo.Edges.AddRange(src_net_topo.Edges.Where(e =>
+                                                e.Node1 == selectNode && scope_net_topo.Nodes.Exists(n => n.ID == e.Node2) ||
+                                                e.Node2 == selectNode && scope_net_topo.Nodes.Exists(n => n.ID == e.Node1)
+                                                ));
+
+                scope_net_topo.Nodes.Add(src_net_topo.Nodes.Find(n => n.ID == selectNode));
             }
 
             NetworkTopology remain_topo;
@@ -289,16 +236,18 @@ namespace Deployment_Simulation
             // Handling the neighbor nodes of each node in the scope network topology.
             if (selectNode != -1)
             {
-                neighbor.Remove(selectNode);
-                neighbor.AddRange(src_net_topo.GetNeighborNodeIDs(selectNode).Except(scope_net_topo.Nodes.Select(n => n.ID)));
-                neighbor = neighbor.Distinct().ToList();
+                neighbor.RemoveAll(n => n.NodeID == selectNode);
+                foreach (int id in src_net_topo.GetNeighborNodeIDs(selectNode).Except(scope_net_topo.Nodes.Select(n => n.ID)))
+                    neighbor.Add(new NeighborIDWithMaxHopCount() { NodeID = id, HopCount = int.MinValue });
+                //neighbor.AddRange(src_net_topo.GetNeighborNodeIDs(selectNode).Except(scope_net_topo.Nodes.Select(n => n.ID)));
+                neighbor = neighbor.GroupBy(n => n.NodeID).Select(n => n.First()).ToList();
             }
 
             // During above process the tmp list will be deployment nodes, and add to deployNodes list.
-            nowDeployNodes.AddRange(neighbor);
+            nowDeployNodes.AddRange(neighbor.Select(n => n.NodeID));
 
             // Adding deploy nodes to the scope network topology.
-            foreach (int id in neighbor)
+            foreach (int id in neighbor.Select(n => n.NodeID))
             {
                 scope_net_topo.Edges.AddRange(src_net_topo.Edges.Where(e =>
                                                     e.Node1 == id && scope_net_topo.Nodes.Exists(n => n.ID == e.Node2) ||
@@ -312,7 +261,7 @@ namespace Deployment_Simulation
             remain_topo = src_net_topo - scope_net_topo;
 
             // Removing deployment nodes and edges from scope network topology.
-            foreach (int id in neighbor)
+            foreach (int id in neighbor.Select(n => n.NodeID))
             {
                 scope_net_topo.Nodes.RemoveAll(x => x.ID == id);
                 scope_net_topo.Edges.RemoveAll(x => x.Node1 == id || x.Node2 == id);
@@ -370,14 +319,6 @@ namespace Deployment_Simulation
                             {
                                 if (scope != null)
                                 {
-                                    //for (int e1 = 0; e1 < scope.Nodes.Count; e1++)
-                                    //{
-                                    //    for (int e2 = 0; e2 < scope.Nodes.Count; e2++)
-                                    //        scope.Edges.AddRange(topo.Edges.Where(e => e.Node1 == scope.Nodes[e1].ID && e.Node2 == scope.Nodes[e2].ID ||
-                                    //                                                    e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
-                                    //}
-                                    //scope.Edges = scope.Edges.Distinct().ToList();
-                                    //scope.ComputingShortestPath();
 
                                     allRoundScopeList.Add(scope);
                                 }
@@ -402,15 +343,6 @@ namespace Deployment_Simulation
 
                 if (scope != null)
                 {
-                    //for (int e1 = 0; e1 < scope.Nodes.Count; e1++)
-                    //{
-                    //    for (int e2 = 0; e2 < scope.Nodes.Count; e2++)
-                    //        scope.Edges.AddRange(topo.Edges.Where(e => e.Node1 == scope.Nodes[e1].ID && e.Node2 == scope.Nodes[e2].ID ||
-                    //                                                    e.Node2 == scope.Nodes[e1].ID && e.Node1 == scope.Nodes[e2].ID));
-                    //}
-                    //scope.Edges = scope.Edges.Distinct().ToList();
-                    //scope.ComputingShortestPath();
-
                     allRoundScopeList.Add(scope);
                 }
                 return true;

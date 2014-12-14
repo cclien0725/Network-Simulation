@@ -172,7 +172,7 @@ namespace Deployment_Simulation
 
                 //neighbor.Sort((x, y) => concentrate_topo.ClusteringCoefficient(x).CompareTo(concentrate_topo.ClusteringCoefficient(y)));
 
-                for (int i = 0; i < tmp.Count; i++)
+                for (int i = 0; i < tmp.Count;)
                 {
                     int max_hop_count = int.MinValue;
 

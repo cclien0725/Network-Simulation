@@ -47,8 +47,8 @@ namespace Network_Simulation
             m_deploy_names.Add(typeof(KCutStartWithSideNode).Name);
             m_deploy_names.Add(typeof(KCutStartWithSideNodeConcentrateDegree).Name);
             m_deploy_names.Add(typeof(KCutStartWithSideNodeConsiderCoefficient).Name);
-            m_deploy_names.Add(typeof(KCutStartWithSideNodeConsiderScopeCoefficient).Name);
-            m_deploy_names.Add(typeof(KCutStartWithSideNodeConsiderScopeCoefficientMinDegree).Name);
+            m_deploy_names.Add(typeof(KCutStartWithSideNodeCoefficientAndMinDegree).Name);
+            m_deploy_names.Add(typeof(KCutStartWithSideMinDegreeAndCoefficient).Name);
 
             m_deploy_worker = new BackgroundWorker();
             m_deploy_worker.WorkerSupportsCancellation = true;
@@ -83,7 +83,7 @@ namespace Network_Simulation
         {
             m_deploy_worker.DoWork += (s, e) =>
             {
-                double count_of_total_runs = m_deploy_file_names.Count * 2 + 2;
+                double count_of_total_runs = m_deploy_file_names.Count * 2;
                 double now_runs = 0;
                 string cmd;
                 DataSet ds = new DataSet();
@@ -98,13 +98,13 @@ namespace Network_Simulation
 
                     // Count of All Level.
                     m_deploy_worker.ReportProgress((int)(now_runs / count_of_total_runs * 100.0), new object[] { filePath, "Processing (1/2)..." });
-                    cmd = "SELECT file_name, node_counts, edge_counts, diameter, k, n, deploy_name, level, deploy_type, COUNT(*) AS count_of_nodes FROM (NetworkTopology INNER JOIN DeploySimulation ON NetworkTopology.n_id = DeploySimulation.n_id) INNER JOIN LevelRecord ON DeploySimulation.job_id = LevelRecord.job_id GROUP BY file_name, node_counts, diameter, k, n, deploy_name, level, deploy_type;";
+                    cmd = "SELECT file_name, node_counts, edge_counts, diameter, k, n, deploy_name, count_of_nodes, COUNT(*) AS count_of_levels FROM (SELECT file_name, node_counts, edge_counts, diameter, k, n, deploy_name, level, deploy_type, COUNT(*) AS count_of_nodes FROM (NetworkTopology INNER JOIN DeploySimulation ON NetworkTopology.n_id = DeploySimulation.n_id) INNER JOIN LevelRecord ON DeploySimulation.job_id= LevelRecord.job_id WHERE deploy_type LIKE 'Scope' GROUP BY file_name, node_counts, diameter, k, n, deploy_name, level) GROUP BY file_name, node_counts, edge_counts, diameter, k, n, deploy_name, count_of_nodes;";
                     m_query_sql.GetResult(cmd, ref ds);
                     dv = ds.Tables[0].DefaultView;
 
                     itemCount = 0;
                     sb.Clear();
-                    sb.Append("INSERT INTO CountOfAllLevel(file_name, node_counts, edge_counts, diameter, k, n, deploy_name, level, deploy_type, count_of_nodes)");
+                    sb.Append("INSERT INTO CountOfAllLevel(file_name, node_counts, edge_counts, diameter, k, n, deploy_name, count_of_nodes, count_of_levels)");
 
                     for (int i = 0; dv != null && i < dv.Count; i++)
                     {
@@ -112,11 +112,11 @@ namespace Network_Simulation
                         {
                             m_deploy_sql.RunCommnad(sb.ToString().Remove(sb.ToString().Length - 6, 6));
                             sb.Clear();
-                            sb.Append("INSERT INTO CountOfAllLevel(file_name, node_counts, edge_counts, diameter, k, n, deploy_name, level, deploy_type, count_of_nodes)");
-                            sb.AppendFormat(" SELECT '{0}',{1},{2},{3},{4},{5},'{6}',{7},'{8}',{9} UNION", dv[i]["file_name"], dv[i]["node_counts"], dv[i]["edge_counts"], dv[i]["diameter"], dv[i]["k"], dv[i]["n"], dv[i]["deploy_name"], dv[i]["level"], dv[i]["deploy_type"], dv[i]["count_of_nodes"]);
+                            sb.Append("INSERT INTO CountOfAllLevel(file_name, node_counts, edge_counts, diameter, k, n, deploy_name, count_of_nodes, count_of_levels)");
+                            sb.AppendFormat(" SELECT '{0}',{1},{2},{3},{4},{5},'{6}',{7},{8} UNION", dv[i]["file_name"], dv[i]["node_counts"], dv[i]["edge_counts"], dv[i]["diameter"], dv[i]["k"], dv[i]["n"], dv[i]["deploy_name"], dv[i]["count_of_nodes"], dv[i]["count_of_levels"]);
                         }
                         else
-                            sb.AppendFormat(" SELECT '{0}',{1},{2},{3},{4},{5},'{6}',{7},'{8}',{9} UNION", dv[i]["file_name"], dv[i]["node_counts"], dv[i]["edge_counts"], dv[i]["diameter"], dv[i]["k"], dv[i]["n"], dv[i]["deploy_name"], dv[i]["level"], dv[i]["deploy_type"], dv[i]["count_of_nodes"]);
+                            sb.AppendFormat(" SELECT '{0}',{1},{2},{3},{4},{5},'{6}',{7},{8} UNION", dv[i]["file_name"], dv[i]["node_counts"], dv[i]["edge_counts"], dv[i]["diameter"], dv[i]["k"], dv[i]["n"], dv[i]["deploy_name"], dv[i]["count_of_nodes"], dv[i]["count_of_levels"]);
                         itemCount++;
                     }
 
@@ -153,16 +153,16 @@ namespace Network_Simulation
                     m_deploy_worker.ReportProgress((int)(++now_runs / count_of_total_runs * 100.0), new object[] { filePath, "Completed (2/2)." });
                 }
 
-                // Count of All Level with Max N.
-                cmd = "INSERT INTO CountOfAllLevelWithMaxN(file_name, node_counts, edge_counts, diameter, k, n, deploy_name, level, deploy_type, count_of_nodes) SELECT c.file_name, c.node_counts, c.edge_counts, c.diameter, c.k, c.n,c.deploy_name, c.level, c.deploy_type, c.count_of_nodes FROM (SELECT file_name, node_counts, edge_counts, diameter, k, MAX(n) AS max_n FROM CountOfAllLevel GROUP BY file_name, node_counts, edge_counts, diameter, k) AS m JOIN CountOfAllLevel AS c ON m.file_name=c.file_name and m.node_counts=c.node_counts and m.edge_counts=c.edge_counts and m.diameter=c.diameter and m.k=c.k and m.max_n=c.n;";
-                m_deploy_sql.RunCommnad(cmd);
+                //// Count of All Level with Max N.
+                //cmd = "INSERT INTO CountOfAllLevelWithMaxN(file_name, node_counts, edge_counts, diameter, k, n, deploy_name, level, deploy_type, count_of_nodes) SELECT c.file_name, c.node_counts, c.edge_counts, c.diameter, c.k, c.n,c.deploy_name, c.level, c.deploy_type, c.count_of_nodes FROM (SELECT file_name, node_counts, edge_counts, diameter, k, MAX(n) AS max_n FROM CountOfAllLevel GROUP BY file_name, node_counts, edge_counts, diameter, k) AS m JOIN CountOfAllLevel AS c ON m.file_name=c.file_name and m.node_counts=c.node_counts and m.edge_counts=c.edge_counts and m.diameter=c.diameter and m.k=c.k and m.max_n=c.n;";
+                //m_deploy_sql.RunCommnad(cmd);
 
-                // Count of Non-Level with Max N.
-                m_deploy_worker.ReportProgress((int)(++now_runs / count_of_total_runs * 100.0));
-                cmd = "INSERT INTO CountOfNonLevelWithMaxN(file_name, node_counts, edge_counts, diameter, k, n, deploy_name, deploy_type, count_of_nodes) SELECT c.file_name, c.node_counts, c.edge_counts, c.diameter, c.k, c.n,c.deploy_name, c.deploy_type, c.count_of_nodes FROM (SELECT file_name, node_counts, edge_counts, diameter, k, MAX(n) AS max_n FROM CountOfNonLevel GROUP BY file_name, node_counts, edge_counts, diameter, k) AS m JOIN CountOfNonLevel AS c ON m.file_name=c.file_name and m.node_counts=c.node_counts and m.edge_counts=c.edge_counts and m.diameter=c.diameter and m.k=c.k and m.max_n=c.n;";
-                m_deploy_sql.RunCommnad(cmd);
+                //// Count of Non-Level with Max N.
+                //m_deploy_worker.ReportProgress((int)(++now_runs / count_of_total_runs * 100.0));
+                //cmd = "INSERT INTO CountOfNonLevelWithMaxN(file_name, node_counts, edge_counts, diameter, k, n, deploy_name, deploy_type, count_of_nodes) SELECT c.file_name, c.node_counts, c.edge_counts, c.diameter, c.k, c.n,c.deploy_name, c.deploy_type, c.count_of_nodes FROM (SELECT file_name, node_counts, edge_counts, diameter, k, MAX(n) AS max_n FROM CountOfNonLevel GROUP BY file_name, node_counts, edge_counts, diameter, k) AS m JOIN CountOfNonLevel AS c ON m.file_name=c.file_name and m.node_counts=c.node_counts and m.edge_counts=c.edge_counts and m.diameter=c.diameter and m.k=c.k and m.max_n=c.n;";
+                //m_deploy_sql.RunCommnad(cmd);
 
-                m_deploy_worker.ReportProgress((int)(++now_runs / count_of_total_runs * 100.0));
+                //m_deploy_worker.ReportProgress((int)(++now_runs / count_of_total_runs * 100.0));
             };
 
             m_deploy_worker.ProgressChanged += (s, e) =>
@@ -391,6 +391,9 @@ namespace Network_Simulation
             {
                 double count_of_total_runs = m_merge_file_names.Count + 1;
                 double now_runs = 0;
+                DataSet ds_network = new DataSet();
+                DataSet ds_deploy = new DataSet();
+                DataSet ds_level = new DataSet();
                 DataView dv_network, dv_deploy, dv_level;
                 StringBuilder sb_level = new StringBuilder();
                 int levelCount = 0;
@@ -409,22 +412,30 @@ namespace Network_Simulation
                     m_merge_worker.ReportProgress((int)(now_runs / count_of_total_runs * 100.0), new object[] { filePath, "Processing..." });
 
                     // Query NetworkTopology.
-                    dv_network = m_query_sql.GetResult("SELECT * FROM NetworkTopology;");
+                    m_query_sql.GetResult("SELECT * FROM NetworkTopology;", ref ds_network);
+                    dv_network = ds_network.Tables[0].DefaultView;
+
                     for (int i = 0; dv_network != null && i < dv_network.Count; i++)
                     {
                         buff_list.Add(string.Format("INSERT INTO NetworkTopology(file_name, node_counts, edge_counts, diameter) VALUES('{0}',{1},{2},{3});", dv_network[i]["file_name"], dv_network[i]["node_counts"], dv_network[i]["edge_counts"], dv_network[i]["diameter"]));
 
                         // Query DeploySimulation.
-                        dv_deploy = m_query_sql.GetResult("SELECT job_id, k, n, deploy_name FROM DeploySimulation WHERE n_id = @n_id;",
-                                                            new List<SQLiteParameter>() { new SQLiteParameter("@n_id", dv_network[i]["n_id"]) });
+                        m_query_sql.GetResult("SELECT job_id, k, n, deploy_name FROM DeploySimulation WHERE n_id = @n_id;",
+                                                ref ds_deploy,
+                                                new List<SQLiteParameter>() { new SQLiteParameter("@n_id", dv_network[i]["n_id"]) });
+                        dv_deploy = ds_deploy.Tables[0].DefaultView;
+
                         for (int j = 0; dv_deploy != null && j < dv_deploy.Count; j++)
                         {
                             new_job_id = DateTime.Now.Subtract(new DateTime(1970, 1, 1)).Ticks;
                             buff_list.Add(string.Format("INSERT INTO DeploySimulation(job_id, n_id, k, n, deploy_name) SELECT {0}, n_id, {2}, {3}, '{4}' FROM NetworkTopology WHERE file_name LIKE '{1}';", new_job_id, dv_network[i]["file_name"], dv_deploy[j]["k"], dv_deploy[j]["n"], dv_deploy[j]["deploy_name"]));
 
                             // Query LevelRecord.
-                            dv_level = m_query_sql.GetResult("SELECT level, node_id, deploy_type FROM LevelRecord WHERE job_id = @job_id;",
-                                                                new List<SQLiteParameter>() { new SQLiteParameter("@job_id", dv_deploy[j]["job_id"]) });
+                            m_query_sql.GetResult("SELECT level, node_id, deploy_type FROM LevelRecord WHERE job_id = @job_id;",
+                                                    ref ds_level,
+                                                    new List<SQLiteParameter>() { new SQLiteParameter("@job_id", dv_deploy[j]["job_id"]) });
+                            dv_level = ds_level.Tables[0].DefaultView;
+
                             for (int k = 0; dv_level != null && k < dv_level.Count; k++)
                             {
                                 if (levelCount != 0 && levelCount % 499 == 0)
@@ -541,10 +552,10 @@ namespace Network_Simulation
         {
             private Dictionary<string, string> m_tables = new Dictionary<string, string>()
             {
-                {"CountOfAllLevel", "file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, deploy_name TEXT, level INTEGER, deploy_type TEXT, count_of_nodes INTEGER"},
-                {"CountOfNonLevel", "file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, deploy_name TEXT, deploy_type TEXT, count_of_nodes INTEGER"},
-                {"CountOfAllLevelWithMaxN", "file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, deploy_name TEXT, level INTEGER, deploy_type TEXT, count_of_nodes INTEGER"},
-                {"CountOfNonLevelWithMaxN", "file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, deploy_name TEXT, deploy_type TEXT, count_of_nodes INTEGER"}
+                {"CountOfAllLevel", "file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, deploy_name TEXT, count_of_nodes INTEGER, count_of_levels INTEGER"},
+                {"CountOfNonLevel", "file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, deploy_name TEXT, deploy_type TEXT, count_of_nodes INTEGER"}
+                //{"CountOfAllLevelWithMaxN", "file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, deploy_name TEXT, level INTEGER, deploy_type TEXT, count_of_nodes INTEGER"},
+                //{"CountOfNonLevelWithMaxN", "file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, deploy_name TEXT, deploy_type TEXT, count_of_nodes INTEGER"}
             };
 
             public DeployStatisticSQLiteUtils()

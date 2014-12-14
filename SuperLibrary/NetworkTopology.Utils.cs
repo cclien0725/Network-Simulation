@@ -337,6 +337,7 @@ namespace Network_Simulation
         {
             NetworkTopology result = new NetworkTopology(left_n.m_src_nodes);
 
+            result.m_diameter = left_n.Diameter;
             result.Nodes = left_n.Nodes.Except(right_n.Nodes).ToList();
             result.Edges = left_n.Edges.Except(right_n.Edges).ToList();
             foreach (var n in right_n.Nodes)

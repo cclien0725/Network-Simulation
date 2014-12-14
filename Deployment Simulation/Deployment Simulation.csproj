@@ -57,13 +57,15 @@
     <Compile Include="KCutStartWithCenterNodeConsiderScopeCoefficientMinDegree.cs" />
     <Compile Include="KCutStartWithCenterNodeNoRecomputeEccentricity.cs" />
     <Compile Include="KCutStartWithSideConcentrateDegree.cs" />
+    <Compile Include="KCutStartWithSideMinDegreeAndCoefficient.cs" />
     <Compile Include="KCutStartWithSideNode.cs" />
+    <Compile Include="KCutStartWithSideNodeCoefficientAndMinDegree.cs" />
     <Compile Include="KCutStartWithSideNodeConsiderCoefficient.cs" />
     <Compile Include="KCutStartWithComparableConsiderCoefficient.cs" />
+    <Compile Include="KCutStartWithSideNodeConsiderCoefficientStrictDegree.cs" />
+    <Compile Include="KCutStartWithSideNodeConsiderCoefficientStrictDegreeWithN.cs" />
     <Compile Include="KCutStartWithSideNodeConsiderCoefficientWithN.cs" />
     <Compile Include="KCutStartWithSideNodeConsiderCoefficientWithNRatio.cs" />
-    <Compile Include="KCutStartWithSideNodeConsiderScopeCoefficient.cs" />
-    <Compile Include="KCutStartWithSideNodeConsiderScopeCoefficientMinDegree.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -79,6 +81,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RandomDeployment.cs" />
     <Compile Include="Simulator.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

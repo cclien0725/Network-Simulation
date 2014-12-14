@@ -65,8 +65,8 @@ namespace Deployment_Simulation
             {
                 {"UndetectedRatio", "u_id INTEGER PRIMARY KEY AUTOINCREMENT, file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, metric_name TEXT, ratio REAL"},
                 {"SearchingCost", "s_id INTEGER PRIMARY KEY AUTOINCREMENT, file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, metric_name TEXT, ratio REAL"},
-                {"SavingCost", "s_id INTEGER PRIMARY KEY AUTOINCREMENT, file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, ratio REAL"},
-                {"SurvivalMaliciousTrafficRatio", "s_id INTEGER PRIMARY KEY AUTOINCREMENT, file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, ratio REAL"}
+                {"SavingCost", "s_id INTEGER PRIMARY KEY AUTOINCREMENT, file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, metric_name TEXT, ratio REAL"},
+                {"SurvivalMaliciousTrafficRatio", "s_id INTEGER PRIMARY KEY AUTOINCREMENT, file_name TEXT, node_counts INTEGER, edge_counts INTEGER, diameter INTEGER, k INTEGER, n INTEGER, metric_name TEXT, ratio REAL"}
             };
 
             public SimulationSqliteUtility(string dbFileName)
@@ -105,14 +105,19 @@ namespace Deployment_Simulation
             set
             {
                 if (value != null)
+                {
                     m_deployment = value;
+                }
             }
         }
 
+        private const int c_packetNumber = 1000;
+
         private Deployment m_deployment;
+        private Deployment m_random_deployment;
         private NetworkTopology m_networkTopology;
         private SimulationSqliteUtility m_sqlite_utils;
-
+        
         public Simulator(NetworkTopology networkTopology, string deployName)
         {
             this.m_networkTopology = networkTopology;
@@ -123,20 +128,7 @@ namespace Deployment_Simulation
 
         public void Run()
         {
-            int packetNumber = 1000;
             int centerID, minE;
-
-            List<int> path;
-
-            List<MarkingEvent> markingEventList = new List<MarkingEvent>();
-            List<PacketEvent> packetEventList = new List<PacketEvent>();
-            List<PacketSentEvent> packetSentEventList = new List<PacketSentEvent>();
-
-            List<int> firstMeetTracerHopCountList = new List<int>();
-            List<int> srcToScopeCenterHopCountList = new List<int>();
-            List<int> pathCountList = new List<int>();
-
-            Random rd = new Random(Guid.NewGuid().GetHashCode());
 
             foreach (int nodeID in m_deployment.DeployNodes)
                 m_networkTopology.Nodes.Find(n => n.ID == nodeID).Tracer = NetworkTopology.TracerType.Marking;
@@ -144,7 +136,37 @@ namespace Deployment_Simulation
             foreach (var scope in m_deployment.AllRoundScopeList)
                 scope.FindCenterNodeID(out centerID, out minE, true);
 
-            for (int i = 0; i < packetNumber; i++)
+            simSpecificDeployMethod();
+
+            foreach (var node in m_networkTopology.Nodes)
+                node.Tracer = NetworkTopology.TracerType.None;
+
+            int[] randomArray = DataUtility.RandomArray(m_networkTopology.Nodes.Count);
+
+            for (int i = 0; i < m_deployment.DeployNodes.Count; i++)
+                m_networkTopology.Nodes[randomArray[i]].Tracer = NetworkTopology.TracerType.Marking;
+
+            simRandomDeployMethod();
+        }
+
+        private void simSpecificDeployMethod()
+        {
+            int centerID, minE;
+
+            List<int> path;
+
+            List<MarkingEvent> markingEventList = new List<MarkingEvent>();
+            //List<PacketEvent> packetEventList = new List<PacketEvent>();
+            //List<PacketSentEvent> packetSentEventList = new List<PacketSentEvent>();
+
+            List<int> firstMeetTracerHopCountList = new List<int>();
+            List<int> srcToScopeCenterHopCountList = new List<int>();
+            List<int> attackerAreaCounts = new List<int>();
+            List<int> pathCountList = new List<int>();
+
+            Random rd = new Random(Guid.NewGuid().GetHashCode());
+
+            for (int i = 0; i < c_packetNumber; i++)
             {
                 bool isMarking = false;
                 NetworkTopology.Node srcNode = m_networkTopology.Nodes[rd.Next(m_networkTopology.Nodes.Count)];
@@ -160,9 +182,14 @@ namespace Deployment_Simulation
                         srcToScopeCenterHopCountList.Add(m_networkTopology.GetShortestPathCount(srcNode.ID, centerID) - 1);
                     else
                         srcToScopeCenterHopCountList.Add(0);
+
+                    attackerAreaCounts.Add(sourceScope.Nodes.Count);
                 }
                 else
+                {
                     srcToScopeCenterHopCountList.Add(0);
+                    attackerAreaCounts.Add(0);
+                }
 
                 path = m_networkTopology.GetShortestPath(srcNode.ID, desNode.ID);
 
@@ -175,7 +202,7 @@ namespace Deployment_Simulation
                     Type = NetworkTopology.NodeType.Attacker
                 };
 
-                packetEventList.Add(packetEvent);
+                //packetEventList.Add(packetEvent);
 
                 for (int j = 0; j < path.Count; j++)
                 {
@@ -203,12 +230,12 @@ namespace Deployment_Simulation
                             break;
                     }
 
-                    PacketSentEvent packetSentEvent = new PacketSentEvent(packetEvent);
-                    packetSentEvent.CurrentNodeID = path[j];
-                    packetSentEvent.NextHopID = j == path.Count - 1 ? -1 : path[j + 1];
-                    packetSentEvent.Length = j == path.Count - 1 ? 0 : m_networkTopology.AdjacentMatrix[m_networkTopology.NodeID2Index(path[j]), m_networkTopology.NodeID2Index(path[j + 1])].Length;
+                    //PacketSentEvent packetSentEvent = new PacketSentEvent(packetEvent);
+                    //packetSentEvent.CurrentNodeID = path[j];
+                    //packetSentEvent.NextHopID = j == path.Count - 1 ? -1 : path[j + 1];
+                    //packetSentEvent.Length = j == path.Count - 1 ? 0 : m_networkTopology.AdjacentMatrix[m_networkTopology.NodeID2Index(path[j]), m_networkTopology.NodeID2Index(path[j + 1])].Length;
 
-                    packetSentEventList.Add(packetSentEvent);
+                    //packetSentEventList.Add(packetSentEvent);
                 }
 
                 pathCountList.Add(path.Count - 1);
@@ -222,11 +249,16 @@ namespace Deployment_Simulation
             // Log into db
             double theoreticalUndetectedRatio = (double)m_deployment.AllRoundScopeList.Sum(s => s.Nodes.Count > 1 ? DataUtility.Combination(s.Nodes.Count, 2) : 0) / (double)DataUtility.Combination(m_networkTopology.Nodes.Count, 2);
             double upperboundUndetectedRatio = m_networkTopology.m_prob_hop.Sum(i => (m_networkTopology.m_prob_hop.ToList().IndexOf(i) >= 1 && m_networkTopology.m_prob_hop.ToList().IndexOf(i) <= m_deployment.K - 1) ? i : 0);
-            double undetectedRatio = (double)(packetNumber - markingEventList.Count) / (double)packetNumber;
-            double firstMeetTracerSearchingCost = (double)firstMeetTracerHopCountList.Sum() / (double)packetNumber;
-            double srcToScopeCenterSearchingCost = (double)srcToScopeCenterHopCountList.Sum() / (double)packetNumber;
-            double savingCost = (double)pathCountList.Sum(x => x - firstMeetTracerHopCountList[pathCountList.IndexOf(x)]) / (double)packetNumber;
+            double undetectedRatio = (double)(c_packetNumber - markingEventList.Count) / (double)c_packetNumber;
+            double firstMeetTracerSearchingCost = (double)firstMeetTracerHopCountList.Sum() / (double)c_packetNumber;
+            double srcToScopeCenterSearchingCost = (double)srcToScopeCenterHopCountList.Sum() / (double)c_packetNumber;
+            double attackerScopeCountSearchingCost = attackerAreaCounts.Average();
+            double savingCost = 0;
             double survivalTrafficRatio = (double)firstMeetTracerHopCountList.Sum() / (double)pathCountList.Sum();
+
+            for (int i = 0; i < c_packetNumber; i++)
+                savingCost += pathCountList[i] - firstMeetTracerHopCountList[i];
+            savingCost /= c_packetNumber;
 
             string cmd;
             // UndetectedRatio
@@ -239,7 +271,7 @@ namespace Deployment_Simulation
                 new SQLiteParameter("@diameter", m_networkTopology.Diameter),
                 new SQLiteParameter("@k", m_deployment.K),
                 new SQLiteParameter("@n", m_deployment.N),
-                new SQLiteParameter("@metric_name", "Undetected Ratio"),
+                new SQLiteParameter("@metric_name", "K-Cut Deployment"),
                 new SQLiteParameter("@ratio", undetectedRatio)
             });
 
@@ -279,7 +311,7 @@ namespace Deployment_Simulation
                 new SQLiteParameter("@diameter", m_networkTopology.Diameter),
                 new SQLiteParameter("@k", m_deployment.K),
                 new SQLiteParameter("@n", m_deployment.N),
-                new SQLiteParameter("@metric_name", "Searching Cost of First Meet Tracer"),
+                new SQLiteParameter("@metric_name", "K-Cut Deployment - First Meet Tracer"),
                 new SQLiteParameter("@ratio", firstMeetTracerSearchingCost)
             });
 
@@ -292,12 +324,11 @@ namespace Deployment_Simulation
                 new SQLiteParameter("@diameter", m_networkTopology.Diameter),
                 new SQLiteParameter("@k", m_deployment.K),
                 new SQLiteParameter("@n", m_deployment.N),
-                new SQLiteParameter("@metric_name", @"Searching Cost of Attacker to Scope Center"),
+                new SQLiteParameter("@metric_name", @"K-Cut Deployment - Attacker to Scope Center"),
                 new SQLiteParameter("@ratio", srcToScopeCenterSearchingCost)
             });
 
-            // Saving Cost
-            cmd = "INSERT INTO SavingCost(file_name, node_counts, edge_counts, diameter, k, n, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @ratio);";
+            cmd = "INSERT INTO SearchingCost(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
             m_sqlite_utils.RunCommnad(cmd, new List<SQLiteParameter>()
             {
                 new SQLiteParameter("@file_name", m_networkTopology.FileName),
@@ -306,11 +337,26 @@ namespace Deployment_Simulation
                 new SQLiteParameter("@diameter", m_networkTopology.Diameter),
                 new SQLiteParameter("@k", m_deployment.K),
                 new SQLiteParameter("@n", m_deployment.N),
+                new SQLiteParameter("@metric_name", @"K-Cut Deployment - The Number of Nodes in Attacker Area"),
+                new SQLiteParameter("@ratio", attackerScopeCountSearchingCost)
+            });
+
+            // Saving Cost
+            cmd = "INSERT INTO SavingCost(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
+            m_sqlite_utils.RunCommnad(cmd, new List<SQLiteParameter>()
+            {
+                new SQLiteParameter("@file_name", m_networkTopology.FileName),
+                new SQLiteParameter("@node_counts", m_networkTopology.Nodes.Count),
+                new SQLiteParameter("@edge_counts", m_networkTopology.Edges.Count),
+                new SQLiteParameter("@diameter", m_networkTopology.Diameter),
+                new SQLiteParameter("@k", m_deployment.K),
+                new SQLiteParameter("@n", m_deployment.N),
+                new SQLiteParameter("@metric_name", "K-Cut Deployment"),
                 new SQLiteParameter("@ratio", savingCost)
             });
 
             // Survival Malicious Traffic Ratio
-            cmd = "INSERT INTO SurvivalMaliciousTrafficRatio(file_name, node_counts, edge_counts, diameter, k, n, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @ratio);";
+            cmd = "INSERT INTO SurvivalMaliciousTrafficRatio(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
             m_sqlite_utils.RunCommnad(cmd, new List<SQLiteParameter>()
             {
                 new SQLiteParameter("@file_name", m_networkTopology.FileName),
@@ -319,6 +365,149 @@ namespace Deployment_Simulation
                 new SQLiteParameter("@diameter", m_networkTopology.Diameter),
                 new SQLiteParameter("@k", m_deployment.K),
                 new SQLiteParameter("@n", m_deployment.N),
+                new SQLiteParameter("@metric_name", "K-Cut Deployment"),
+                new SQLiteParameter("@ratio", survivalTrafficRatio)
+            });
+        }
+
+        private void simRandomDeployMethod()
+        {
+            List<int> path;
+
+            List<MarkingEvent> markingEventList = new List<MarkingEvent>();
+            //List<PacketEvent> packetEventList = new List<PacketEvent>();
+            //List<PacketSentEvent> packetSentEventList = new List<PacketSentEvent>();
+
+            List<int> firstMeetTracerHopCountList = new List<int>();
+            List<int> pathCountList = new List<int>();
+
+            Random rd = new Random(Guid.NewGuid().GetHashCode());
+
+            for (int i = 0; i < c_packetNumber; i++)
+            {
+                bool isMarking = false;
+                NetworkTopology.Node srcNode = m_networkTopology.Nodes[rd.Next(m_networkTopology.Nodes.Count)];
+                NetworkTopology.Node desNode = null;
+                while (desNode == null || desNode == srcNode)
+                    desNode = m_networkTopology.Nodes[rd.Next(m_networkTopology.Nodes.Count)];
+
+                path = m_networkTopology.GetShortestPath(srcNode.ID, desNode.ID);
+
+                PacketEvent packetEvent = new PacketEvent()
+                {
+                    PacketID = i,
+                    Source = srcNode.ID,
+                    Destination = desNode.ID,
+                    Time = 0,
+                    Type = NetworkTopology.NodeType.Attacker
+                };
+
+                //packetEventList.Add(packetEvent);
+
+                for (int j = 0; j < path.Count; j++)
+                {
+                    switch (m_networkTopology.Nodes[m_networkTopology.NodeID2Index(path[j])].Tracer)
+                    {
+                        case NetworkTopology.TracerType.None:
+                            break;
+                        case NetworkTopology.TracerType.Marking:
+                            if (!isMarking)
+                            {
+                                MarkingEvent markingEvent = new MarkingEvent(packetEvent);
+                                markingEvent.MarkingNodeID = path[j];
+
+                                firstMeetTracerHopCountList.Add(j);
+                                isMarking = true;
+
+                                markingEventList.Add(markingEvent);
+                            }
+                            break;
+                        case NetworkTopology.TracerType.Tunneling:
+                            break;
+                        case NetworkTopology.TracerType.Filtering:
+                            break;
+                        default:
+                            break;
+                    }
+
+                    //PacketSentEvent packetSentEvent = new PacketSentEvent(packetEvent);
+                    //packetSentEvent.CurrentNodeID = path[j];
+                    //packetSentEvent.NextHopID = j == path.Count - 1 ? -1 : path[j + 1];
+                    //packetSentEvent.Length = j == path.Count - 1 ? 0 : m_networkTopology.AdjacentMatrix[m_networkTopology.NodeID2Index(path[j]), m_networkTopology.NodeID2Index(path[j + 1])].Length;
+
+                    //packetSentEventList.Add(packetSentEvent);
+                }
+
+                pathCountList.Add(path.Count - 1);
+
+                if (!isMarking)
+                    firstMeetTracerHopCountList.Add(path.Count - 1);
+            }
+
+            // Log into db
+            double undetectedRatio = (double)(c_packetNumber - markingEventList.Count) / (double)c_packetNumber;
+            double firstMeetTracerSearchingCost = (double)firstMeetTracerHopCountList.Sum() / (double)c_packetNumber;
+            double savingCost = 0;
+            double survivalTrafficRatio = (double)firstMeetTracerHopCountList.Sum() / (double)pathCountList.Sum();
+
+            for (int i = 0; i < c_packetNumber; i++)
+                savingCost += pathCountList[i] - firstMeetTracerHopCountList[i];
+            savingCost /= c_packetNumber;
+
+            string cmd;
+            // UndetectedRatio
+            cmd = "INSERT INTO UndetectedRatio(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
+            m_sqlite_utils.RunCommnad(cmd, new List<SQLiteParameter>()
+            {
+                new SQLiteParameter("@file_name", m_networkTopology.FileName),
+                new SQLiteParameter("@node_counts", m_networkTopology.Nodes.Count),
+                new SQLiteParameter("@edge_counts", m_networkTopology.Edges.Count),
+                new SQLiteParameter("@diameter", m_networkTopology.Diameter),
+                new SQLiteParameter("@k", m_deployment.K),
+                new SQLiteParameter("@n", m_deployment.N),
+                new SQLiteParameter("@metric_name", "Random Deployment"),
+                new SQLiteParameter("@ratio", undetectedRatio)
+            });
+
+            // Searching Cost
+            cmd = "INSERT INTO SearchingCost(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
+            m_sqlite_utils.RunCommnad(cmd, new List<SQLiteParameter>()
+            {
+                new SQLiteParameter("@file_name", m_networkTopology.FileName),
+                new SQLiteParameter("@node_counts", m_networkTopology.Nodes.Count),
+                new SQLiteParameter("@edge_counts", m_networkTopology.Edges.Count),
+                new SQLiteParameter("@diameter", m_networkTopology.Diameter),
+                new SQLiteParameter("@k", m_deployment.K),
+                new SQLiteParameter("@n", m_deployment.N),
+                new SQLiteParameter("@metric_name", "Random Deployment - First Meet Tracer"),
+                new SQLiteParameter("@ratio", firstMeetTracerSearchingCost)
+            });
+
+            // Saving Cost
+            cmd = "INSERT INTO SavingCost(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
+            m_sqlite_utils.RunCommnad(cmd, new List<SQLiteParameter>()
+            {
+                new SQLiteParameter("@file_name", m_networkTopology.FileName),
+                new SQLiteParameter("@node_counts", m_networkTopology.Nodes.Count),
+                new SQLiteParameter("@edge_counts", m_networkTopology.Edges.Count),
+                new SQLiteParameter("@diameter", m_networkTopology.Diameter),
+                new SQLiteParameter("@k", m_deployment.K),
+                new SQLiteParameter("@n", m_deployment.N),
+                new SQLiteParameter("@metric_name", "Random Deployment"),
+                new SQLiteParameter("@ratio", savingCost)
+            });
+
+            // Survival Malicious Traffic Ratio
+            cmd = "INSERT INTO SurvivalMaliciousTrafficRatio(file_name, node_counts, edge_counts, diameter, k, n, metric_name, ratio) VALUES(@file_name, @node_counts, @edge_counts, @diameter, @k, @n, @metric_name, @ratio);";
+            m_sqlite_utils.RunCommnad(cmd, new List<SQLiteParameter>()
+            {
+                new SQLiteParameter("@file_name", m_networkTopology.FileName),
+                new SQLiteParameter("@node_counts", m_networkTopology.Nodes.Count),
+                new SQLiteParameter("@edge_counts", m_networkTopology.Edges.Count),
+                new SQLiteParameter("@diameter", m_networkTopology.Diameter),
+                new SQLiteParameter("@k", m_deployment.K),
+                new SQLiteParameter("@n", m_deployment.N),
+                new SQLiteParameter("@metric_name", "Random Deployment"),
                 new SQLiteParameter("@ratio", survivalTrafficRatio)
             });
         }

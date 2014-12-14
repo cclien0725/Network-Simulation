@@ -9,7 +9,7 @@ using SuperLibrary;
 
 namespace Network_Simulation
 {
-    public abstract class Deployment
+    public abstract class Deployment : IDisposable
     {
         protected double percentageOfTunnelingTracer;
         protected double percentageOfMarkingTracer;
@@ -184,6 +184,13 @@ namespace Network_Simulation
 
                 RunCommnad(cmd, parms);
             }
+        }
+
+        public void Dispose()
+        {
+            allRoundScopeList.Clear();
+            allRoundScopeList = null;
+            //GC.Collect();
         }
     }
 }
